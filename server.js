@@ -161,7 +161,7 @@ async function callOpenAI(messages, { model, temperature = 0.4 } = {}) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return null;
 
-  const usedModel = model || process.env.OPENAI_AGENT_MODEL || "gpt-4.5";
+  const usedModel = model || process.env.OPENAI_AGENT_MODEL || "gpt-5.5";
 
   const r = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
@@ -847,7 +847,7 @@ const server = http.createServer((req, res) => {
     sendJson(res, 200, {
       apollo: !!process.env.APOLLO_API_KEY,
       openai: !!process.env.OPENAI_API_KEY,
-      agentModel: process.env.OPENAI_AGENT_MODEL || "gpt-4.5"
+      agentModel: process.env.OPENAI_AGENT_MODEL || "gpt-5.5"
     });
     return;
   }
@@ -869,5 +869,5 @@ server.listen(PORT, () => {
   console.log(`Apex outbound dashboard → http://localhost:${PORT}`);
   console.log(`Apollo: ${hasApollo ? "connected" : "not set — enrichment will use manual data"}`);
   console.log(`OpenAI: ${hasOpenAI ? "connected" : "not set — agents will use local drafts"}`);
-  if (hasOpenAI) console.log(`Agent model: ${process.env.OPENAI_AGENT_MODEL || "gpt-4.5"}`);
+  if (hasOpenAI) console.log(`Agent model: ${process.env.OPENAI_AGENT_MODEL || "gpt-5.5"}`);
 });
