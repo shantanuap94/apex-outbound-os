@@ -611,6 +611,63 @@ function wireAgentChain() {
     }
   });
 
+  // Step 1 → Research with Perplexity
+  document.getElementById("researchBtn")?.addEventListener("click", async () => {
+    const prospect = getProspectInputs();
+    if (!prospect.firstName && !prospect.lastName) { toast("Enter at least a first or last name."); return; }
+    if (!prospect.company && !prospect.domain) { toast("Enter a company name or domain."); return; }
+
+    setLoading("researchBtn", true);
+    try {
+      const research = await post("/api/prospect/research", prospect);
+      if (research.source === "no_key") {
+        toast("Add PERPLEXITY_API_KEY to your .env file to enable web research.");
+        return;
+      }
+      // Convert Perplexity research into enrichment format so downstream agents work
+      const enrichment = {
+        source: "perplexity",
+        enrichedAt: research.enrichedAt,
+        person: {
+          name: research.person?.name || `${prospect.firstName} ${prospect.lastName}`.trim(),
+          title: research.person?.title || prospect.title,
+          linkedin: prospect.linkedinUrl,
+          background: research.person?.background,
+          recentActivity: research.person?.recentActivity
+        },
+        company: {
+          name: research.company?.name || prospect.company,
+          domain: prospect.domain,
+          industry: prospect.industry,
+          size: research.company?.size,
+          revenue: research.company?.revenue,
+          products: research.company?.products,
+          clients: research.company?.clients,
+          recentNews: research.company?.recentNews
+        },
+        signals: research.signals || [],
+        painIndicators: research.painIndicators || [],
+        growthSignals: research.growthSignals || []
+      };
+
+      // Pre-fill signal context with Perplexity's suggested context
+      if (research.suggestedContext) {
+        const sigCtx = document.getElementById("signalContext");
+        if (sigCtx && !sigCtx.value) sigCtx.value = research.suggestedContext;
+      }
+
+      saveChain({ prospect, enrichment });
+      renderEnrichment(enrichment);
+      unlock("step-enrichment");
+      unlock("step-signals-input");
+      toast("Perplexity research complete — signals pre-filled");
+    } catch (err) {
+      toast(err.message);
+    } finally {
+      setLoading("researchBtn", false);
+    }
+  });
+
   // Step 3 → Agent 1
   document.getElementById("agent1Btn")?.addEventListener("click", async () => {
     const chain = getChain();
@@ -758,6 +815,8 @@ async function checkApiStatus() {
     const status = await fetch("/api/status").then(r => r.json());
     document.getElementById("sdot-apollo").className = "sdot " + (status.apollo ? "sdot-on" : "sdot-off");
     document.getElementById("sdot-openai").className = "sdot " + (status.openai ? "sdot-on" : "sdot-off");
+    const pDot = document.getElementById("sdot-perplexity");
+    if (pDot) pDot.className = "sdot " + (status.perplexity ? "sdot-on" : "sdot-off");
     if (status.apollo && status.openai) {
       document.getElementById("sidebarHint").textContent = `All systems live · ${status.agentModel}`;
     } else {

@@ -692,6 +692,80 @@ async function handleAiIcp(req, res) {
   }
 }
 
+// ── Perplexity Research ───────────────────────────────────────────────────────
+
+async function perplexityResearch(prospect) {
+  const key = process.env.PERPLEXITY_API_KEY;
+  if (!key) return null;
+
+  const name = `${prospect.firstName || ""} ${prospect.lastName || ""}`.trim();
+  const prompt = `Research this B2B prospect for a sales team in India. Return ONLY valid JSON, no markdown, no prose.
+
+Prospect: ${name}, ${prospect.title || "founder"} at ${prospect.company || "unknown company"} (${prospect.domain || ""})
+LinkedIn: ${prospect.linkedinUrl || "not provided"}
+Industry: ${prospect.industry || "B2B"}
+
+Find and return structured intelligence as this exact JSON shape:
+{
+  "person": {
+    "name": "${name}",
+    "title": "current verified title",
+    "background": "2-3 sentences: career history, education, notable roles",
+    "recentActivity": "any recent LinkedIn posts, interviews, quotes, or public statements in the last 6 months"
+  },
+  "company": {
+    "name": "${prospect.company || ""}",
+    "founded": "year if known",
+    "size": "headcount estimate",
+    "revenue": "estimated revenue in crore if known",
+    "products": "what they sell or make",
+    "clients": "any known enterprise clients or sectors served",
+    "recentNews": "latest news: expansions, awards, new offices, fundraising, new products, hiring sprees, media coverage"
+  },
+  "signals": [
+    { "type": "growth|pain|trigger|hiring|expansion|award|funding", "description": "specific finding", "date": "month/year if known", "weight": "high|medium|low" }
+  ],
+  "painIndicators": ["observed pain points based on company stage, industry, and news"],
+  "growthSignals": ["positive growth indicators that make them a good prospect"],
+  "suggestedContext": "3-4 sentences summarising the most important intelligence for a sales rep reaching out to this person — what angle to use, what pain to address, what trigger to reference"
+}`;
+
+  const r = await fetch("https://api.perplexity.ai/chat/completions", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "sonar-pro",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.2,
+      max_tokens: 2000
+    })
+  });
+
+  if (!r.ok) throw new Error(`Perplexity ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  const data = await r.json();
+  const text = data?.choices?.[0]?.message?.content || "";
+  const parsed = safeParseJson(text);
+  if (!parsed) throw new Error("Perplexity did not return valid JSON");
+  parsed.source = "perplexity";
+  parsed.enrichedAt = new Date().toISOString();
+  return parsed;
+}
+
+async function handleProspectResearch(req, res) {
+  try {
+    const body = await readRequestBody(req);
+    const input = body ? JSON.parse(body) : {};
+    if (!process.env.PERPLEXITY_API_KEY) {
+      sendJson(res, 200, { source: "no_key", message: "Add PERPLEXITY_API_KEY to your .env to enable web research." });
+      return;
+    }
+    const result = await perplexityResearch(input);
+    sendJson(res, 200, result);
+  } catch (err) {
+    sendJson(res, 500, { error: "Perplexity research failed", detail: err.message });
+  }
+}
+
 async function handleProspectEnrich(req, res) {
   try {
     const body = await readRequestBody(req);
@@ -833,6 +907,7 @@ function serveStatic(req, res) {
 const POST_ROUTES = {
   "/api/ai/icp-section": handleAiIcp,
   "/api/prospect/enrich": handleProspectEnrich,
+  "/api/prospect/research": handleProspectResearch,
   "/api/agent/1-research": handleAgent1,
   "/api/agent/2-cold-email": handleAgent2,
   "/api/agent/3-linkedin": handleAgent3,
@@ -847,6 +922,7 @@ const server = http.createServer((req, res) => {
     sendJson(res, 200, {
       apollo: !!process.env.APOLLO_API_KEY,
       openai: !!process.env.OPENAI_API_KEY,
+      perplexity: !!process.env.PERPLEXITY_API_KEY,
       agentModel: process.env.OPENAI_AGENT_MODEL || "gpt-5.5"
     });
     return;
