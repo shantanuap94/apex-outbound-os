@@ -919,11 +919,13 @@ const server = http.createServer((req, res) => {
   const { pathname } = new URL(req.url, `http://${req.headers.host}`);
 
   if (req.method === "GET" && pathname === "/api/status") {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
     sendJson(res, 200, {
       apollo: !!process.env.APOLLO_API_KEY,
       openai: !!process.env.OPENAI_API_KEY,
       perplexity: !!process.env.PERPLEXITY_API_KEY,
-      agentModel: process.env.OPENAI_AGENT_MODEL || "gpt-5.5"
+      agentModel: process.env.OPENAI_AGENT_MODEL || "gpt-5.5",
+      pid: process.pid
     });
     return;
   }
