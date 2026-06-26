@@ -942,8 +942,10 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   const hasApollo = !!process.env.APOLLO_API_KEY;
   const hasOpenAI = !!process.env.OPENAI_API_KEY;
+  const hasPerplexity = !!process.env.PERPLEXITY_API_KEY;
   console.log(`Apex outbound dashboard → http://localhost:${PORT}`);
   console.log(`Apollo: ${hasApollo ? "connected" : "not set — enrichment will use manual data"}`);
   console.log(`OpenAI: ${hasOpenAI ? "connected" : "not set — agents will use local drafts"}`);
+  console.log(`Perplexity: ${hasPerplexity ? "connected (key prefix: " + process.env.PERPLEXITY_API_KEY.slice(0,8) + "...)" : "not set — web research unavailable"}`);
   if (hasOpenAI) console.log(`Agent model: ${process.env.OPENAI_AGENT_MODEL || "gpt-5.5"}`);
 });
