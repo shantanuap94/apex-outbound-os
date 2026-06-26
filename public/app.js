@@ -243,6 +243,45 @@ function renderEnrichment(enrichment) {
       </div>
     `;
   }
+
+  // Show Vibe Prospecting button if email or LinkedIn is missing
+  const missingEmail = !p.email;
+  const missingLinkedIn = !p.linkedin;
+  if (missingEmail || missingLinkedIn) {
+    const missing = [missingEmail && "work email", missingLinkedIn && "LinkedIn URL"].filter(Boolean).join(" and ");
+    const prospect = getChain().prospect || {};
+    const vpQuery = `Use Vibe Prospecting to find the ${missing} for this person and return the results:
+
+Name: ${p.name || [prospect.firstName, prospect.lastName].filter(Boolean).join(" ") || "—"}
+Title: ${p.title || prospect.title || "—"}
+Company: ${c.name || prospect.company || "—"}
+Domain: ${c.website || prospect.domain || "—"}
+${p.linkedin ? `LinkedIn: ${p.linkedin}` : ""}
+
+Please run a full Vibe Prospecting search (fetch-entities + enrich-prospects) and return their verified ${missing}.`;
+
+    grid.innerHTML += `
+      <div class="vp-missing-banner">
+        <span class="vp-missing-label">⚠ ${missing} not found in Apollo</span>
+        <button class="vp-search-btn" id="vpSearchBtn" type="button">Search Vibe Prospecting →</button>
+        <div class="vp-query-box" id="vpQueryBox" style="display:none">
+          <p class="vp-instructions">Copy this query and paste it into the Claude chat below:</p>
+          <pre class="vp-query-text" id="vpQueryText">${esc(vpQuery)}</pre>
+          <button class="secondary-btn" id="vpCopyBtn" type="button">Copy query</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("vpSearchBtn")?.addEventListener("click", () => {
+      const box = document.getElementById("vpQueryBox");
+      box.style.display = box.style.display === "none" ? "block" : "none";
+    });
+
+    document.getElementById("vpCopyBtn")?.addEventListener("click", () => {
+      copyText(vpQuery);
+      toast("Query copied — paste it in the Claude chat to run Vibe Prospecting");
+    });
+  }
 }
 
 // ── Dossier display ───────────────────────────────────────────────────────────

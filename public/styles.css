@@ -203,6 +203,15 @@ select { cursor: pointer; appearance: auto; }
 .emp-item { font-size: 13.5px; margin-bottom: 4px; }
 .emp-item strong { margin-right: 4px; }
 
+/* Vibe Prospecting missing-data banner */
+.vp-missing-banner { margin-top: 14px; padding: 12px 14px; background: #fff8ec; border: 1px solid #f5c842; border-radius: 8px; }
+.vp-missing-label { font-size: 13px; color: #92640a; font-weight: 600; display: block; margin-bottom: 8px; }
+.vp-search-btn { background: #f5c842; color: #1a1209; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.vp-search-btn:hover { background: #e6b800; }
+.vp-query-box { margin-top: 12px; }
+.vp-instructions { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+.vp-query-text { background: #f7f5f2; border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: monospace; white-space: pre-wrap; word-break: break-word; margin-bottom: 8px; }
+
 /* Score badge */
 .score-badge {
   display: flex; align-items: baseline; gap: 3px; padding: 6px 14px;
