@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Apex Growth Partners · Outbound OS</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <span class="brand-mark">A</span>
+          <div>
+            <strong>Apex</strong>
+            <span>Outbound OS</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item" type="button" data-view="icp">
+            <span class="nav-num">1</span> ICP Definition
+          </button>
+          <button class="nav-item" type="button" data-view="signals">
+            <span class="nav-num">2</span> Signal Strategy
+          </button>
+          <button class="nav-item active" type="button" data-view="agents">
+            <span class="nav-num">3</span> Agent Chain
+          </button>
+          <button class="nav-item" type="button" data-view="campaigns">
+            <span class="nav-num">4</span> Campaigns
+          </button>
+        </nav>
+
+        <div class="sidebar-note">
+          <span>Stack status</span>
+          <div class="status-dots" id="sidebarStatus">
+            <div class="sdot" id="sdot-apollo" title="Apollo API">Apollo</div>
+            <div class="sdot" id="sdot-openai" title="OpenAI API">OpenAI</div>
+          </div>
+          <p id="sidebarHint">Check .env for API keys.</p>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Apex Growth Partners</p>
+            <h1>AI outbound sales stack</h1>
+          </div>
+          <div class="status-strip" aria-label="Build status">
+            <span><strong id="statProspects">0</strong> prospects</span>
+            <span><strong id="statDossiers">0</strong> dossiers</span>
+            <span><strong id="statDrafts">0</strong> drafts ready</span>
+          </div>
+        </header>
+
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- VIEW 1: ICP DEFINITION -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <section class="view" id="view-icp">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Step 1</p>
+              <h2>Customer ICP Definition</h2>
+              <p>Define who the system sells to, what they carry emotionally, and what a buying signal looks like for this market. This feeds every agent prompt.</p>
+            </div>
+            <div class="header-actions">
+              <button class="secondary-btn" id="restoreDefaults" type="button">Restore Apex ICP</button>
+              <button class="primary-btn" id="generateAll" type="button">Generate all fields</button>
+            </div>
+          </div>
+
+          <form class="icp-layout" id="icpForm" autocomplete="off">
+            <section class="panel wide-panel">
+              <div class="panel-title">
+                <h3>Seed Description</h3>
+                <button class="ai-btn" type="button" data-ai="seedDescription">AI fill</button>
+              </div>
+              <textarea id="seedDescription" rows="3"></textarea>
+            </section>
+
+            <section class="panel">
+              <div class="panel-title">
+                <h3>Role &amp; Seniority</h3>
+                <button class="ai-btn" type="button" data-ai="roleSeniority">AI fill</button>
+              </div>
+              <textarea id="roleSeniority" rows="4"></textarea>
+            </section>
+
+            <section class="panel">
+              <div class="panel-title">
+                <h3>Company Stage &amp; Size</h3>
+                <button class="ai-btn" type="button" data-ai="companyStageSize">AI fill</button>
+              </div>
+              <textarea id="companyStageSize" rows="4"></textarea>
+            </section>
+
+            <section class="panel wide-panel">
+              <div class="panel-title">
+                <h3>Responsibility Scope</h3>
+                <button class="ai-btn" type="button" data-ai="responsibilityScope">AI fill</button>
+              </div>
+              <textarea id="responsibilityScope" rows="3"></textarea>
+            </section>
+
+            <section class="panel wide-panel">
+              <div class="panel-title">
+                <h3>Empathy Map</h3>
+                <span class="muted">Four channels the agents use for hooks and objection handling.</span>
+              </div>
+              <div class="quadrant-grid">
+                <label>
+                  <span>What they say out loud</span>
+                  <button class="mini-ai" type="button" data-ai="says">AI</button>
+                  <textarea id="says" rows="6"></textarea>
+                </label>
+                <label>
+                  <span>What they think privately</span>
+                  <button class="mini-ai" type="button" data-ai="thinks">AI</button>
+                  <textarea id="thinks" rows="6"></textarea>
+                </label>
+                <label>
+                  <span>What they actually do</span>
+                  <button class="mini-ai" type="button" data-ai="does">AI</button>
+                  <textarea id="does" rows="6"></textarea>
+                </label>
+                <label>
+                  <span>What they feel</span>
+                  <button class="mini-ai" type="button" data-ai="feels">AI</button>
+                  <textarea id="feels" rows="6"></textarea>
+                </label>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-title">
+                <h3>Pains</h3>
+                <button class="ai-btn" type="button" data-ai="pains">AI fill</button>
+              </div>
+              <textarea id="pains" rows="7"></textarea>
+            </section>
+
+            <section class="panel">
+              <div class="panel-title">
+                <h3>Fears</h3>
+                <button class="ai-btn" type="button" data-ai="fears">AI fill</button>
+              </div>
+              <textarea id="fears" rows="7"></textarea>
+            </section>
+
+            <section class="panel">
+              <div class="panel-title">
+                <h3>Frustrations</h3>
+                <button class="ai-btn" type="button" data-ai="frustrations">AI fill</button>
+              </div>
+              <textarea id="frustrations" rows="7"></textarea>
+            </section>
+
+            <section class="panel">
+              <div class="panel-title">
+                <h3>Dream Outcomes</h3>
+                <button class="ai-btn" type="button" data-ai="dreamOutcomes">AI fill</button>
+              </div>
+              <textarea id="dreamOutcomes" rows="7"></textarea>
+            </section>
+          </form>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- VIEW 2: SIGNAL STRATEGY -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <section class="view" id="view-signals">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Step 2</p>
+              <h2>Signal Strategy</h2>
+              <p>What makes a founder-led B2B company worth reaching out to <em>right now</em>. Agent 1 uses these weights to score every prospect 0–100.</p>
+            </div>
+          </div>
+
+          <div class="signals-score-bands">
+            <div class="score-band hot"><span class="band-range">80 – 100</span><strong>Hot</strong><p>Priority outreach this week. 2+ timing signals, strong ICP fit.</p></div>
+            <div class="score-band warm"><span class="band-range">60 – 79</span><strong>Qualified</strong><p>One clear timing signal. Outreach within 14 days.</p></div>
+            <div class="score-band watch"><span class="band-range">40 – 59</span><strong>Watch list</strong><p>Good fit, weak timing. Re-check in 30 days.</p></div>
+            <div class="score-band cold"><span class="band-range">0 – 39</span><strong>Archive</strong><p>Not the right moment. Re-surface in 90 days or skip.</p></div>
+          </div>
+
+          <div class="panel wide-panel" style="margin-top: 14px">
+            <div class="panel-title">
+              <h3>Signal Scoring Rubric</h3>
+              <span class="muted">Base score: 30 (solid ICP fit). Add or subtract below.</span>
+            </div>
+            <table class="signal-table">
+              <thead>
+                <tr>
+                  <th>Signal</th>
+                  <th>Weight</th>
+                  <th>Priority</th>
+                  <th>Where to find</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>New plant / branch / office / project announced</td>
+                  <td><span class="weight-plus">+25</span></td>
+                  <td><span class="badge-priority high">HIGH</span></td>
+                  <td>LinkedIn post, news, company website</td>
+                </tr>
+                <tr>
+                  <td>Hiring a sales / BD / operations leadership role</td>
+                  <td><span class="weight-plus">+20</span></td>
+                  <td><span class="badge-priority high">HIGH</span></td>
+                  <td>LinkedIn Jobs, Apollo, Naukri</td>
+                </tr>
+                <tr>
+                  <td>Founder posting about growth, delegation, systems, or hiring on LinkedIn</td>
+                  <td><span class="weight-plus">+20</span></td>
+                  <td><span class="badge-priority high">HIGH</span></td>
+                  <td>LinkedIn (founder profile, last 30 days)</td>
+                </tr>
+                <tr>
+                  <td>New enterprise client win or marquee project announced</td>
+                  <td><span class="weight-plus">+15</span></td>
+                  <td><span class="badge-priority med">MED-HIGH</span></td>
+                  <td>LinkedIn, company website, news</td>
+                </tr>
+                <tr>
+                  <td>PE / institutional investment received</td>
+                  <td><span class="weight-plus">+15</span></td>
+                  <td><span class="badge-priority med">MED-HIGH</span></td>
+                  <td>Tracxn, Inc42, SEBI filings, news</td>
+                </tr>
+                <tr>
+                  <td>Industry award or recognition received</td>
+                  <td><span class="weight-plus">+10</span></td>
+                  <td><span class="badge-priority med">MEDIUM</span></td>
+                  <td>LinkedIn, news, company website</td>
+                </tr>
+                <tr>
+                  <td>Basic tech stack (Tally, spreadsheets, WhatsApp) — signals systems gap</td>
+                  <td><span class="weight-plus">+10</span></td>
+                  <td><span class="badge-priority med">MEDIUM</span></td>
+                  <td>Apollo tech enrichment, BuiltWith</td>
+                </tr>
+                <tr>
+                  <td>Company visibly stuck at founder-led sales (inference from size vs. team)</td>
+                  <td><span class="weight-plus">+10</span></td>
+                  <td><span class="badge-priority med">MEDIUM</span></td>
+                  <td>LinkedIn team page, Apollo headcount</td>
+                </tr>
+                <tr class="weight-neg-row">
+                  <td>Company less than 2 years old</td>
+                  <td><span class="weight-minus">−10</span></td>
+                  <td><span class="badge-priority low">DISQUALIFY</span></td>
+                  <td>LinkedIn, company website, Zaubacorp</td>
+                </tr>
+                <tr class="weight-neg-row">
+                  <td>Enterprise scale already (500+ headcount, 200+ crore)</td>
+                  <td><span class="weight-minus">−10</span></td>
+                  <td><span class="badge-priority low">DISQUALIFY</span></td>
+                  <td>Apollo, LinkedIn</td>
+                </tr>
+                <tr class="weight-neg-row">
+                  <td>No B2B component (pure retail or consumer)</td>
+                  <td><span class="weight-minus">−15</span></td>
+                  <td><span class="badge-priority low">DISQUALIFY</span></td>
+                  <td>Website, LinkedIn, Apollo</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="signals-sources-grid">
+            <div class="panel">
+              <div class="panel-title"><h3>Apollo</h3></div>
+              <ul class="source-list">
+                <li>Person match — email, title, employment history</li>
+                <li>Company enrich — headcount, industry, tech stack</li>
+                <li>Jobs API — open roles for hiring signals</li>
+                <li>Connect <code>APOLLO_API_KEY</code> in .env</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <div class="panel-title"><h3>Vibe Prospecting (Explorium)</h3></div>
+              <ul class="source-list">
+                <li>Search by intent signals — funding, hiring, expansion</li>
+                <li>Filter by company size, industry, region</li>
+                <li>Export enriched prospect lists</li>
+                <li>Use via Claude chat — ask to find prospects</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <div class="panel-title"><h3>LinkedIn (manual)</h3></div>
+              <ul class="source-list">
+                <li>Founder profile — recent posts, activity</li>
+                <li>Company page — updates, employee count, jobs</li>
+                <li>Paste content into Signal Context in Agent Chain</li>
+                <li>Sales Navigator for saved searches</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <div class="panel-title"><h3>Other Sources</h3></div>
+              <ul class="source-list">
+                <li>Apify scrapers — LinkedIn posts, news</li>
+                <li>Google Alerts — company name, founder name</li>
+                <li>Tracxn / Inc42 — PE and funding signals</li>
+                <li>Zaubacorp / MCA filings — company age, directors</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- VIEW 3: AGENT CHAIN -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <section class="view active" id="view-agents">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Step 3</p>
+              <h2>Agent Chain</h2>
+              <p>Input a prospect, enrich with Apollo, run all five agents — research, cold email, LinkedIn, follow-up, and objection handling.</p>
+            </div>
+            <div class="header-actions">
+              <button class="secondary-btn" id="clearChain" type="button">Clear prospect</button>
+            </div>
+          </div>
+
+          <!-- Step 1: Prospect Input -->
+          <div class="chain-step" id="step-prospect">
+            <div class="step-hd">
+              <span class="step-num">1</span>
+              <div>
+                <h3>Prospect Input</h3>
+                <p class="step-desc">Name, company, domain. Apollo fills in the rest.</p>
+              </div>
+              <span class="step-status" id="status-prospect"></span>
+            </div>
+            <div class="prospect-grid">
+              <div class="field-group">
+                <label for="p-firstName">First Name</label>
+                <input type="text" id="p-firstName" placeholder="Rajesh" />
+              </div>
+              <div class="field-group">
+                <label for="p-lastName">Last Name</label>
+                <input type="text" id="p-lastName" placeholder="Mehta" />
+              </div>
+              <div class="field-group">
+                <label for="p-title">Title</label>
+                <input type="text" id="p-title" placeholder="Founder &amp; MD" />
+              </div>
+              <div class="field-group">
+                <label for="p-company">Company Name</label>
+                <input type="text" id="p-company" placeholder="Mehta Industries" />
+              </div>
+              <div class="field-group">
+                <label for="p-domain">Company Domain</label>
+                <input type="text" id="p-domain" placeholder="mehtaindustries.com" />
+              </div>
+              <div class="field-group">
+                <label for="p-linkedin">LinkedIn URL</label>
+                <input type="text" id="p-linkedin" placeholder="linkedin.com/in/rajeshmehta" />
+              </div>
+              <div class="field-group">
+                <label for="p-industry">Industry</label>
+                <select id="p-industry">
+                  <option value="">Select…</option>
+                  <option value="manufacturing">Manufacturing</option>
+                  <option value="real_estate">Real Estate / Construction</option>
+                  <option value="ca_firm">CA / Accounting Firm</option>
+                  <option value="architecture">Architecture / Design</option>
+                  <option value="professional_services">Professional Services</option>
+                  <option value="logistics">Logistics / Distribution</option>
+                  <option value="trading">Trading / Distribution B2B</option>
+                  <option value="other_b2b">Other B2B</option>
+                </select>
+              </div>
+            </div>
+            <div class="step-actions">
+              <button class="primary-btn" id="enrichBtn" type="button">Enrich with Apollo →</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Enrichment snapshot -->
+          <div class="chain-step locked" id="step-enrichment">
+            <div class="step-hd">
+              <span class="step-num">2</span>
+              <div>
+                <h3>Company Snapshot</h3>
+                <p class="step-desc">Data from Apollo — headcount, tech stack, funding, location.</p>
+              </div>
+              <span class="step-status" id="status-enrichment"></span>
+            </div>
+            <div class="enrichment-grid" id="enrichmentGrid"></div>
+          </div>
+
+          <!-- Step 3: Signal context -->
+          <div class="chain-step locked" id="step-signals-input">
+            <div class="step-hd">
+              <span class="step-num">3</span>
+              <div>
+                <h3>Signal Context</h3>
+                <p class="step-desc">Paste LinkedIn posts, news, job listings, or any timing signals. The more specific, the better the dossier.</p>
+              </div>
+            </div>
+            <textarea id="signalContext" rows="5" placeholder="e.g. 'Rajesh posted 2 weeks ago: We're opening our second plant in Nagpur. Hiring VP Sales and Operations Head. Very excited to scale...'&#10;&#10;Or paste a news article, job listing, or anything relevant from the last 90 days."></textarea>
+            <div class="step-actions">
+              <button class="primary-btn" id="agent1Btn" type="button">Run Agent 1 — Research →</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Dossier (Agent 1 output) -->
+          <div class="chain-step locked" id="step-dossier">
+            <div class="step-hd">
+              <span class="step-num">4</span>
+              <div>
+                <h3>Intelligence Dossier</h3>
+                <p class="step-desc">Prospect snapshot, triggers, pains, and personalization hooks.</p>
+              </div>
+              <div class="score-badge" id="scoreBadge">
+                <span class="score-label">Score</span>
+                <strong class="score-value" id="scoreValue">—</strong>
+                <span class="score-denom">/100</span>
+              </div>
+            </div>
+            <div class="qa-strip" id="qaStrip"></div>
+            <div class="dossier-grid" id="dossierGrid"></div>
+            <div class="step-actions">
+              <button class="primary-btn" id="generateOutreachBtn" type="button" disabled>Generate Outreach →</button>
+              <span class="gate-note" id="gateNote"></span>
+            </div>
+          </div>
+
+          <!-- Step 5: Cold Emails (Agent 2 output) -->
+          <div class="chain-step locked" id="step-email">
+            <div class="step-hd">
+              <span class="step-num">5</span>
+              <div>
+                <h3>Cold Emails</h3>
+                <p class="step-desc">Three variants — under 90 words each, specific to this prospect.</p>
+              </div>
+              <span class="step-status" id="status-email"></span>
+            </div>
+            <div class="variant-tabs" id="emailTabs">
+              <button class="vtab active" data-variant="pain-led">A · Pain-led</button>
+              <button class="vtab" data-variant="trigger-led">B · Trigger-led</button>
+              <button class="vtab" data-variant="curiosity-led">C · Curiosity-led</button>
+            </div>
+            <div id="emailPanel"></div>
+          </div>
+
+          <!-- Step 6: LinkedIn (Agent 3 output) -->
+          <div class="chain-step locked" id="step-linkedin">
+            <div class="step-hd">
+              <span class="step-num">6</span>
+              <div>
+                <h3>LinkedIn Sequence</h3>
+                <p class="step-desc">Connection note, Day 3 DM, Day 7 value drop — peer-to-peer, no pitch.</p>
+              </div>
+              <span class="step-status" id="status-linkedin"></span>
+            </div>
+            <div class="linkedin-posts" id="linkedinPosts">
+              <label class="li-posts-label">
+                <span>Paste founder's recent LinkedIn posts (optional — improves personalisation):</span>
+                <textarea id="linkedinPostsInput" rows="3" placeholder="Paste their last 2–3 posts here..."></textarea>
+              </label>
+            </div>
+            <div class="linkedin-grid" id="linkedinGrid"></div>
+          </div>
+
+          <!-- Step 7: Follow-up Sequence (Agent 4) -->
+          <div class="chain-step" id="step-sequence">
+            <div class="step-hd">
+              <span class="step-num">7</span>
+              <div>
+                <h3>Follow-up Sequence</h3>
+                <p class="step-desc">5–7 touches across email and LinkedIn. Select the prospect's current state.</p>
+              </div>
+            </div>
+            <div class="state-row">
+              <label for="sequenceState">Current state:</label>
+              <select id="sequenceState">
+                <option value="no_open">Email sent — no open</option>
+                <option value="open_no_reply">Email opened — no reply</option>
+                <option value="soft_no">Replied with soft no ("not now")</option>
+                <option value="ghosted">Ghosted after 2+ touches</option>
+              </select>
+              <button class="secondary-btn" id="agent4Btn" type="button">Build Sequence</button>
+            </div>
+            <div class="sequence-list" id="sequenceList"></div>
+          </div>
+
+          <!-- Step 8: Objection Handler (Agent 5) -->
+          <div class="chain-step" id="step-objection">
+            <div class="step-hd">
+              <span class="step-num">8</span>
+              <div>
+                <h3>Objection Handler</h3>
+                <p class="step-desc">Paste their reply. Get a classification and a suggested response in your voice.</p>
+              </div>
+            </div>
+            <div class="objection-input-area">
+              <label for="replyText">Their reply:</label>
+              <textarea id="replyText" rows="4" placeholder="e.g. 'Hi, thanks for reaching out. We're not looking at this kind of thing right now. Maybe next quarter.'"></textarea>
+              <button class="secondary-btn" id="agent5Btn" type="button">Classify &amp; Draft Response</button>
+            </div>
+            <div id="objectionOutput"></div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- VIEW 4: CAMPAIGNS (coming soon) -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <section class="view" id="view-campaigns">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Step 4</p>
+              <h2>Campaigns</h2>
+              <p>Track approved outreach, sequence states, reply classifications, and Gmail handoffs across all active prospects.</p>
+            </div>
+          </div>
+          <div class="coming-soon-panel">
+            <div class="cs-icon">→</div>
+            <h3>Coming next</h3>
+            <p>Run your agent chain on 10–20 prospects first. Once you've validated dossier quality and reply rates, this module will track active sequences, automate Gmail drafts, and surface replies that need Agent 5 classification.</p>
+            <ul>
+              <li>Prospect pipeline with status</li>
+              <li>Gmail draft creation from approved cold emails</li>
+              <li>Reply inbox with auto-classification</li>
+              <li>Sequence state tracker</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>

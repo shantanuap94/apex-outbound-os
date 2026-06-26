@@ -1,0 +1,13 @@
+{
+  "name": "apex-outbound-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dashboard for Apex Growth Partners AI outbound sales stack.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
