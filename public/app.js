@@ -104,7 +104,7 @@ function wireIcp() {
 
   $("icpFillBtn").addEventListener("click", async () => {
     const desc = $("icpDesc").value.trim();
-    if (!desc) return;
+    if (!desc) { alert("Type a company description first, then click Fill with AI."); return; }
     const btn = $("icpFillBtn");
     btn.textContent = "Filling…";
     btn.disabled = true;
