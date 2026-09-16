@@ -117,16 +117,77 @@ async function handleChainRun(req, res) {
     const body = await readBody(req);
     const { prospect, icp, step } = body;
 
-    const systemPrompt = `You are an expert B2B revenue strategist and sales copywriter for Apex Growth Partners.
-ICP Context: ${JSON.stringify(icp || {})}
-Your job is to help craft highly personalized, insight-led outreach for Indian SMB founders/CXOs in manufacturing, real estate, architecture, and CA firms with ₹30-80cr revenue.`;
+    const systemPrompt = `You are an expert B2B sales intelligence analyst and outreach strategist.
+ICP Context (what the sender sells / their target customer): ${JSON.stringify(icp || {})}
+Your job: produce sharp, specific, insight-led sales intelligence and outreach copy. Never be generic. Always tie insights back to why the sender's offering is relevant to this specific prospect.`;
+
+    const researchPrompt = `Produce a structured prospect intelligence brief for this person:
+Prospect: ${JSON.stringify(prospect)}
+
+Structure your response in exactly these 4 sections:
+
+## 1. Company Intelligence
+- What the company does, size, market position
+- Recent signals: any known expansions, new products, leadership changes, funding, awards, or industry news
+- Key business priorities likely on the CEO/leadership agenda right now
+
+## 2. Role & Pain Point Analysis
+- What does someone in this role (${prospect.title || "their role"}) actually care about day-to-day?
+- What KPIs are they likely measured on?
+- Where are they most likely feeling pressure or friction?
+- Is this role a decision-maker, influencer, or end-user for what the ICP context describes? Explain.
+
+## 3. Personal Signals
+- What can be inferred about this person from their title, tenure, industry, and LinkedIn URL?
+- What professional ambitions or career motivations would resonate with them?
+- Recommended communication tone (formal/direct/consultative/peer-to-peer)?
+
+## 4. Outreach Angle Recommendation
+- The single sharpest angle to open with — specific to this person and company
+- One thing to avoid (a generic mistake most salespeople make with this persona)
+- Best channel to start: email or LinkedIn? Why?`;
 
     const stepPrompts = {
-      research: `Research this prospect and their company. Identify their likely pain points, recent business challenges, and growth ambitions based on their role and industry. Prospect: ${JSON.stringify(prospect)}`,
-      hook: `Based on the research, write 3 alternative opening hooks for a cold email. Each hook must be specific, insight-led, and avoid generic phrases. Format as numbered list.`,
-      email: `Write a complete cold email (subject line + body). Max 120 words. End with a clear, low-friction CTA. Must feel hand-written, not templated.`,
-      linkedin: `Write a LinkedIn connection request message (under 300 chars) and a follow-up DM (under 500 chars) for this prospect.`,
-      sequence: `Draft a 3-touch outreach sequence (Day 1 email, Day 4 LinkedIn, Day 8 follow-up email). Be concise and specific.`,
+      research: researchPrompt,
+      hook: `Based on the research so far, write 3 alternative opening hooks for a cold outreach message to ${prospect.name || "this prospect"} at ${prospect.company || "their company"}.
+
+Rules:
+- Each hook must be specific to this person/company — no generic phrases
+- Reference something real: their role, a likely pain, a business signal, or a relatable challenge
+- Under 2 sentences each
+- No flattery, no "I hope this finds you well"
+- Format as numbered list with a one-line label for each (e.g. "Pain-led:", "Signal-led:", "Contrarian:")`,
+      email: `Write a cold email to ${prospect.name || "this prospect"}.
+
+Rules:
+- Subject line: specific, curiosity-driven, under 8 words
+- Body: max 100 words
+- Open with the strongest hook from the research
+- One clear value proposition tied to their specific pain
+- CTA: low-friction, specific (propose a 15-min call or ask one qualifying question)
+- Tone: direct, peer-to-peer — not salesy, not corporate
+
+Format:
+Subject: [subject line]
+---
+[email body]`,
+      linkedin: `Write two LinkedIn messages for ${prospect.name || "this prospect"}:
+
+1. CONNECTION REQUEST (under 300 characters): Personalized, no pitch, reference something specific about their role or company. Feel like a warm peer, not a salesperson.
+
+2. FOLLOW-UP DM (under 400 characters): Send this 3-4 days after connecting. Lead with a specific insight or question relevant to their world. One soft CTA.`,
+      sequence: `Write a complete 3-touch outreach sequence for ${prospect.name || "this prospect"} at ${prospect.company || "their company"}.
+
+TOUCH 1 — Day 1 (Email):
+Subject + body (max 80 words). Lead with the sharpest hook.
+
+TOUCH 2 — Day 4 (LinkedIn DM):
+Max 300 characters. Reference the email without being pushy. Add a new angle.
+
+TOUCH 3 — Day 8 (Follow-up Email):
+Max 60 words. Acknowledge no response, add one new insight or social proof, final soft CTA.
+
+Keep each touch distinct — don't repeat the same message.`,
     };
 
     const messages = [
