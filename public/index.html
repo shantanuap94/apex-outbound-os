@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apex Outbound OS</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="brand">Apex <span>Outbound OS</span></div>
+    <div class="sdots">
+      <div class="sdot" id="sdot-openai"    title="OpenAI API">OpenAI</div>
+      <div class="sdot" id="sdot-apollo"    title="Apollo API">Apollo</div>
+      <div class="sdot" id="sdot-perplexity" title="Perplexity API">Perplexity</div>
+      <div class="sdot" id="sdot-apify"     title="Apify API">Apify</div>
+    </div>
+  </header>
+
+  <!-- ── Nav ── -->
+  <nav>
+    <button class="tab-btn active" data-tab="icp">1 ICP Builder</button>
+    <button class="tab-btn"        data-tab="chain">2 Agent Chain</button>
+    <button class="tab-btn"        data-tab="status">3 Status</button>
+    <button class="tab-btn"        data-tab="pipeline">4 Lead Pipeline</button>
+  </nav>
+
+  <main>
+
+    <!-- ─────────────────────────────────────── ICP Builder ── -->
+    <section id="tab-icp" class="tab-panel active">
+      <div class="section-hd">Ideal Customer Profile</div>
+
+      <div class="card">
+        <label>Describe the company (AI will fill the form)</label>
+        <div class="icp-fill-bar">
+          <textarea id="icpDesc" placeholder="e.g. A mid-size steel manufacturer in Pune with around 200 employees, struggling with inconsistent sales pipeline…"></textarea>
+          <button class="btn btn-primary" id="icpFillBtn">Fill with AI</button>
+        </div>
+      </div>
+
+      <div id="icpGrid">
+        <div class="field"><label>Company Name</label><input type="text" id="icp-companyName" placeholder="Acme Industries"></div>
+        <div class="field"><label>Website</label><input type="url" id="icp-website" placeholder="https://acme.in"></div>
+        <div class="field"><label>Industry</label><input type="text" id="icp-industry" placeholder="Manufacturing / Real Estate / Architecture / CA Firm"></div>
+        <div class="field"><label>Headcount</label><input type="text" id="icp-headcount" placeholder="50–200 employees"></div>
+        <div class="field"><label>Revenue (₹)</label><input type="text" id="icp-revenue" placeholder="₹30–80 crore"></div>
+        <div class="field"><label>Location</label><input type="text" id="icp-location" placeholder="India (Tier 1 / Tier 2 cities)"></div>
+        <div class="field" style="grid-column:span 2"><label>Pain Points</label><textarea id="icp-painPoints" placeholder="Inconsistent pipeline, over-reliance on referrals, no structured outbound…"></textarea></div>
+        <div class="field" style="grid-column:span 2"><label>Goals</label><textarea id="icp-goals" placeholder="Predictable revenue, 3–4 enterprise clients, scale without hiring large sales team…"></textarea></div>
+        <div class="field"><label>Triggers to Reach Out</label><textarea id="icp-triggers" placeholder="New hire, expansion announcement, award recognition…"></textarea></div>
+        <div class="field"><label>Common Objections</label><textarea id="icp-objections" placeholder="Already have someone for this, not the right time, price…"></textarea></div>
+        <div class="field" style="grid-column:span 2"><label>Notes</label><textarea id="icp-notes" placeholder="Additional context about this ICP segment…"></textarea></div>
+      </div>
+
+      <div class="icp-actions mt-16">
+        <button class="btn btn-primary" id="icpSaveBtn">Save ICP</button>
+        <button class="btn btn-secondary" id="icpClearBtn">Clear</button>
+        <span class="icp-saved-note" id="icpSavedNote">Saved ✓</span>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────── Agent Chain ── -->
+    <section id="tab-chain" class="tab-panel">
+      <div class="section-hd">Agent Chain — Personalized Outreach</div>
+
+      <div id="chainLoadedBadge" class="chain-loaded-badge hidden">Loaded from pipeline</div>
+
+      <div class="chain-layout">
+
+        <!-- Prospect panel -->
+        <div class="prospect-panel">
+          <div class="section-hd">Prospect</div>
+          <div class="field"><label>Full Name</label><input type="text" id="prospectName" placeholder="Rahul Sharma"></div>
+          <div class="field"><label>Title</label><input type="text" id="prospectTitle" placeholder="Founder / MD / CEO"></div>
+          <div class="field"><label>Company</label><input type="text" id="prospectCompany" placeholder="Acme Industries"></div>
+          <div class="field"><label>Email</label><input type="text" id="prospectEmail" placeholder="rahul@acme.in"></div>
+          <div class="field"><label>LinkedIn URL</label><input type="text" id="prospectLinkedin" placeholder="linkedin.com/in/..."></div>
+          <div class="field"><label>Industry</label><input type="text" id="prospectIndustry" placeholder="Manufacturing"></div>
+          <div class="field"><label>Notes</label><textarea id="prospectNotes" placeholder="Score, headcount, recent signals…" style="min-height:60px"></textarea></div>
+        </div>
+
+        <!-- Chain panel -->
+        <div class="chain-panel">
+          <div>
+            <div class="section-hd" style="margin-bottom:10px">Run Steps</div>
+            <div class="chain-step-btns">
+              <button class="chain-step-btn" data-step="research">Research</button>
+              <button class="chain-step-btn" data-step="hook">Hooks</button>
+              <button class="chain-step-btn" data-step="email">Cold Email</button>
+              <button class="chain-step-btn" data-step="linkedin">LinkedIn DM</button>
+              <button class="chain-step-btn" data-step="sequence">Full Sequence</button>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Output</span>
+              <button class="btn btn-secondary btn-sm" id="chainClearBtn">Clear</button>
+            </div>
+            <div id="chainOutput" class="output-box"><span class="output-empty">Select a step above to generate content…</span></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────── Status ── -->
+    <section id="tab-status" class="tab-panel">
+      <div class="section-hd">API Status</div>
+
+      <div class="status-grid">
+        <div class="status-card" id="sc-openai">
+          <div class="sc-name">OpenAI</div>
+          <div class="sc-val" id="sc-openai-val">checking…</div>
+        </div>
+        <div class="status-card" id="sc-apollo">
+          <div class="sc-name">Apollo.io</div>
+          <div class="sc-val" id="sc-apollo-val">checking…</div>
+        </div>
+        <div class="status-card" id="sc-perplexity">
+          <div class="sc-name">Perplexity</div>
+          <div class="sc-val" id="sc-perplexity-val">checking…</div>
+        </div>
+        <div class="status-card" id="sc-apify">
+          <div class="sc-name">Apify</div>
+          <div class="sc-val" id="sc-apify-val">checking…</div>
+        </div>
+      </div>
+
+      <div class="env-help">
+        <h3>Environment Variables (add to .env file)</h3>
+        <ul>
+          <li><code>OPENAI_API_KEY</code> — platform.openai.com → API Keys</li>
+          <li><code>APOLLO_API_KEY</code> — app.apollo.io → Settings → API Keys</li>
+          <li><code>PERPLEXITY_API_KEY</code> — perplexity.ai → API → Keys</li>
+          <li><code>APIFY_API_KEY</code> — console.apify.com → Settings → Integrations</li>
+        </ul>
+        <div class="mt-8" style="font-size:12px;color:var(--muted)">.env file lives at the project root alongside server.js. Never commit it to git.</div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────── Lead Pipeline ── -->
+    <section id="tab-pipeline" class="tab-panel">
+
+      <!-- Gen panel -->
+      <div class="gen-panel">
+        <div class="section-hd">Generate Leads from Apollo</div>
+
+        <div class="gen-form-row">
+          <div class="gen-url-wrap">
+            <label class="gen-label">Apollo Search URL</label>
+            <input type="text" id="apolloSearchUrl" class="gen-url-input" placeholder="https://app.apollo.io/#/people?…">
+            <div class="gen-hint">Paste an Apollo People search URL, or use the pre-built ICP filter below.</div>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <button class="text-link-btn" id="useDefaultUrlBtn">Use pre-built ICP URL (India · Founder/MD/CEO · 21–500 employees) →</button>
+        </div>
+
+        <div class="gen-form-row mt-16" style="align-items:flex-end;gap:12px">
+          <div>
+            <label class="gen-label">Max Leads</label>
+            <input type="number" id="maxLeads" class="gen-num-input" value="50" min="10" max="200">
+          </div>
+          <div style="flex:1">
+            <label class="gen-label">Apify Actor ID</label>
+            <input type="text" id="apifyActorId" value="curious_coder~apollo-io-scraper">
+          </div>
+          <button class="btn btn-primary" id="generateLeadsBtn" disabled>Generate Leads</button>
+        </div>
+
+        <div id="genProgress" class="gen-progress hidden">
+          <div class="spinner-dot"></div>
+          <span id="genProgressText">Starting scraper…</span>
+        </div>
+
+        <details class="gen-help-details">
+          <summary>Setup instructions</summary>
+          <div class="help-body">
+            <ol>
+              <li>Add <code>APIFY_API_KEY</code> to your <code>.env</code> file</li>
+              <li>Open <a href="https://app.apollo.io/#/people" target="_blank" style="color:var(--accent)">app.apollo.io</a> and filter by your ICP: <strong>Founder, MD, Managing Director, CEO</strong> in <strong>India</strong>, <strong>21–500 employees</strong> (proxy for ₹30–80cr)</li>
+              <li>Copy the URL from your browser and paste it above, or click "Use pre-built ICP URL"</li>
+              <li>Set max leads (50 is a good start), click Generate</li>
+              <li>Wait ~2-4 min for Apify to scrape. Leads appear below scored by ICP fit.</li>
+              <li>Click <strong>Load into Chain →</strong> on any lead to pre-fill the Agent Chain</li>
+            </ol>
+          </div>
+        </details>
+      </div>
+
+      <!-- Pipeline results -->
+      <div id="pipelineWrap" class="pipeline-wrap hidden">
+        <div class="pipeline-hd">
+          <h3>Leads</h3>
+          <span class="pipe-count" id="pipeCount"></span>
+          <div class="score-legend">
+            <span class="sl-hot">● Hot 70+</span>
+            <span class="sl-warm">● Warm 50–69</span>
+            <span class="sl-watch">● Watch 30–49</span>
+            <span class="sl-cold">● Cold &lt;30</span>
+          </div>
+          <div class="pipe-actions">
+            <button class="btn btn-secondary btn-sm" id="exportCsvBtn">Export CSV</button>
+            <button class="btn btn-danger btn-sm" id="clearLeadsBtn">Clear</button>
+          </div>
+        </div>
+        <div id="leadsGrid" class="leads-grid"></div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
