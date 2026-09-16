@@ -121,73 +121,106 @@ async function handleChainRun(req, res) {
 ICP Context (what the sender sells / their target customer): ${JSON.stringify(icp || {})}
 Your job: produce sharp, specific, insight-led sales intelligence and outreach copy. Never be generic. Always tie insights back to why the sender's offering is relevant to this specific prospect.`;
 
-    const researchPrompt = `Produce a structured prospect intelligence brief for this person:
-Prospect: ${JSON.stringify(prospect)}
+    const p = prospect.name || "this prospect";
+    const co = prospect.company || "their company";
+    const role = prospect.title || "their role";
 
-Structure your response in exactly these 4 sections:
+    const researchPrompt = `Produce a full prospect intelligence brief for:
+Prospect: ${JSON.stringify(prospect)}
+What the sender offers / ICP: ${JSON.stringify(icp || {})}
+
+Respond in exactly these 6 sections:
 
 ## 1. Company Intelligence
-- What the company does, size, market position
-- Recent signals: any known expansions, new products, leadership changes, funding, awards, or industry news
-- Key business priorities likely on the CEO/leadership agenda right now
+- What the company does, size, market position, competitive landscape
+- Recent signals: expansions, new products/services, leadership changes, funding, awards, press, or industry tailwinds/headwinds
+- The 2-3 things leadership is most likely obsessed with right now
 
-## 2. Role & Pain Point Analysis
-- What does someone in this role (${prospect.title || "their role"}) actually care about day-to-day?
-- What KPIs are they likely measured on?
-- Where are they most likely feeling pressure or friction?
-- Is this role a decision-maker, influencer, or end-user for what the ICP context describes? Explain.
+## 2. Role & Decision-Making Analysis
+- What does a ${role} actually own and care about day-to-day?
+- KPIs they are measured on
+- Where are they feeling the most pressure or friction right now?
+- Decision-maker, influencer, or champion for what the sender offers? Be specific about why.
 
-## 3. Personal Signals
-- What can be inferred about this person from their title, tenure, industry, and LinkedIn URL?
-- What professional ambitions or career motivations would resonate with them?
-- Recommended communication tone (formal/direct/consultative/peer-to-peer)?
+## 3. Empathy Map
+Think like this person. What is their inner world like right now?
+- THINK & FEEL: Their private worries, ambitions, and what success looks like to them personally
+- HEAR: What their boss, board, peers, or market is telling them
+- SEE: What they observe in their industry, competitors, and their own org
+- SAY & DO: How they present themselves publicly vs. how they actually behave under pressure
 
-## 4. Outreach Angle Recommendation
-- The single sharpest angle to open with — specific to this person and company
-- One thing to avoid (a generic mistake most salespeople make with this persona)
-- Best channel to start: email or LinkedIn? Why?`;
+## 4. NDFFO — Psychological Profile
+- NEEDS: The functional outcome they need right now (what must get done)
+- DESIRES: The deeper aspiration — what they really want for their career or business
+- FEARS: What keeps them up at night; what failure looks like for them
+- FRUSTRATIONS: The daily friction points, broken processes, or people problems that grind them down
+- OBJECTIONS: The exact reasons they will say no or go cold — be brutally honest
+
+## 5. Ice Breaker Bank
+Write 3 specific, ready-to-use ice breakers. Each must reference a real signal (company news, role context, or personal inference) and feel like it came from someone who did their homework.
+- Ice Breaker 1 (Company Signal): [one sentence]
+- Ice Breaker 2 (Role/Pain Signal): [one sentence]
+- Ice Breaker 3 (Personal/Aspiration Signal): [one sentence]
+
+## 6. Outreach Strategy
+- Sharpest angle: the single most compelling reason this person should care about the sender's offer, right now
+- Tone to use: (formal / direct / peer-to-peer / consultative) and why
+- Best first channel: email or LinkedIn, and why
+- The one thing NOT to say (the generic mistake that will get this person to delete/ignore)`;
 
     const stepPrompts = {
       research: researchPrompt,
-      hook: `Based on the research so far, write 3 alternative opening hooks for a cold outreach message to ${prospect.name || "this prospect"} at ${prospect.company || "their company"}.
+      hook: `Using the research, empathy map, and NDFFO for ${p} at ${co}, write 5 opening hooks for cold outreach.
 
-Rules:
-- Each hook must be specific to this person/company — no generic phrases
-- Reference something real: their role, a likely pain, a business signal, or a relatable challenge
-- Under 2 sentences each
-- No flattery, no "I hope this finds you well"
-- Format as numbered list with a one-line label for each (e.g. "Pain-led:", "Signal-led:", "Contrarian:")`,
-      email: `Write a cold email to ${prospect.name || "this prospect"}.
+Each hook must:
+- Reference a specific signal, fear, frustration, or desire — not a generic pain
+- Feel like it came from someone who understands their world, not a salesperson
+- Be under 2 sentences
 
-Rules:
-- Subject line: specific, curiosity-driven, under 8 words
-- Body: max 100 words
-- Open with the strongest hook from the research
-- One clear value proposition tied to their specific pain
-- CTA: low-friction, specific (propose a 15-min call or ask one qualifying question)
-- Tone: direct, peer-to-peer — not salesy, not corporate
+Format as:
+1. [Label — e.g. Fear-led / Signal-led / Desire-led / Frustration-led / Contrarian]:
+   [Hook text]
 
-Format:
-Subject: [subject line]
+After the 5 hooks, add one line: ★ Recommended: #[N] — [one sentence on why]`,
+
+      email: `Using the research, empathy map, NDFFO, and ice breakers for ${p} at ${co}, write a cold email.
+
+Structure:
+Subject: [specific, curiosity-driven, under 8 words — no clickbait]
 ---
-[email body]`,
-      linkedin: `Write two LinkedIn messages for ${prospect.name || "this prospect"}:
+[Opening line: use the strongest ice breaker or fear/frustration hook — 1 sentence]
+[Bridge: connect their pain/desire to what the sender offers — 1-2 sentences]
+[Proof or specificity: one concrete reason to believe — 1 sentence]
+[CTA: low-friction, specific — propose a 15-min call OR ask one smart qualifying question]
 
-1. CONNECTION REQUEST (under 300 characters): Personalized, no pitch, reference something specific about their role or company. Feel like a warm peer, not a salesperson.
+Rules:
+- Total body: max 100 words
+- No "I hope this finds you well", no "we help companies like yours", no buzzwords
+- Tone: peer-to-peer — like a smart colleague, not a vendor`,
 
-2. FOLLOW-UP DM (under 400 characters): Send this 3-4 days after connecting. Lead with a specific insight or question relevant to their world. One soft CTA.`,
-      sequence: `Write a complete 3-touch outreach sequence for ${prospect.name || "this prospect"} at ${prospect.company || "their company"}.
+      linkedin: `Using the ice breakers and personal signals for ${p}, write:
 
-TOUCH 1 — Day 1 (Email):
-Subject + body (max 80 words). Lead with the sharpest hook.
+1. CONNECTION REQUEST (under 280 characters):
+Reference one specific thing about their role, company, or a shared insight. No pitch. Feel like a peer who noticed something interesting about their work.
 
-TOUCH 2 — Day 4 (LinkedIn DM):
-Max 300 characters. Reference the email without being pushy. Add a new angle.
+2. FOLLOW-UP DM — send 3-4 days after connecting (under 400 characters):
+Open with a new angle drawn from their NDFFO (a desire or frustration). Ask one smart question or share one sharp insight. Soft CTA — no pressure.
 
-TOUCH 3 — Day 8 (Follow-up Email):
-Max 60 words. Acknowledge no response, add one new insight or social proof, final soft CTA.
+Label each clearly.`,
 
-Keep each touch distinct — don't repeat the same message.`,
+      sequence: `Using the full research brief, empathy map, NDFFO, and ice breakers for ${p} at ${co}, write a 3-touch sequence:
+
+TOUCH 1 — Day 1 · Email
+Subject: [under 8 words]
+Body: [max 80 words — open with the sharpest ice breaker, speak to their #1 fear or frustration, end with a soft CTA]
+
+TOUCH 2 — Day 4 · LinkedIn DM
+[under 300 chars — new angle, draw from a desire or aspiration, don't reference the email directly]
+
+TOUCH 3 — Day 8 · Email (Break-up)
+[max 60 words — acknowledge no response, add one new insight or social proof, final CTA that lowers the bar even further]
+
+Each touch must feel distinct — different angle, different emotional register.`,
     };
 
     const messages = [
@@ -202,7 +235,7 @@ Keep each touch distinct — don't repeat the same message.`,
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
       },
-      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: 1500 }),
+      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: 2000 }),
     });
     const data = await r.json();
     json(res, { content: data.choices?.[0]?.message?.content, step });
