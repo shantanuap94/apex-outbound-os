@@ -1,29 +1,29 @@
 // ─── Constants ────────────────────────────────────────────────────────────────
-const API = "";  // same origin
+const API = "";
 
-const DEFAULT_APOLLO_URL = [
-  "https://app.apollo.io/#/people",
-  "?sortByField=recommendations&sortAscending=false&page=1",
-  "&personTitles[]=Founder",
-  "&personTitles[]=Managing+Director",
-  "&personTitles[]=MD",
-  "&personTitles[]=CEO",
-  "&personTitles[]=Chief+Executive+Officer",
-  "&personLocations[]=India",
-  "&organizationNumEmployeesRanges[]=21,50",
-  "&organizationNumEmployeesRanges[]=51,100",
-  "&organizationNumEmployeesRanges[]=101,200",
-  "&organizationNumEmployeesRanges[]=201,500",
-].join("");
+const ICP_FIELDS = [
+  "seedDescription","roleSeniority","companyStageSize","responsibilityScope",
+  "empathySayLoud","empathyThinkPrivately","empathyActuallyDo","empathyFeel",
+  "pains","fears","frustrations","dreamOutcomes",
+];
 
-const ICP_FIELDS = ["companyName","website","industry","headcount","revenue","location","painPoints","goals","triggers","objections","notes"];
-const POLL_INTERVAL_MS = 8000;
-const POLL_MAX = 75;  // ~10 min
+const APEX_ICP = {
+  seedDescription: "Founders of a 50 crore B2B company, typically manufacturing, real estate, or expert-led B2B services like CA firms, architecture firms, and similar businesses.",
+  roleSeniority: "Founder and Managing Director.",
+  companyStageSize: "Post-survival SME with 50 crore annual turnover, transitioning from owner-led survival to professional management.",
+  responsibilityScope: "Accountable for topline growth, major client relationships, high-level bank and investor relations, and capital allocation for expansion.",
+  empathySayLoud: "We have the best product and service in the market, but sales is not consistent enough.\nGood talent is hard to find and harder to keep.\nThe way we did things at 5 crore will not get us to 100 crore.",
+  empathyThinkPrivately: "If I stop pushing for one week, will the momentum disappear?\nI am paying senior managers well, but am I still doing their work?\nMy competitors are younger and using technology better than I am.",
+  empathyActuallyDo: "Intervenes in sales meetings because they do not fully trust the team.\nChecks bank balances and receivables personally.\nManages key projects through WhatsApp groups, verbal instructions, and trusted loyalists.",
+  empathyFeel: "Feels the heavy weight of being the sole growth engine.\nFeels proud of the business, but quietly exhausted.\nFeels anxious that the market is changing faster than internal processes can adapt.",
+  pains: "Revenue is stuck at a plateau and every new crore feels harder to earn.\nHigh dependency on the founder for major decisions.\nCash flow gaps despite a healthy order book.\nInability to attract and retain high-quality professional leadership.",
+  fears: "The business may collapse or shrink if they step away for health or personal reasons.\nA smarter, tech-enabled competitor may steal key accounts.\nThey may be exposed as a small-time player when trying to win enterprise clients.\nTheir reputation for quality may erode as the company scales.",
+  frustrations: "Spending most of the day firefighting instead of thinking strategically.\nThe team keeps making the same mistakes despite repeated instructions.\nData is scattered across spreadsheets, paper files, and people's heads.\nSales cycles are lengthening without a clear reason.",
+  dreamOutcomes: "A dashboard that shows real-time business health without asking five people for reports.\nA self-managing leadership team that brings solutions, not just problems.\nPredictable month-on-month growth that does not require founder intervention.\nFreedom to spend time on expansion, new ventures, or family while the business grows.",
+};
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 const $  = (id) => document.getElementById(id);
-const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; return e; };
-
 function post(path, body) {
   return fetch(API + path, {
     method: "POST",
@@ -31,44 +31,44 @@ function post(path, body) {
     body: JSON.stringify(body),
   }).then((r) => r.json());
 }
-
-function get(path) {
-  return fetch(API + path).then((r) => r.json());
-}
+function get(path) { return fetch(API + path).then((r) => r.json()); }
 
 // ─── API Status ───────────────────────────────────────────────────────────────
 async function checkApiStatus() {
   try {
     const s = await get("/api/status");
-    const keys = ["openai", "apollo", "perplexity", "apify"];
+    const keys = ["openai", "apollo", "perplexity"];
+    const missing = [];
     keys.forEach((k) => {
-      const dot = $(`sdot-${k}`);
-      const card = $(`sc-${k}`);
-      const val = $(`sc-${k}-val`);
-      if (dot) { dot.className = "sdot " + (s[k] ? "on" : "off"); }
-      if (card) { card.className = "status-card " + (s[k] ? "ok" : "err"); }
-      if (val)  { val.textContent = s[k] ? "Connected ✓" : "Not set"; }
+      const pill = $(`sdot-${k}`);
+      if (pill) pill.className = "spill" + (s[k] ? " on" : "");
+      if (!s[k]) missing.push(k.toUpperCase() + "_API_KEY");
     });
+    const missingEl = $("sbMissing");
+    if (missingEl) missingEl.textContent = missing.length ? "Missing: " + missing.join(", ") : "";
+    updateCounters();
+  } catch (e) { console.warn("Status check failed:", e.message); }
+}
 
-    const genBtn = $("generateLeadsBtn");
-    if (genBtn) genBtn.disabled = !s.apify;
-  } catch (e) {
-    console.warn("Status check failed:", e.message);
-  }
+function updateCounters() {
+  const dossiers = parseInt(localStorage.getItem("apex.dossierCount") || "0", 10);
+  const drafts   = parseInt(localStorage.getItem("apex.draftCount")   || "0", 10);
+  const p = $("ctr-prospects"); if (p) p.textContent = "0 prospects";
+  const d = $("ctr-dossiers");  if (d) d.textContent = `${dossiers} dossier${dossiers !== 1 ? "s" : ""}`;
+  const r = $("ctr-drafts");    if (r) r.textContent = `${drafts} drafts ready`;
 }
 
 // ─── Tab navigation ───────────────────────────────────────────────────────────
 function switchTab(tabId) {
-  document.querySelectorAll(".tab-btn").forEach((b) => {
+  document.querySelectorAll(".nav-item").forEach((b) => {
     b.classList.toggle("active", b.dataset.tab === tabId);
   });
   document.querySelectorAll(".tab-panel").forEach((p) => {
     p.classList.toggle("active", p.id === `tab-${tabId}`);
   });
 }
-
 function wireTabs() {
-  document.querySelectorAll(".tab-btn").forEach((btn) => {
+  document.querySelectorAll(".nav-item").forEach((btn) => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
 }
@@ -99,283 +99,295 @@ function getIcp() {
   return data;
 }
 
+function fillIcpFromObj(obj) {
+  ICP_FIELDS.forEach((f) => {
+    const inp = $(`icp-${f}`);
+    if (inp && obj[f]) inp.value = obj[f];
+  });
+}
+
+async function fillSingleField(field, seed) {
+  try {
+    const { value, error } = await post("/api/icp/fill", { field, description: seed });
+    if (error) { alert("Error: " + error); return; }
+    const inp = $(`icp-${field}`);
+    if (inp && value) inp.value = value;
+  } catch (e) { alert("Network error: " + e.message); }
+}
+
 function wireIcp() {
   loadSavedIcp();
 
+  $("restoreIcpBtn").addEventListener("click", () => fillIcpFromObj(APEX_ICP));
+
   $("icpFillBtn").addEventListener("click", async () => {
-    const desc = $("icpDesc").value.trim();
-    if (!desc) { alert("Type a company description first, then click Fill with AI."); return; }
+    const seed = $("icp-seedDescription").value.trim();
+    if (!seed) { alert("Enter a Seed Description first, then click Generate all fields."); return; }
     const btn = $("icpFillBtn");
-    btn.textContent = "Filling…";
-    btn.disabled = true;
+    btn.textContent = "Generating…"; btn.disabled = true;
     try {
-      const { icp, error } = await post("/api/icp/fill", { description: desc });
+      const { icp, error } = await post("/api/icp/fill", { description: seed });
       if (error) { alert("Error: " + error); return; }
-      ICP_FIELDS.forEach((f) => {
-        const inp = $(`icp-${f}`);
-        if (inp && icp[f]) inp.value = icp[f];
-      });
-    } catch (e) {
-      alert("Network error: " + e.message);
-    } finally {
-      btn.textContent = "Fill with AI";
-      btn.disabled = false;
-    }
+      fillIcpFromObj(icp);
+    } catch (e) { alert("Network error: " + e.message); }
+    finally { btn.textContent = "Generate all fields"; btn.disabled = false; }
+  });
+
+  document.querySelectorAll(".btn-ai[data-field]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const field = btn.dataset.field;
+      const seed  = $("icp-seedDescription").value.trim();
+      if (!seed) { alert("Enter a Seed Description first."); return; }
+      const orig = btn.textContent;
+      btn.textContent = "…"; btn.disabled = true;
+      await fillSingleField(field, seed);
+      btn.textContent = orig; btn.disabled = false;
+    });
   });
 
   $("icpSaveBtn").addEventListener("click", saveIcp);
-
   $("icpClearBtn").addEventListener("click", () => {
     ICP_FIELDS.forEach((f) => { const inp = $(`icp-${f}`); if (inp) inp.value = ""; });
-    $("icpDesc").value = "";
   });
 }
 
 // ─── Agent Chain ──────────────────────────────────────────────────────────────
-const chainHistory = [];
-
-function loadLeadIntoChain(lead) {
-  const name = [lead.first_name, lead.last_name].filter(Boolean).join(" ") || lead.name || "";
-  $("prospectName").value     = name;
-  $("prospectTitle").value    = lead.title || lead.job_title || "";
-  $("prospectCompany").value  = lead.organization_name || lead.company || "";
-  $("prospectEmail").value    = lead.email || lead.work_email || "";
-  $("prospectLinkedin").value = lead.linkedin_url || lead.person_linkedin_url || "";
-  $("prospectIndustry").value = lead.organization_industry || lead.industry || "";
-  $("prospectNotes").value    = `Score: ${lead._score}/100. Headcount: ${lead.num_employees || "?"}. Location: ${lead.city || ""} ${lead.country || "India"}.`;
-
-  chainHistory.length = 0;
-  $("chainOutput").innerHTML = "";
-  $("chainLoadedBadge").classList.remove("hidden");
-
-  switchTab("chain");
-}
-
 function getProspect() {
   return {
-    name:     $("prospectName").value,
-    title:    $("prospectTitle").value,
-    company:  $("prospectCompany").value,
-    email:    $("prospectEmail").value,
-    linkedin: $("prospectLinkedin").value,
-    industry: $("prospectIndustry").value,
-    notes:    $("prospectNotes").value,
+    name:    [($("pFirstName").value || ""), ($("pLastName").value || "")].filter(Boolean).join(" "),
+    firstName: $("pFirstName").value,
+    lastName:  $("pLastName").value,
+    title:   $("pTitle").value,
+    company: $("pCompany").value,
+    domain:  $("pDomain").value,
+    linkedin: $("pLinkedin").value,
+    industry: $("pIndustry").value,
   };
 }
 
-function appendChainStep(step, content) {
-  const out = $("chainOutput");
-  const empty = out.querySelector(".output-empty");
-  if (empty) empty.remove();
+function setStepDone(n) {
+  const b = $(`badge-${n}`);
+  if (b) { b.className = "step-badge done"; b.textContent = "✓"; }
+}
 
-  const labels = { research: "Research", hook: "Opening Hooks", email: "Cold Email", linkedin: "LinkedIn DM", sequence: "Full Sequence" };
-  const block = el("div", "step-block");
-  block.appendChild(el("div", "step-label", labels[step] || step));
-  block.appendChild(el("div", "step-content", content.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")));
-  out.appendChild(block);
-  out.scrollTop = out.scrollHeight;
+function setRunning(btn, label) {
+  btn.textContent = label + "…"; btn.disabled = true;
+}
+function resetBtn(btn, label) {
+  btn.textContent = label; btn.disabled = false;
 }
 
 function wireChain() {
-  document.querySelectorAll(".chain-step-btn").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const step = btn.dataset.step;
-      const prospect = getProspect();
-      if (!prospect.name && !prospect.company) {
-        alert("Fill in at least the prospect name or company first.");
-        return;
+  $("clearProspectBtn").addEventListener("click", () => {
+    ["pFirstName","pLastName","pTitle","pCompany","pDomain","pLinkedin"].forEach((id) => $(`${id}`).value = "");
+    $("pIndustry").value = "";
+    $("signalContext").value = "";
+    $("linkedinPosts").value = "";
+    $("objectionReply").value = "";
+    $("snapshotOut").innerHTML = '<span style="color:var(--text-3);font-style:italic">Enrich with Apollo or paste company notes manually…</span>';
+    $("dossierOut").innerHTML  = '<span class="dossier-empty">Run Agent 1 to generate the intelligence dossier…</span>';
+    $("dossierScore").textContent = "— / 100";
+    ["a","b","c"].forEach((v) => { const e = $(`emailOut-${v}`); if (e) { e.textContent = ""; } });
+    $("emailOut-a").innerHTML = '<span class="email-empty">Generate outreach to see email variants…</span>';
+    $("liOut").innerHTML = '<span style="color:var(--text-3);font-style:italic">Generate outreach to see LinkedIn sequence…</span>';
+    $("followupOut").textContent = ""; $("followupOut").classList.add("hidden");
+    $("objectionOut").textContent = ""; $("objectionOut").classList.add("hidden");
+    for (let i = 1; i <= 8; i++) {
+      const b = $(`badge-${i}`);
+      if (b) { b.className = "step-badge" + (i === 1 ? " active" : ""); b.textContent = i; }
+    }
+    localStorage.removeItem("apex.currentDossier");
+  });
+
+  // Enrich with Apollo
+  $("enrichApolloBtn").addEventListener("click", async () => {
+    const p = getProspect();
+    if (!p.company && !p.domain) { alert("Enter at least Company Name or Domain first."); return; }
+    const btn = $("enrichApolloBtn");
+    setRunning(btn, "Enrich with Apollo");
+    try {
+      const res = await post("/api/apollo/match", {
+        first_name: p.firstName, last_name: p.lastName,
+        organization_name: p.company, domain: p.domain,
+      });
+      if (res.error) {
+        $("snapshotOut").textContent = "Apollo: " + res.error;
+      } else {
+        const person = res.person || {};
+        const org = person.organization || {};
+        const snap = [
+          org.name ? `Company: ${org.name}` : "",
+          org.estimated_num_employees ? `Headcount: ~${org.estimated_num_employees}` : "",
+          org.industry ? `Industry: ${org.industry}` : "",
+          org.primary_domain ? `Domain: ${org.primary_domain}` : "",
+          org.city ? `Location: ${org.city}, ${org.country || ""}` : "",
+          person.title ? `Title confirmed: ${person.title}` : "",
+          person.email ? `Email: ${person.email}` : "",
+        ].filter(Boolean).join("\n");
+        $("snapshotOut").textContent = snap || "Apollo enrichment returned no data.";
+        setStepDone(2);
+        if (person.email && !$("pFirstName").value) {
+          const nameParts = (person.name || "").split(" ");
+          $("pFirstName").value = nameParts[0] || "";
+          $("pLastName").value  = nameParts.slice(1).join(" ") || "";
+        }
+      }
+    } catch (e) {
+      $("snapshotOut").textContent = "Apollo API not connected. Add APOLLO_API_KEY to your environment.";
+    }
+    resetBtn(btn, "Enrich with Apollo →");
+  });
+
+  // Research with Perplexity
+  $("researchPerplexityBtn").addEventListener("click", async () => {
+    const p = getProspect();
+    if (!p.company) { alert("Enter the Company Name first."); return; }
+    const btn = $("researchPerplexityBtn");
+    setRunning(btn, "Research with Perplexity");
+    try {
+      const query = `Latest news about ${p.company}${p.domain ? " (" + p.domain + ")" : ""}: recent expansions, hiring announcements, awards, new clients, or leadership changes in the last 90 days.`;
+      const res = await post("/api/perplexity/search", {
+        messages: [{ role: "user", content: query }],
+      });
+      const content = res.choices?.[0]?.message?.content || res.error || "No results.";
+      const current = $("signalContext").value;
+      $("signalContext").value = (current ? current + "\n\n---\nPerplexity Research:\n" : "Perplexity Research:\n") + content;
+      setStepDone(2);
+    } catch (e) {
+      alert("Perplexity API not connected. Add PERPLEXITY_API_KEY to your environment.");
+    }
+    resetBtn(btn, "Research with Perplexity →");
+  });
+
+  // Run Agent 1 — Research
+  $("runResearchBtn").addEventListener("click", async () => {
+    const p = getProspect();
+    if (!p.name && !p.company) { alert("Fill in the prospect name or company first."); return; }
+    const btn = $("runResearchBtn");
+    setRunning(btn, "Run Agent 1 — Research");
+    $("dossierOut").innerHTML = '<span class="dossier-empty">Researching…</span>';
+    try {
+      const { content, error } = await post("/api/chain/run", {
+        prospect: p,
+        icp: getIcp(),
+        step: "research",
+        signalContext: $("signalContext").value,
+      });
+      if (error) { $("dossierOut").textContent = "Error: " + error; return; }
+      $("dossierOut").textContent = content;
+      localStorage.setItem("apex.currentDossier", content);
+
+      // Extract score
+      const scoreMatch = content.match(/Intelligence Score[:\s]*(\d+)/i);
+      if (scoreMatch) $("dossierScore").textContent = scoreMatch[1] + " / 100";
+      else $("dossierScore").textContent = "— / 100";
+
+      setStepDone(3); setStepDone(4);
+
+      // Update dossier counter
+      const count = parseInt(localStorage.getItem("apex.dossierCount") || "0", 10) + 1;
+      localStorage.setItem("apex.dossierCount", count);
+      updateCounters();
+    } catch (e) { $("dossierOut").textContent = "Network error: " + e.message; }
+    resetBtn(btn, "Run Agent 1 — Research →");
+  });
+
+  // Generate Outreach (emails + LinkedIn simultaneously)
+  $("genOutreachBtn").addEventListener("click", async () => {
+    const p = getProspect();
+    const dossier = localStorage.getItem("apex.currentDossier") || $("dossierOut").textContent;
+    const btn = $("genOutreachBtn");
+    setRunning(btn, "Generate Outreach");
+
+    ["a","b","c"].forEach((v) => {
+      const e = $(`emailOut-${v}`);
+      if (e) e.innerHTML = '<span class="email-empty">Generating…</span>';
+    });
+    $("liOut").innerHTML = '<span style="color:var(--text-3);font-style:italic">Generating…</span>';
+
+    try {
+      // Run cold emails + LinkedIn in parallel
+      const [emailRes, liRes] = await Promise.all([
+        post("/api/chain/run", { prospect: p, icp: getIcp(), step: "outreach", dossier }),
+        post("/api/chain/run", { prospect: p, icp: getIcp(), step: "linkedin", dossier, linkedinPosts: $("linkedinPosts").value }),
+      ]);
+
+      // Parse 3 email variants from response
+      if (emailRes.content) {
+        const raw = emailRes.content;
+        const aMatch = raw.match(/VARIANT A[\s\S]*?(?=VARIANT B|$)/i)?.[0] || "";
+        const bMatch = raw.match(/VARIANT B[\s\S]*?(?=VARIANT C|$)/i)?.[0] || "";
+        const cMatch = raw.match(/VARIANT C[\s\S]*/i)?.[0] || "";
+        $("emailOut-a").textContent = aMatch.trim() || raw;
+        $("emailOut-b").textContent = bMatch.trim() || "See Variant A";
+        $("emailOut-c").textContent = cMatch.trim() || "See Variant A";
+
+        const count = parseInt(localStorage.getItem("apex.draftCount") || "0", 10) + 3;
+        localStorage.setItem("apex.draftCount", count);
+        updateCounters();
       }
 
-      btn.classList.add("running");
-      btn.textContent = btn.textContent.replace("…", "") + "…";
-      btn.disabled = true;
-
-      try {
-        const { content, error } = await post("/api/chain/run", {
-          prospect,
-          icp: getIcp(),
-          step,
-          history: chainHistory.slice(-6),
-        });
-        if (error) { appendChainStep(step, "Error: " + error); return; }
-        appendChainStep(step, content);
-        chainHistory.push({ role: "user", content: step });
-        chainHistory.push({ role: "assistant", content });
-      } catch (e) {
-        appendChainStep(step, "Network error: " + e.message);
-      } finally {
-        btn.classList.remove("running");
-        btn.textContent = btn.textContent.replace("…", "");
-        btn.disabled = false;
+      if (liRes.content) {
+        $("liOut").textContent = liRes.content;
       }
+
+      setStepDone(5); setStepDone(6);
+    } catch (e) {
+      $("emailOut-a").textContent = "Network error: " + e.message;
+    }
+    resetBtn(btn, "Generate Outreach →");
+  });
+
+  // Email variant tabs
+  document.querySelectorAll(".etab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".etab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      const v = tab.dataset.variant;
+      ["a","b","c"].forEach((x) => {
+        const el = $(`emailOut-${x}`);
+        if (el) el.classList.toggle("hidden", x !== v);
+      });
     });
   });
 
-  $("chainClearBtn").addEventListener("click", () => {
-    $("chainOutput").innerHTML = '<span class="output-empty">Select a step above to generate content…</span>';
-    chainHistory.length = 0;
-    $("chainLoadedBadge").classList.add("hidden");
-  });
-}
-
-// ─── Lead Pipeline ────────────────────────────────────────────────────────────
-function scoreBand(score) {
-  if (score >= 70) return "hot";
-  if (score >= 50) return "warm";
-  if (score >= 30) return "watch";
-  return "cold";
-}
-
-function renderLeadCard(lead) {
-  const band = scoreBand(lead._score);
-  const name = [lead.first_name, lead.last_name].filter(Boolean).join(" ") || lead.name || "—";
-  const title = lead.title || lead.job_title || "";
-  const company = lead.organization_name || lead.company || "";
-  const hc = lead.num_employees || lead.headcount || "";
-  const ind = lead.organization_industry || lead.industry || "";
-  const hasEmail = !!(lead.email || lead.work_email);
-  const hasLi = !!(lead.linkedin_url || lead.person_linkedin_url);
-
-  const card = el("div", "lead-card");
-  card.innerHTML = `
-    <div class="lead-card-top">
-      <div class="lead-names">
-        <div class="ln-name">${name}</div>
-        ${title ? `<div class="ln-title">${title}</div>` : ""}
-        ${company ? `<div class="ln-company">${company}</div>` : ""}
-      </div>
-      <div class="lead-score-mini lsm-${band}">${lead._score}</div>
-    </div>
-    <div class="lead-chips">
-      ${hasEmail ? '<span class="lead-chip lc-email">✉ Email</span>' : ""}
-      ${hasLi    ? '<span class="lead-chip lc-linkedin">in LinkedIn</span>' : ""}
-      ${hc       ? `<span class="lead-chip lc-hc">${hc} emp</span>` : ""}
-      ${ind      ? `<span class="lead-chip lc-industry">${ind}</span>` : ""}
-    </div>
-    <button class="lead-load-btn">Load into Chain →</button>
-  `;
-  card.querySelector(".lead-load-btn").addEventListener("click", () => loadLeadIntoChain(lead));
-  return card;
-}
-
-function renderLeadPipeline(leads) {
-  const grid = $("leadsGrid");
-  grid.innerHTML = "";
-  leads.forEach((lead) => grid.appendChild(renderLeadCard(lead)));
-
-  const pipeWrap = $("pipelineWrap");
-  pipeWrap.classList.remove("hidden");
-
-  const hot  = leads.filter((l) => l._score >= 70).length;
-  const warm = leads.filter((l) => l._score >= 50 && l._score < 70).length;
-  $("pipeCount").textContent = `${leads.length} leads — ${hot} hot, ${warm} warm`;
-}
-
-function leadsToCSV(leads) {
-  const cols = ["name", "title", "company", "email", "linkedin_url", "industry", "num_employees", "city", "country", "_score"];
-  const header = cols.join(",");
-  const rows = leads.map((l) =>
-    cols.map((c) => {
-      const val = [l.first_name, l.last_name].filter(Boolean).join(" ") && c === "name"
-        ? [l.first_name, l.last_name].filter(Boolean).join(" ")
-        : (l[c] || "");
-      return `"${String(val).replace(/"/g, '""')}"`;
-    }).join(",")
-  );
-  return [header, ...rows].join("\n");
-}
-
-function wireCampaigns() {
-  $("useDefaultUrlBtn").addEventListener("click", () => {
-    $("apolloSearchUrl").value = DEFAULT_APOLLO_URL;
-  });
-
-  let pollTimer = null;
-  let pollCount = 0;
-  let currentLeads = JSON.parse(localStorage.getItem("apex.leads") || "null");
-
-  if (currentLeads && currentLeads.length) {
-    renderLeadPipeline(currentLeads);
-  }
-
-  $("generateLeadsBtn").addEventListener("click", async () => {
-    const searchUrl = $("apolloSearchUrl").value.trim();
-    if (!searchUrl) { alert("Paste an Apollo search URL first."); return; }
-
-    const maxLeads = parseInt($("maxLeads").value || "50", 10);
-    const actorId  = $("apifyActorId").value.trim() || "curious_coder~apollo-io-scraper";
-
-    $("generateLeadsBtn").disabled = true;
-    $("genProgress").classList.remove("hidden");
-    $("genProgressText").textContent = "Starting Apify actor…";
-    pollCount = 0;
-
-    let runId, datasetId;
+  // Build Follow-up Sequence
+  $("buildSequenceBtn").addEventListener("click", async () => {
+    const p = getProspect();
+    const dossier = localStorage.getItem("apex.currentDossier") || "";
+    const state   = $("sequenceState").value;
+    const btn = $("buildSequenceBtn");
+    btn.textContent = "Building…"; btn.disabled = true;
+    $("followupOut").textContent = "Generating sequence…";
+    $("followupOut").classList.remove("hidden");
     try {
-      const result = await post("/api/leads/generate", { searchUrl, maxLeads, actorId });
-      if (result.error) { alert("Error: " + result.error); return; }
-      runId = result.runId;
-      datasetId = result.datasetId;
-    } catch (e) {
-      alert("Network error: " + e.message);
-      $("generateLeadsBtn").disabled = false;
-      $("genProgress").classList.add("hidden");
-      return;
-    }
-
-    $("genProgressText").textContent = `Run started (${runId.slice(0,8)}…). Polling for results…`;
-
-    clearInterval(pollTimer);
-    pollTimer = setInterval(async () => {
-      pollCount++;
-      if (pollCount > POLL_MAX) {
-        clearInterval(pollTimer);
-        $("genProgressText").textContent = "Timeout — run may still be processing in Apify.";
-        $("generateLeadsBtn").disabled = false;
-        return;
-      }
-
-      try {
-        const status = await get(`/api/leads/run/${runId}`);
-        $("genProgressText").textContent = `Status: ${status.status} (poll ${pollCount}/${POLL_MAX})…`;
-
-        if (status.status === "SUCCEEDED") {
-          clearInterval(pollTimer);
-          $("genProgressText").textContent = "Fetching results…";
-          const { leads, error } = await get(`/api/leads/results/${status.datasetId || datasetId}`);
-          if (error) { $("genProgressText").textContent = "Error: " + error; return; }
-
-          localStorage.setItem("apex.leads", JSON.stringify(leads));
-          renderLeadPipeline(leads);
-          $("genProgress").classList.add("hidden");
-          $("generateLeadsBtn").disabled = false;
-        }
-
-        if (status.status === "FAILED" || status.status === "ABORTED") {
-          clearInterval(pollTimer);
-          $("genProgressText").textContent = `Run ${status.status}. Check Apify console.`;
-          $("generateLeadsBtn").disabled = false;
-        }
-      } catch (e) {
-        $("genProgressText").textContent = `Poll error: ${e.message}`;
-      }
-    }, POLL_INTERVAL_MS);
+      const { content, error } = await post("/api/chain/run", {
+        prospect: p, icp: getIcp(), step: "followup",
+        dossier, sequenceState: state,
+      });
+      $("followupOut").textContent = error ? "Error: " + error : content;
+      if (!error) setStepDone(7);
+    } catch (e) { $("followupOut").textContent = "Network error: " + e.message; }
+    btn.textContent = "Build Sequence"; btn.disabled = false;
   });
 
-  $("exportCsvBtn").addEventListener("click", () => {
-    const leads = JSON.parse(localStorage.getItem("apex.leads") || "[]");
-    if (!leads.length) return;
-    const blob = new Blob([leadsToCSV(leads)], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `apex-leads-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-  });
-
-  $("clearLeadsBtn").addEventListener("click", () => {
-    localStorage.removeItem("apex.leads");
-    $("leadsGrid").innerHTML = "";
-    $("pipelineWrap").classList.add("hidden");
+  // Objection Handler
+  $("classifyBtn").addEventListener("click", async () => {
+    const reply = $("objectionReply").value.trim();
+    if (!reply) { alert("Paste their reply first."); return; }
+    const btn = $("classifyBtn");
+    btn.textContent = "Classifying…"; btn.disabled = true;
+    $("objectionOut").textContent = "Analysing reply…";
+    $("objectionOut").classList.remove("hidden");
+    try {
+      const { content, error } = await post("/api/chain/run", {
+        prospect: getProspect(), icp: getIcp(),
+        step: "objection", reply,
+      });
+      $("objectionOut").textContent = error ? "Error: " + error : content;
+      if (!error) setStepDone(8);
+    } catch (e) { $("objectionOut").textContent = "Network error: " + e.message; }
+    btn.textContent = "Classify & Draft Response"; btn.disabled = false;
   });
 }
 
@@ -384,7 +396,6 @@ document.addEventListener("DOMContentLoaded", () => {
   wireTabs();
   wireIcp();
   wireChain();
-  wireCampaigns();
   checkApiStatus();
   setInterval(checkApiStatus, 30000);
 });

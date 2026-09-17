@@ -9,212 +9,470 @@
 <body>
 <div id="app">
 
-  <!-- ── Header ── -->
-  <header>
-    <div class="brand">Apex <span>Outbound OS</span></div>
-    <div class="sdots">
-      <div class="sdot" id="sdot-openai"    title="OpenAI API">OpenAI</div>
-      <div class="sdot" id="sdot-apollo"    title="Apollo API">Apollo</div>
-      <div class="sdot" id="sdot-perplexity" title="Perplexity API">Perplexity</div>
-      <div class="sdot" id="sdot-apify"     title="Apify API">Apify</div>
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-icon">A</div>
+      <div>
+        <div class="sb-brand-name">Apex</div>
+        <div class="sb-brand-sub">Outbound OS</div>
+      </div>
     </div>
-  </header>
-
-  <!-- ── Nav ── -->
-  <nav>
-    <button class="tab-btn active" data-tab="icp">1 ICP Builder</button>
-    <button class="tab-btn"        data-tab="chain">2 Agent Chain</button>
-    <button class="tab-btn"        data-tab="status">3 Status</button>
-    <button class="tab-btn"        data-tab="pipeline">4 Lead Pipeline</button>
-  </nav>
-
-  <main>
-
-    <!-- ─────────────────────────────────────── ICP Builder ── -->
-    <section id="tab-icp" class="tab-panel active">
-      <div class="section-hd">Ideal Customer Profile</div>
-
-      <div class="card">
-        <label>Describe the company (AI will fill the form)</label>
-        <div class="icp-fill-bar">
-          <textarea id="icpDesc" placeholder="e.g. A mid-size steel manufacturer in Pune with around 200 employees, struggling with inconsistent sales pipeline…"></textarea>
-          <button class="btn btn-primary" id="icpFillBtn">Fill with AI</button>
-        </div>
+    <nav class="sb-nav">
+      <button class="nav-item active" data-tab="icp"><span class="nav-num">1</span>ICP Definition</button>
+      <button class="nav-item" data-tab="signal"><span class="nav-num">2</span>Signal Strategy</button>
+      <button class="nav-item" data-tab="chain"><span class="nav-num">3</span>Agent Chain</button>
+      <button class="nav-item" data-tab="campaigns"><span class="nav-num">4</span>Campaigns</button>
+    </nav>
+    <div class="sb-status">
+      <div class="sb-status-lbl">STACK STATUS</div>
+      <div class="sb-pills">
+        <span class="spill" id="sdot-apollo">Apollo</span>
+        <span class="spill" id="sdot-openai">OpenAI</span>
+        <span class="spill" id="sdot-perplexity">Perplexity</span>
       </div>
+      <div class="sb-missing" id="sbMissing"></div>
+    </div>
+  </aside>
 
-      <div id="icpGrid">
-        <div class="field"><label>Company Name</label><input type="text" id="icp-companyName" placeholder="Acme Industries"></div>
-        <div class="field"><label>Website</label><input type="url" id="icp-website" placeholder="https://acme.in"></div>
-        <div class="field"><label>Industry</label><input type="text" id="icp-industry" placeholder="Manufacturing / Real Estate / Architecture / CA Firm"></div>
-        <div class="field"><label>Headcount</label><input type="text" id="icp-headcount" placeholder="50–200 employees"></div>
-        <div class="field"><label>Revenue (₹)</label><input type="text" id="icp-revenue" placeholder="₹30–80 crore"></div>
-        <div class="field"><label>Location</label><input type="text" id="icp-location" placeholder="India (Tier 1 / Tier 2 cities)"></div>
-        <div class="field" style="grid-column:span 2"><label>Pain Points</label><textarea id="icp-painPoints" placeholder="Inconsistent pipeline, over-reliance on referrals, no structured outbound…"></textarea></div>
-        <div class="field" style="grid-column:span 2"><label>Goals</label><textarea id="icp-goals" placeholder="Predictable revenue, 3–4 enterprise clients, scale without hiring large sales team…"></textarea></div>
-        <div class="field"><label>Triggers to Reach Out</label><textarea id="icp-triggers" placeholder="New hire, expansion announcement, award recognition…"></textarea></div>
-        <div class="field"><label>Common Objections</label><textarea id="icp-objections" placeholder="Already have someone for this, not the right time, price…"></textarea></div>
-        <div class="field" style="grid-column:span 2"><label>Notes</label><textarea id="icp-notes" placeholder="Additional context about this ICP segment…"></textarea></div>
+  <!-- ── Main ── -->
+  <div class="main-wrap">
+    <div class="main-hd">
+      <div>
+        <div class="hd-eyebrow">APEX GROWTH PARTNERS</div>
+        <div class="hd-title">AI outbound sales stack</div>
       </div>
-
-      <div class="icp-actions mt-16">
-        <button class="btn btn-primary" id="icpSaveBtn">Save ICP</button>
-        <button class="btn btn-secondary" id="icpClearBtn">Clear</button>
-        <span class="icp-saved-note" id="icpSavedNote">Saved ✓</span>
+      <div class="hd-counters">
+        <span class="ctr-pill" id="ctr-prospects">0 prospects</span>
+        <span class="ctr-pill" id="ctr-dossiers">0 dossiers</span>
+        <span class="ctr-pill" id="ctr-drafts">0 drafts ready</span>
       </div>
-    </section>
+    </div>
 
-    <!-- ─────────────────────────────────────── Agent Chain ── -->
-    <section id="tab-chain" class="tab-panel">
-      <div class="section-hd">Agent Chain — Personalized Outreach</div>
+    <main>
 
-      <div id="chainLoadedBadge" class="chain-loaded-badge hidden">Loaded from pipeline</div>
-
-      <div class="chain-layout">
-
-        <!-- Prospect panel -->
-        <div class="prospect-panel">
-          <div class="section-hd">Prospect</div>
-          <div class="field"><label>Full Name</label><input type="text" id="prospectName" placeholder="Rahul Sharma"></div>
-          <div class="field"><label>Title</label><input type="text" id="prospectTitle" placeholder="Founder / MD / CEO"></div>
-          <div class="field"><label>Company</label><input type="text" id="prospectCompany" placeholder="Acme Industries"></div>
-          <div class="field"><label>Email</label><input type="text" id="prospectEmail" placeholder="rahul@acme.in"></div>
-          <div class="field"><label>LinkedIn URL</label><input type="text" id="prospectLinkedin" placeholder="linkedin.com/in/..."></div>
-          <div class="field"><label>Industry</label><input type="text" id="prospectIndustry" placeholder="Manufacturing"></div>
-          <div class="field"><label>Notes</label><textarea id="prospectNotes" placeholder="Score, headcount, recent signals…" style="min-height:60px"></textarea></div>
-        </div>
-
-        <!-- Chain panel -->
-        <div class="chain-panel">
+      <!-- ────────────────────────────────── ICP Definition ── -->
+      <section id="tab-icp" class="tab-panel active">
+        <div class="step-eyebrow">STEP 1</div>
+        <div class="step-hd">
           <div>
-            <div class="section-hd" style="margin-bottom:10px">Run Steps</div>
-            <div class="chain-step-btns">
-              <button class="chain-step-btn" data-step="research">Research</button>
-              <button class="chain-step-btn" data-step="hook">Hooks</button>
-              <button class="chain-step-btn" data-step="email">Cold Email</button>
-              <button class="chain-step-btn" data-step="linkedin">LinkedIn DM</button>
-              <button class="chain-step-btn" data-step="sequence">Full Sequence</button>
+            <h2>Customer ICP Definition</h2>
+            <p class="step-desc">Define who the system sells to, what they carry emotionally, and what a buying signal looks like. This feeds every agent prompt.</p>
+          </div>
+          <div class="step-hd-btns">
+            <button class="btn btn-outline" id="restoreIcpBtn">Restore Apex ICP</button>
+            <button class="btn btn-dark" id="icpFillBtn">Generate all fields</button>
+          </div>
+        </div>
+
+        <div class="icp-fields">
+          <div class="field-card">
+            <div class="fc-hd">
+              <label>Seed Description</label>
+              <button class="btn-ai" data-field="seedDescription">AI fill</button>
+            </div>
+            <textarea id="icp-seedDescription" rows="3" placeholder="e.g. Founders of a 50 crore B2B company, typically manufacturing, real estate, or CA firms…"></textarea>
+          </div>
+
+          <div class="field-row">
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Role &amp; Seniority</label>
+                <button class="btn-ai" data-field="roleSeniority">AI fill</button>
+              </div>
+              <textarea id="icp-roleSeniority" rows="3" placeholder="Founder and Managing Director…"></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Company Stage &amp; Size</label>
+                <button class="btn-ai" data-field="companyStageSize">AI fill</button>
+              </div>
+              <textarea id="icp-companyStageSize" rows="3" placeholder="Post-survival SME, 50 crore turnover…"></textarea>
             </div>
           </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <span style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Output</span>
-              <button class="btn btn-secondary btn-sm" id="chainClearBtn">Clear</button>
+
+          <div class="field-card">
+            <div class="fc-hd">
+              <label>Responsibility Scope</label>
+              <button class="btn-ai" data-field="responsibilityScope">AI fill</button>
             </div>
-            <div id="chainOutput" class="output-box"><span class="output-empty">Select a step above to generate content…</span></div>
+            <textarea id="icp-responsibilityScope" rows="3" placeholder="Accountable for topline growth, major client relationships…"></textarea>
+          </div>
+
+          <div class="field-card">
+            <div class="fc-hd">
+              <label>Empathy Map</label>
+              <span class="fc-note">Four channels the agents use for hooks and objection handling.</span>
+            </div>
+            <div class="empathy-grid">
+              <div class="em-cell">
+                <div class="em-cell-hd">
+                  <span>What they say out loud</span>
+                  <button class="btn-ai" data-field="empathySayLoud">AI</button>
+                </div>
+                <textarea id="icp-empathySayLoud" placeholder="We have the best product, but sales is inconsistent…"></textarea>
+              </div>
+              <div class="em-cell">
+                <div class="em-cell-hd">
+                  <span>What they think privately</span>
+                  <button class="btn-ai" data-field="empathyThinkPrivately">AI</button>
+                </div>
+                <textarea id="icp-empathyThinkPrivately" placeholder="If I stop pushing, will the momentum disappear?…"></textarea>
+              </div>
+              <div class="em-cell">
+                <div class="em-cell-hd">
+                  <span>What they actually do</span>
+                  <button class="btn-ai" data-field="empathyActuallyDo">AI</button>
+                </div>
+                <textarea id="icp-empathyActuallyDo" placeholder="Intervenes in sales meetings, checks bank balances personally…"></textarea>
+              </div>
+              <div class="em-cell">
+                <div class="em-cell-hd">
+                  <span>What they feel</span>
+                  <button class="btn-ai" data-field="empathyFeel">AI</button>
+                </div>
+                <textarea id="icp-empathyFeel" placeholder="Feels proud but quietly exhausted…"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Pains</label>
+                <button class="btn-ai" data-field="pains">AI fill</button>
+              </div>
+              <textarea id="icp-pains" rows="4" placeholder="Revenue stuck at a plateau, high founder dependency…"></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Fears</label>
+                <button class="btn-ai" data-field="fears">AI fill</button>
+              </div>
+              <textarea id="icp-fears" rows="4" placeholder="Business may collapse if they step away…"></textarea>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Frustrations</label>
+                <button class="btn-ai" data-field="frustrations">AI fill</button>
+              </div>
+              <textarea id="icp-frustrations" rows="4" placeholder="Firefighting instead of strategic thinking…"></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Dream Outcomes</label>
+                <button class="btn-ai" data-field="dreamOutcomes">AI fill</button>
+              </div>
+              <textarea id="icp-dreamOutcomes" rows="4" placeholder="Self-managing team, predictable monthly growth…"></textarea>
+            </div>
           </div>
         </div>
 
-      </div>
-    </section>
-
-    <!-- ─────────────────────────────────────── Status ── -->
-    <section id="tab-status" class="tab-panel">
-      <div class="section-hd">API Status</div>
-
-      <div class="status-grid">
-        <div class="status-card" id="sc-openai">
-          <div class="sc-name">OpenAI</div>
-          <div class="sc-val" id="sc-openai-val">checking…</div>
+        <div class="icp-save mt-16">
+          <button class="btn btn-dark" id="icpSaveBtn">Save ICP</button>
+          <button class="btn btn-outline" id="icpClearBtn">Clear</button>
+          <span class="saved-note" id="icpSavedNote">Saved ✓</span>
         </div>
-        <div class="status-card" id="sc-apollo">
-          <div class="sc-name">Apollo.io</div>
-          <div class="sc-val" id="sc-apollo-val">checking…</div>
-        </div>
-        <div class="status-card" id="sc-perplexity">
-          <div class="sc-name">Perplexity</div>
-          <div class="sc-val" id="sc-perplexity-val">checking…</div>
-        </div>
-        <div class="status-card" id="sc-apify">
-          <div class="sc-name">Apify</div>
-          <div class="sc-val" id="sc-apify-val">checking…</div>
-        </div>
-      </div>
+      </section>
 
-      <div class="env-help">
-        <h3>Environment Variables (add to .env file)</h3>
-        <ul>
-          <li><code>OPENAI_API_KEY</code> — platform.openai.com → API Keys</li>
-          <li><code>APOLLO_API_KEY</code> — app.apollo.io → Settings → API Keys</li>
-          <li><code>PERPLEXITY_API_KEY</code> — perplexity.ai → API → Keys</li>
-          <li><code>APIFY_API_KEY</code> — console.apify.com → Settings → Integrations</li>
-        </ul>
-        <div class="mt-8" style="font-size:12px;color:var(--muted)">.env file lives at the project root alongside server.js. Never commit it to git.</div>
-      </div>
-    </section>
-
-    <!-- ─────────────────────────────────────── Lead Pipeline ── -->
-    <section id="tab-pipeline" class="tab-panel">
-
-      <!-- Gen panel -->
-      <div class="gen-panel">
-        <div class="section-hd">Generate Leads from Apollo</div>
-
-        <div class="gen-form-row">
-          <div class="gen-url-wrap">
-            <label class="gen-label">Apollo Search URL</label>
-            <input type="text" id="apolloSearchUrl" class="gen-url-input" placeholder="https://app.apollo.io/#/people?…">
-            <div class="gen-hint">Paste an Apollo People search URL, or use the pre-built ICP filter below.</div>
-          </div>
-        </div>
-
-        <div class="mt-8">
-          <button class="text-link-btn" id="useDefaultUrlBtn">Use pre-built ICP URL (India · Founder/MD/CEO · 21–500 employees) →</button>
-        </div>
-
-        <div class="gen-form-row mt-16" style="align-items:flex-end;gap:12px">
+      <!-- ────────────────────────────────── Signal Strategy ── -->
+      <section id="tab-signal" class="tab-panel">
+        <div class="step-eyebrow">STEP 2</div>
+        <div class="step-hd">
           <div>
-            <label class="gen-label">Max Leads</label>
-            <input type="number" id="maxLeads" class="gen-num-input" value="50" min="10" max="200">
-          </div>
-          <div style="flex:1">
-            <label class="gen-label">Apify Actor ID</label>
-            <input type="text" id="apifyActorId" value="curious_coder~apollo-io-scraper">
-          </div>
-          <button class="btn btn-primary" id="generateLeadsBtn" disabled>Generate Leads</button>
-        </div>
-
-        <div id="genProgress" class="gen-progress hidden">
-          <div class="spinner-dot"></div>
-          <span id="genProgressText">Starting scraper…</span>
-        </div>
-
-        <details class="gen-help-details">
-          <summary>Setup instructions</summary>
-          <div class="help-body">
-            <ol>
-              <li>Add <code>APIFY_API_KEY</code> to your <code>.env</code> file</li>
-              <li>Open <a href="https://app.apollo.io/#/people" target="_blank" style="color:var(--accent)">app.apollo.io</a> and filter by your ICP: <strong>Founder, MD, Managing Director, CEO</strong> in <strong>India</strong>, <strong>21–500 employees</strong> (proxy for ₹30–80cr)</li>
-              <li>Copy the URL from your browser and paste it above, or click "Use pre-built ICP URL"</li>
-              <li>Set max leads (50 is a good start), click Generate</li>
-              <li>Wait ~2-4 min for Apify to scrape. Leads appear below scored by ICP fit.</li>
-              <li>Click <strong>Load into Chain →</strong> on any lead to pre-fill the Agent Chain</li>
-            </ol>
-          </div>
-        </details>
-      </div>
-
-      <!-- Pipeline results -->
-      <div id="pipelineWrap" class="pipeline-wrap hidden">
-        <div class="pipeline-hd">
-          <h3>Leads</h3>
-          <span class="pipe-count" id="pipeCount"></span>
-          <div class="score-legend">
-            <span class="sl-hot">● Hot 70+</span>
-            <span class="sl-warm">● Warm 50–69</span>
-            <span class="sl-watch">● Watch 30–49</span>
-            <span class="sl-cold">● Cold &lt;30</span>
-          </div>
-          <div class="pipe-actions">
-            <button class="btn btn-secondary btn-sm" id="exportCsvBtn">Export CSV</button>
-            <button class="btn btn-danger btn-sm" id="clearLeadsBtn">Clear</button>
+            <h2>Signal Strategy</h2>
+            <p class="step-desc">What makes a founder-led B2B company worth reaching out to <em>right now</em>. Agent 1 uses these weights to score every prospect 0–100.</p>
           </div>
         </div>
-        <div id="leadsGrid" class="leads-grid"></div>
-      </div>
 
-    </section>
+        <div class="score-bands">
+          <div class="band-card hot">
+            <div class="band-range">80 – 100</div>
+            <div class="band-name">Hot</div>
+            <div class="band-desc">Priority outreach this week. 2+ timing signals, strong ICP fit.</div>
+          </div>
+          <div class="band-card qual">
+            <div class="band-range">60 – 79</div>
+            <div class="band-name">Qualified</div>
+            <div class="band-desc">One clear timing signal. Outreach within 14 days.</div>
+          </div>
+          <div class="band-card watch">
+            <div class="band-range">40 – 59</div>
+            <div class="band-name">Watch list</div>
+            <div class="band-desc">Good fit, weak timing. Re-check in 30 days.</div>
+          </div>
+          <div class="band-card arch">
+            <div class="band-range">0 – 39</div>
+            <div class="band-name">Archive</div>
+            <div class="band-desc">Not the right moment. Re-surface in 90 days or skip.</div>
+          </div>
+        </div>
 
-  </main>
+        <div class="rubric-card">
+          <div class="rubric-hd">
+            <h4>Signal Scoring Rubric</h4>
+            <span class="rubric-hd-note">Base score: 30 (solid ICP fit). Add or subtract below.</span>
+          </div>
+          <table class="rubric-tbl">
+            <thead>
+              <tr><th>SIGNAL</th><th>WEIGHT</th><th>PRIORITY</th><th>WHERE TO FIND</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>New plant / branch / office / project announced</td><td><span class="wt wt-p">+25</span></td><td><span class="pri pri-h">HIGH</span></td><td>LinkedIn post, news, company website</td></tr>
+              <tr><td>Hiring a sales / BD / operations leadership role</td><td><span class="wt wt-p">+20</span></td><td><span class="pri pri-h">HIGH</span></td><td>LinkedIn Jobs, Apollo, Naukri</td></tr>
+              <tr><td>Founder posting about growth, delegation, systems, or hiring on LinkedIn</td><td><span class="wt wt-p">+20</span></td><td><span class="pri pri-h">HIGH</span></td><td>LinkedIn (founder profile, last 30 days)</td></tr>
+              <tr><td>New enterprise client win or marquee project announced</td><td><span class="wt wt-p">+15</span></td><td><span class="pri pri-mh">MED-HIGH</span></td><td>LinkedIn, company website, news</td></tr>
+              <tr><td>PE / institutional investment received</td><td><span class="wt wt-p">+15</span></td><td><span class="pri pri-mh">MED-HIGH</span></td><td>Tracxn, Inc42, SEBI filings, news</td></tr>
+              <tr><td>Industry award or recognition received</td><td><span class="wt wt-p">+10</span></td><td><span class="pri pri-m">MEDIUM</span></td><td>LinkedIn, news, company website</td></tr>
+              <tr><td>Basic tech stack (Tally, spreadsheets, WhatsApp) — signals systems gap</td><td><span class="wt wt-p">+10</span></td><td><span class="pri pri-m">MEDIUM</span></td><td>Apollo tech enrichment, BuiltWith</td></tr>
+              <tr><td>Company visibly stuck at founder-led sales (inference from size vs. team)</td><td><span class="wt wt-p">+10</span></td><td><span class="pri pri-m">MEDIUM</span></td><td>LinkedIn team page, Apollo headcount</td></tr>
+              <tr class="disq"><td>Company less than 2 years old</td><td><span class="wt wt-n">−10</span></td><td><span class="pri pri-d">DISQUALIFY</span></td><td>LinkedIn, company website, Zaubacorp</td></tr>
+              <tr class="disq"><td>Enterprise scale already (500+ headcount, 200+ crore)</td><td><span class="wt wt-n">−10</span></td><td><span class="pri pri-d">DISQUALIFY</span></td><td>Apollo, LinkedIn</td></tr>
+              <tr class="disq"><td>No B2B component (pure retail or consumer)</td><td><span class="wt wt-n">−15</span></td><td><span class="pri pri-d">DISQUALIFY</span></td><td>Website, LinkedIn, Apollo</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="source-grid">
+          <div class="source-card"><h4>Apollo</h4><ul>
+            <li>Person match — email, title, employment history</li>
+            <li>Company enrich — headcount, industry, tech stack</li>
+            <li>Jobs API — open roles for hiring signals</li>
+            <li>Connect <code class="ikey">APOLLO_API_KEY</code> in .env</li>
+          </ul></div>
+          <div class="source-card"><h4>Vibe Prospecting (Explorium)</h4><ul>
+            <li>Search by intent signals — funding, hiring, expansion</li>
+            <li>Filter by company size, industry, region</li>
+            <li>Export enriched prospect lists</li>
+            <li>Use via Claude chat — ask to find prospects</li>
+          </ul></div>
+          <div class="source-card"><h4>LinkedIn (manual)</h4><ul>
+            <li>Founder profile — recent posts, activity</li>
+            <li>Company page — updates, employee count, jobs</li>
+            <li>Paste content into Signal Context in Agent Chain</li>
+            <li>Sales Navigator for saved searches</li>
+          </ul></div>
+          <div class="source-card"><h4>Other Sources</h4><ul>
+            <li>Apify scrapers — LinkedIn posts, news</li>
+            <li>Google Alerts — company name, founder name</li>
+            <li>Tracxn / Inc42 — PE and funding signals</li>
+            <li>Zaubacorp / MCA filings — company age, directors</li>
+          </ul></div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────── Agent Chain ── -->
+      <section id="tab-chain" class="tab-panel">
+        <div class="step-eyebrow">STEP 3</div>
+        <div class="step-hd">
+          <div>
+            <h2>Agent Chain</h2>
+            <p class="step-desc">Input a prospect, enrich with Apollo, run all five agents — research, cold email, LinkedIn, follow-up, and objection handling.</p>
+          </div>
+          <div class="step-hd-btns">
+            <button class="btn btn-outline" id="clearProspectBtn">Clear prospect</button>
+          </div>
+        </div>
+
+        <!-- Step 1: Prospect Input -->
+        <div class="step-card">
+          <div class="step-card-hd">
+            <div class="step-badge active" id="badge-1">1</div>
+            <div>
+              <div class="step-card-title">Prospect Input</div>
+              <div class="step-card-sub">Name, company, domain. Apollo fills in the rest.</div>
+            </div>
+          </div>
+          <div class="step-card-body">
+            <div class="prospect-grid">
+              <div class="pfield"><label>First Name</label><input type="text" id="pFirstName" placeholder="Rajesh"></div>
+              <div class="pfield"><label>Last Name</label><input type="text" id="pLastName" placeholder="Mehta"></div>
+              <div class="pfield"><label>Title</label><input type="text" id="pTitle" placeholder="Founder &amp; MD"></div>
+              <div class="pfield"><label>Company Name</label><input type="text" id="pCompany" placeholder="Mehta Industries"></div>
+              <div class="pfield"><label>Company Domain</label><input type="text" id="pDomain" placeholder="mehtaindustries.com"></div>
+              <div class="pfield"><label>LinkedIn URL</label><input type="text" id="pLinkedin" placeholder="linkedin.com/in/rajeshmehta"></div>
+            </div>
+            <div class="pfield" style="max-width:300px;margin-bottom:14px">
+              <label>Industry</label>
+              <select id="pIndustry">
+                <option value="">Select…</option>
+                <option>Manufacturing</option>
+                <option>Real Estate / Property</option>
+                <option>Architecture / Interior Design</option>
+                <option>CA / Accounting / Audit</option>
+                <option>Professional Services</option>
+                <option>Technology / SaaS</option>
+                <option>Healthcare</option>
+                <option>Financial Services</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="chain-actions">
+              <button class="btn btn-dark" id="enrichApolloBtn">Enrich with Apollo →</button>
+              <button class="btn btn-outline" id="researchPerplexityBtn">Research with Perplexity →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Company Snapshot -->
+        <div class="step-card">
+          <div class="step-card-hd">
+            <div class="step-badge" id="badge-2">2</div>
+            <div>
+              <div class="step-card-title">Company Snapshot</div>
+              <div class="step-card-sub">Data from Apollo — headcount, tech stack, funding, location.</div>
+            </div>
+          </div>
+          <div class="step-card-body">
+            <div id="snapshotOut" class="snapshot-out"><span style="color:var(--text-3);font-style:italic">Enrich with Apollo or paste company notes manually…</span></div>
+          </div>
+        </div>
+
+        <!-- Step 3: Signal Context -->
+        <div class="step-card">
+          <div class="step-card-hd">
+            <div class="step-badge" id="badge-3">3</div>
+            <div>
+              <div class="step-card-title">Signal Context</div>
+              <div class="step-card-sub">Paste LinkedIn posts, news, job listings, or any timing signals. The more specific, the better the dossier.</div>
+            </div>
+          </div>
+          <div class="step-card-body">
+            <textarea id="signalContext" class="signal-textarea" placeholder="e.g. 'Rajesh posted 2 weeks ago: We're opening our second plant in Nagpur. Hiring VP Sales and Operations Head. Very excited to scale…'&#10;&#10;Or paste a news article, job listing, or anything relevant from the last 90 days."></textarea>
+            <button class="btn btn-dark" id="runResearchBtn">Run Agent 1 — Research →</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Intelligence Dossier -->
+        <div class="step-card">
+          <div class="step-card-hd">
+            <div class="step-badge" id="badge-4">4</div>
+            <div>
+              <div class="step-card-title">Intelligence Dossier</div>
+              <div class="step-card-sub">Prospect snapshot, triggers, pains, and personalization hooks.</div>
+            </div>
+          </div>
+          <div class="step-card-body">
+            <div class="dossier-score">
+              <span class="score-lbl">SCORE</span>
+              <span class="score-val" id="dossierScore">— / 100</span>
+            </div>
+            <div id="dossierOut" class="dossier-out"><span class="dossier-empty">Run Agent 1 to generate the intelligence dossier…</span></div>
+            <button class="btn btn-dark mt-12" id="genOutreachBtn">Generate Outreach →</button>
+          </div>
+        </div>
+
+        <!-- Step 5: Cold Emails -->
+        <div class="step-card">
+          <div class="step-card-hd">
+            <div class="step-badge" id="badge-5">5</div>
+            <div>
+              <div class="step-card-title">Cold Emails</div>
+              <div class="step-card-sub">Three variants — under 90 words each, specific to this prospect.</div>
+            </div>
+          </div>
+          <div class="step-card-body">
+            <div class="email-tabs">
+              <button class="etab active" data-variant="a">A · Pain-led</button>
+              <button class="etab" data-variant="b">B · Trigger-led</button>
+              <button class="etab" data-variant="c">C · Curiosity-led</button>
+            </div>
+            <div id="emailOut-a" class="email-out"><span class="email-empty">Generate outreach to see email variants…</span></div>
+            <div id="emailOut-b" class="email-out hidden"></div>
+            <div id="emailOut-c" class="email-out hidden"></div>
+          </div>
+        </div>
+
+        <!-- Step 6: LinkedIn Sequence -->
+        <div class="step-card">
+          <div class="step-card-hd">
+            <div class="step-badge" id="badge-6">6</div>
+            <div>
+              <div class="step-card-title">LinkedIn Sequence</div>
+              <div class="step-card-sub">Connection note, Day 3 DM, Day 7 value drop — peer-to-peer, no pitch.</div>
+            </div>
+          </div>
+          <div class="step-card-body">
+            <span class="li-posts-lbl">Paste founder's recent LinkedIn posts (optional — improves personalisation):</span>
+            <textarea id="linkedinPosts" class="li-posts" placeholder="Paste their last 2–3 posts here…"></textarea>
+            <div id="liOut" class="li-out"><span style="color:var(--text-3);font-style:italic">Generate outreach to see LinkedIn sequence…</span></div>
+          </div>
+        </div>
+
+        <!-- Step 7: Follow-up Sequence -->
+        <div class="step-card">
+          <div class="step-card-hd">
+            <div class="step-badge" id="badge-7">7</div>
+            <div>
+              <div class="step-card-title">Follow-up Sequence</div>
+              <div class="step-card-sub">5–7 touches across email and LinkedIn. Select the prospect's current state.</div>
+            </div>
+          </div>
+          <div class="step-card-body">
+            <div class="state-row">
+              <span style="font-size:13px;color:var(--text-2)">Current state:</span>
+              <select id="sequenceState" class="state-sel">
+                <option>Email sent — no open</option>
+                <option>Opened — no reply</option>
+                <option>Replied — not interested</option>
+                <option>Call booked — prepping</option>
+                <option>Ghosted after positive reply</option>
+              </select>
+              <button class="btn btn-dark btn-sm" id="buildSequenceBtn">Build Sequence</button>
+            </div>
+            <div id="followupOut" class="followup-out hidden"></div>
+          </div>
+        </div>
+
+        <!-- Step 8: Objection Handler -->
+        <div class="step-card">
+          <div class="step-card-hd">
+            <div class="step-badge" id="badge-8">8</div>
+            <div>
+              <div class="step-card-title">Objection Handler</div>
+              <div class="step-card-sub">Paste their reply. Get a classification and a suggested response in your voice.</div>
+            </div>
+          </div>
+          <div class="step-card-body">
+            <span style="font-size:12.5px;color:var(--text-2);display:block;margin-bottom:6px">Their reply:</span>
+            <textarea id="objectionReply" class="reply-textarea" placeholder="e.g. 'Hi, thanks for reaching out. We're not looking at this kind of thing right now. Maybe next quarter.'"></textarea>
+            <button class="btn btn-dark" id="classifyBtn">Classify &amp; Draft Response</button>
+            <div id="objectionOut" class="objection-out hidden"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ────────────────────────────────── Campaigns ── -->
+      <section id="tab-campaigns" class="tab-panel">
+        <div class="step-eyebrow">STEP 4</div>
+        <div class="step-hd">
+          <div>
+            <h2>Campaigns</h2>
+            <p class="step-desc">Track approved outreach, sequence states, reply classifications, and Gmail handoffs across all active prospects.</p>
+          </div>
+        </div>
+        <div class="coming-next-wrap">
+          <div class="coming-next-card">
+            <div class="coming-next-arrow">→</div>
+            <h3>Coming next</h3>
+            <p>Run your agent chain on 10–20 prospects first. Once you've validated dossier quality and reply rates, this module will track active sequences, automate Gmail drafts, and surface replies that need Agent 5 classification.</p>
+            <ul>
+              <li>Prospect pipeline with status</li>
+              <li>Gmail draft creation from approved cold emails</li>
+              <li>Reply inbox with auto-classification</li>
+              <li>Sequence state tracker</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
 </div>
 <script src="app.js"></script>
 </body>

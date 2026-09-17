@@ -86,6 +86,48 @@ async function handleStatus(req, res) {
 async function handleIcpFill(req, res) {
   try {
     const body = await readBody(req);
+    const { description, field } = body;
+
+    // Single-field fill: return {value: "..."}
+    if (field) {
+      const fieldDescriptions = {
+        roleSeniority: "The seniority level and title of the ideal buyer persona (e.g. Founder, MD, VP Sales)",
+        companyStageSize: "The company stage and size that fits this ICP (e.g. post-survival SME with 50 crore turnover)",
+        responsibilityScope: "What this person is accountable for day-to-day in their role",
+        empathySayLoud: "What they say publicly — to their team, investors, peers. 3 example quotes.",
+        empathyThinkPrivately: "What they privately think but won't say out loud. 3 example thoughts.",
+        empathyActuallyDo: "How they actually behave under pressure — their real actions, not stated intentions.",
+        empathyFeel: "How they feel emotionally about their business situation right now. 3 feelings.",
+        pains: "The functional pain points — broken processes, plateaus, failures they experience regularly.",
+        fears: "Their deep fears — what failure looks like, what keeps them up at night.",
+        frustrations: "Day-to-day frustrations — people, processes, market conditions that grind them down.",
+        dreamOutcomes: "What success looks like — the outcomes they dream about for their business and career.",
+      };
+      const fieldPrompt = fieldDescriptions[field] || `Generate a value for the ICP field: ${field}`;
+      const r = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4.1-mini",
+          messages: [
+            {
+              role: "system",
+              content: "You are a B2B sales strategist and psychographic profiler. Return a concise, specific, insight-driven value for the requested ICP field. Be concrete — avoid corporate buzzwords. Return only the value text, no labels or JSON.",
+            },
+            { role: "user", content: `ICP Seed Description: ${description || ""}\n\nGenerate the value for this field: ${fieldPrompt}` },
+          ],
+          max_tokens: 300,
+        }),
+      });
+      const data = await r.json();
+      const value = data.choices?.[0]?.message?.content?.trim();
+      return json(res, { value });
+    }
+
+    // Full ICP fill: return {icp: {...}}
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -97,11 +139,25 @@ async function handleIcpFill(req, res) {
         messages: [
           {
             role: "system",
-            content: "You are a B2B sales expert. Given a company description, return a detailed ICP profile as JSON with these fields: companyName, website, industry, headcount, revenue, location, painPoints, goals, triggers, objections, notes. Return only valid JSON.",
+            content: `You are a B2B sales strategist and psychographic profiler. Given a seed description, generate a full ICP profile as JSON with exactly these fields:
+- seedDescription (keep or improve the original)
+- roleSeniority
+- companyStageSize
+- responsibilityScope
+- empathySayLoud (3 example quotes they say publicly)
+- empathyThinkPrivately (3 private thoughts they won't say)
+- empathyActuallyDo (their real behaviours under pressure)
+- empathyFeel (3 emotional states they experience)
+- pains (functional pain points, 3-5 bullet points)
+- fears (deep fears and failure scenarios, 3-5 bullet points)
+- frustrations (day-to-day frustrations, 3-5 bullet points)
+- dreamOutcomes (success outcomes they desire, 3-5 bullet points)
+Be specific, concrete, and insight-driven. Avoid buzzwords. Return only valid JSON.`,
           },
-          { role: "user", content: body.description || "" },
+          { role: "user", content: description || "" },
         ],
         response_format: { type: "json_object" },
+        max_tokens: 1500,
       }),
     });
     const data = await r.json();
@@ -115,7 +171,7 @@ async function handleIcpFill(req, res) {
 async function handleChainRun(req, res) {
   try {
     const body = await readBody(req);
-    const { prospect, icp, step } = body;
+    const { prospect, icp, step, dossier, signalContext, linkedinPosts, sequenceState, reply } = body;
 
     const systemPrompt = `You are an expert B2B sales intelligence analyst and outreach strategist.
 ICP Context (what the sender sells / their target customer): ${JSON.stringify(icp || {})}
@@ -124,10 +180,12 @@ Your job: produce sharp, specific, insight-led sales intelligence and outreach c
     const p = prospect.name || "this prospect";
     const co = prospect.company || "their company";
     const role = prospect.title || "their role";
+    const dossierCtx = dossier ? `\n\nIntelligence Dossier:\n${dossier}` : "";
 
     const researchPrompt = `Produce a full prospect intelligence brief for:
 Prospect: ${JSON.stringify(prospect)}
 What the sender offers / ICP: ${JSON.stringify(icp || {})}
+${signalContext ? `\nSignal Context (company news, research):\n${signalContext}` : ""}
 
 Respond in exactly these 6 sections:
 
@@ -198,7 +256,8 @@ Rules:
 - No "I hope this finds you well", no "we help companies like yours", no buzzwords
 - Tone: peer-to-peer — like a smart colleague, not a vendor`,
 
-      linkedin: `Using the ice breakers and personal signals for ${p}, write:
+      linkedin: `Using the ice breakers and personal signals for ${p}, write:${dossierCtx}
+${linkedinPosts ? `\nTheir recent LinkedIn posts for context:\n${linkedinPosts}\n` : ""}
 
 1. CONNECTION REQUEST (under 280 characters):
 Reference one specific thing about their role, company, or a shared insight. No pitch. Feel like a peer who noticed something interesting about their work.
@@ -221,6 +280,63 @@ TOUCH 3 — Day 8 · Email (Break-up)
 [max 60 words — acknowledge no response, add one new insight or social proof, final CTA that lowers the bar even further]
 
 Each touch must feel distinct — different angle, different emotional register.`,
+
+      outreach: `Using the intelligence dossier for ${p} at ${co}, write 3 cold email variants. Each must have a distinct angle and emotional register.${dossierCtx}
+
+VARIANT A — Pain-led
+Subject: [under 8 words — pain or problem framing]
+Body: [max 100 words — open with their biggest frustration or fear, bridge to the sender's solution, one proof point, soft CTA]
+
+VARIANT B — Trigger-led
+Subject: [under 8 words — reference a company signal or event]
+Body: [max 100 words — open with a specific company/industry signal, show you've done your homework, connect to the relevant outcome, CTA]
+
+VARIANT C — Curiosity-led
+Subject: [under 8 words — provocative question or counterintuitive statement]
+Body: [max 100 words — open with a sharp insight or question that challenges their assumption, bridge to the sender's angle, CTA]
+
+Rules for all variants:
+- No "I hope this finds you well", no "we help companies like yours"
+- Tone: peer-to-peer — like a smart colleague, not a vendor
+- Subject lines must stand out in a crowded inbox
+Label each variant clearly.`,
+
+      followup: `Using the intelligence dossier for ${p} at ${co}, build a follow-up sequence.${dossierCtx}
+Current prospect state: ${sequenceState || "No reply to first email"}
+
+Write a 5-touch sequence tailored to this state. Each touch must:
+- Use a different angle (rotate through: pain, desire, social proof, insight, break-up)
+- Feel like a natural continuation, not a copy-paste follow-up
+- Get progressively shorter as the sequence continues
+
+TOUCH 1 — [Day X] · [Channel]
+[Content]
+
+TOUCH 2 — [Day X] · [Channel]
+[Content]
+
+...continue through 5 touches.
+
+End with a break-up touch that leaves the door open without being needy.`,
+
+      objection: `Analyse this prospect reply from ${p} at ${co} and draft a response.
+${dossierCtx}
+
+Their reply:
+"${reply || ""}"
+
+1. OBJECTION CLASSIFICATION
+Type: [Price / Timing / No need / Competitor / Trust / Gatekeeper / Other]
+Root cause: [one sentence — what's really behind this objection]
+Urgency level: [Hot / Warm / Cold] — and why
+
+2. RECOMMENDED RESPONSE
+[max 100 words — address the root cause, not the surface objection; use an insight or reframe; end with a lower-friction CTA]
+
+3. ALTERNATIVE RESPONSE (if the above feels too direct)
+[max 80 words — softer approach, more curious, less pushback]
+
+Be honest: if this is a polite no, say so and recommend a breakup message instead.`,
     };
 
     const messages = [
@@ -235,7 +351,7 @@ Each touch must feel distinct — different angle, different emotional register.
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
       },
-      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: 2000 }),
+      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: 2500 }),
     });
     const data = await r.json();
     json(res, { content: data.choices?.[0]?.message?.content, step });
