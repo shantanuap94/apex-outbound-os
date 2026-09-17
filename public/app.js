@@ -209,6 +209,7 @@ function wireChain() {
       const res = await post("/api/apollo/match", {
         first_name: p.firstName, last_name: p.lastName,
         organization_name: p.company, domain: p.domain,
+        linkedin_url: p.linkedin,
       });
       if (res.error) {
         $("snapshotOut").textContent = "Apollo: " + res.error;
@@ -220,9 +221,13 @@ function wireChain() {
           org.estimated_num_employees ? `Headcount: ~${org.estimated_num_employees}` : "",
           org.industry ? `Industry: ${org.industry}` : "",
           org.primary_domain ? `Domain: ${org.primary_domain}` : "",
-          org.city ? `Location: ${org.city}, ${org.country || ""}` : "",
-          person.title ? `Title confirmed: ${person.title}` : "",
+          org.city ? `Location: ${org.city}${org.country ? ", " + org.country : ""}` : "",
+          org.organization_revenue_printed ? `Revenue: ${org.organization_revenue_printed}` : "",
+          org.technology_names?.length ? `Tech stack: ${org.technology_names.slice(0, 6).join(", ")}` : "",
+          person.title ? `Title (Apollo): ${person.title}` : "",
+          person.seniority ? `Seniority: ${person.seniority}` : "",
           person.email ? `Email: ${person.email}` : "",
+          person.match_confidence ? `Match confidence: ${person.match_confidence}` : "",
         ].filter(Boolean).join("\n");
         $("snapshotOut").textContent = snap || "Apollo enrichment returned no data.";
         setStepDone(2);
