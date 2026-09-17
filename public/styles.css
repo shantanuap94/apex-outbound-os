@@ -37,7 +37,8 @@ input, textarea, select { font-family: inherit; }
 a { color: var(--accent); }
 
 /* ─── App layout ─────────────────────────────────────────────────────────── */
-#app { display: grid; grid-template-columns: 165px 1fr; min-height: 100vh; }
+/* Sidebar is position:fixed so no grid needed — margin-left on main-wrap handles offset */
+#app { min-height: 100vh; }
 
 /* ─── Sidebar ────────────────────────────────────────────────────────────── */
 .sidebar {
@@ -388,7 +389,6 @@ main { padding: 24px 32px 60px; }
 
 /* ─── Responsive — tablet / small laptop (≤ 900px) ──────────────────────── */
 @media (max-width: 900px) {
-  #app { grid-template-columns: 150px 1fr; }
   .sidebar { width: 150px; }
   .main-wrap { margin-left: 150px; }
   .sb-brand-name { font-size: 12px; }
