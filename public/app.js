@@ -1,6 +1,18 @@
 // ─── Constants ────────────────────────────────────────────────────────────────
 const API = "";
 
+const SENDER_FIELDS = ["name","role","offer","valueProp","proof","cta","tone"];
+
+const APEX_SENDER = {
+  name: "Shantanu",
+  role: "Founder, Apex Growth Partners",
+  offer: "We help founder-led B2B companies between 30–200 crore scale revenue without adding founder dependency.",
+  valueProp: "We build the systems, team structures, and sales processes that let a founder step back without the business slowing down.",
+  proof: "Helped founder-led manufacturing and services companies unlock the next stage of growth.",
+  cta: "15-minute conversation to see if there's a fit",
+  tone: "Peer-to-peer — like a smart colleague who genuinely gets it",
+};
+
 const ICP_FIELDS = [
   "seedDescription","roleSeniority","companyStageSize","responsibilityScope",
   "empathySayLoud","empathyThinkPrivately","empathyActuallyDo","empathyFeel",
@@ -151,6 +163,199 @@ function wireIcp() {
   });
 }
 
+// ─── Sender Profile ───────────────────────────────────────────────────────────
+function getSender() {
+  const data = {};
+  SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp) data[f] = inp.value || ""; });
+  return data;
+}
+
+function loadSavedSender() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("apex.sender") || "{}");
+    const src = Object.keys(saved).length ? saved : APEX_SENDER;
+    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && src[f]) inp.value = src[f]; });
+  } catch {}
+}
+
+function saveSender() {
+  localStorage.setItem("apex.sender", JSON.stringify(getSender()));
+  const note = $("senderSavedNote");
+  note.classList.add("show");
+  setTimeout(() => note.classList.remove("show"), 2000);
+}
+
+function wireSender() {
+  loadSavedSender();
+  $("saveSenderBtn").addEventListener("click", saveSender);
+  $("restoreSenderBtn").addEventListener("click", () => {
+    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && APEX_SENDER[f]) inp.value = APEX_SENDER[f]; });
+  });
+}
+
+// ─── Prospect Memory ──────────────────────────────────────────────────────────
+const MEMORY_KEY = "apex.prospectMemory";
+
+function getProspectMemory() {
+  try { return JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]"); } catch { return []; }
+}
+
+function saveProspectToMemory(prospect, update) {
+  const all = getProspectMemory();
+  const matchIdx = all.findIndex((e) =>
+    e.prospect?.domain === prospect.domain && e.prospect?.name === prospect.name
+  );
+  if (matchIdx >= 0) {
+    all[matchIdx] = { ...all[matchIdx], ...update, updatedAt: new Date().toISOString() };
+  } else {
+    all.unshift({
+      id: Date.now().toString(),
+      savedAt: new Date().toISOString(),
+      status: "active",
+      prospect,
+      ...update,
+    });
+  }
+  try { localStorage.setItem(MEMORY_KEY, JSON.stringify(all.slice(0, 100))); } catch {}
+  return all[matchIdx >= 0 ? matchIdx : 0]?.id;
+}
+
+function statusLabel(s) {
+  return { active: "Active", replied: "Replied ✓", meeting: "Meeting Booked", closed: "Closed" }[s] || s;
+}
+function statusClass(s) {
+  return { active: "ms-active", replied: "ms-replied", meeting: "ms-meeting", closed: "ms-closed" }[s] || "ms-active";
+}
+
+let _currentDrawerId = null;
+
+function renderMemoryList() {
+  const all = getProspectMemory();
+  const empty = $("memoryEmpty");
+  const list  = $("memoryList");
+  if (!list) return;
+
+  if (!all.length) {
+    if (empty) empty.style.display = "";
+    list.innerHTML = "";
+    return;
+  }
+  if (empty) empty.style.display = "none";
+
+  list.innerHTML = all.map((e) => {
+    const date = new Date(e.savedAt).toLocaleDateString("en-IN", { day:"numeric", month:"short" });
+    return `<div class="memory-row" data-id="${e.id}">
+      <div class="mr-main">
+        <div class="mr-name">${e.prospect?.name || "Unknown"}</div>
+        <div class="mr-meta">${e.prospect?.title || ""} · ${e.prospect?.company || ""}</div>
+      </div>
+      <div class="mr-right">
+        <span class="memory-status ${statusClass(e.status)}">${statusLabel(e.status)}</span>
+        <span class="mr-date">${date}</span>
+        <button class="btn btn-ghost btn-sm mr-open" data-id="${e.id}">View →</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  list.querySelectorAll(".mr-open").forEach((btn) => {
+    btn.addEventListener("click", () => openMemoryDrawer(btn.dataset.id));
+  });
+  list.querySelectorAll(".memory-row").forEach((row) => {
+    row.addEventListener("click", (e) => {
+      if (!e.target.closest("button")) openMemoryDrawer(row.dataset.id);
+    });
+  });
+}
+
+function openMemoryDrawer(id) {
+  const all = getProspectMemory();
+  const entry = all.find((e) => e.id === id);
+  if (!entry) return;
+  _currentDrawerId = id;
+
+  $("drawerName").textContent = entry.prospect?.name || "Unknown";
+  $("drawerMeta").textContent = [entry.prospect?.title, entry.prospect?.company].filter(Boolean).join(" · ");
+  $("drawerMarkReplied").textContent = entry.status === "replied" ? "Replied ✓" : "Mark Replied";
+  $("drawerMarkReplied").classList.toggle("btn-dark", entry.status !== "replied");
+
+  renderDrawerTab("dossier", entry);
+  $("memoryDrawer").classList.remove("hidden");
+  $("memoryDrawer").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderDrawerTab(tab, entry) {
+  const content = $("drawerContent");
+  document.querySelectorAll(".dtab").forEach((t) => t.classList.toggle("active", t.dataset.dtab === tab));
+
+  if (tab === "dossier") {
+    content.innerHTML = `<pre class="drawer-pre">${entry.dossier || "No dossier yet — run the Agent Chain first."}</pre>`;
+  } else if (tab === "emails") {
+    const a = entry.emails?.a || ""; const b = entry.emails?.b || ""; const c = entry.emails?.c || "";
+    content.innerHTML = `
+      <div class="drawer-email-tabs">
+        <button class="detab active" data-v="a">Variant A</button>
+        <button class="detab" data-v="b">Variant B</button>
+        <button class="detab" data-v="c">Variant C</button>
+      </div>
+      <pre class="drawer-pre detab-a">${a || "No emails yet."}</pre>
+      <pre class="drawer-pre detab-b hidden">${b}</pre>
+      <pre class="drawer-pre detab-c hidden">${c}</pre>`;
+    content.querySelectorAll(".detab").forEach((t) => {
+      t.addEventListener("click", () => {
+        content.querySelectorAll(".detab").forEach((x) => x.classList.remove("active"));
+        t.classList.add("active");
+        ["a","b","c"].forEach((v) => {
+          content.querySelector(`.detab-${v}`)?.classList.toggle("hidden", v !== t.dataset.v);
+        });
+      });
+    });
+  } else if (tab === "linkedin") {
+    content.innerHTML = `<pre class="drawer-pre">${entry.linkedin || "No LinkedIn copy yet."}</pre>`;
+  } else if (tab === "objection") {
+    content.innerHTML = `<pre class="drawer-pre">${entry.objection || "No objection handler yet."}</pre>`;
+  }
+}
+
+function wireMemory() {
+  renderMemoryList();
+
+  const clearBtn = $("clearMemoryBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      if (!confirm("Clear all prospect memory? This cannot be undone.")) return;
+      localStorage.removeItem(MEMORY_KEY);
+      renderMemoryList();
+      $("memoryDrawer").classList.add("hidden");
+    });
+  }
+
+  const drawerClose = $("drawerClose");
+  if (drawerClose) drawerClose.addEventListener("click", () => $("memoryDrawer").classList.add("hidden"));
+
+  const markReplied = $("drawerMarkReplied");
+  if (markReplied) {
+    markReplied.addEventListener("click", () => {
+      if (!_currentDrawerId) return;
+      const all = getProspectMemory();
+      const idx = all.findIndex((e) => e.id === _currentDrawerId);
+      if (idx < 0) return;
+      all[idx].status = all[idx].status === "replied" ? "active" : "replied";
+      try { localStorage.setItem(MEMORY_KEY, JSON.stringify(all)); } catch {}
+      renderMemoryList();
+      openMemoryDrawer(_currentDrawerId);
+    });
+  }
+
+  document.querySelectorAll(".dtab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      if (!_currentDrawerId) return;
+      const all = getProspectMemory();
+      const entry = all.find((e) => e.id === _currentDrawerId);
+      if (entry) renderDrawerTab(tab.dataset.dtab, entry);
+    });
+  });
+}
+
 // ─── Agent Chain ──────────────────────────────────────────────────────────────
 function getProspect() {
   return {
@@ -275,12 +480,20 @@ function wireChain() {
       const { content, error } = await post("/api/chain/run", {
         prospect: p,
         icp: getIcp(),
+        senderProfile: getSender(),
         step: "research",
         signalContext: $("signalContext").value,
       });
       if (error) { $("dossierOut").textContent = "Error: " + error; return; }
       $("dossierOut").textContent = content;
       localStorage.setItem("apex.currentDossier", content);
+
+      // Save to prospect memory
+      saveProspectToMemory(p, {
+        snapshot: $("snapshotOut").textContent,
+        dossier: content,
+      });
+      if (document.getElementById("tab-campaigns")?.classList.contains("active")) renderMemoryList();
 
       // Extract score
       const scoreMatch = content.match(/Intelligence Score[:\s]*(\d+)/i);
@@ -311,21 +524,24 @@ function wireChain() {
     $("liOut").innerHTML = '<span style="color:var(--text-3);font-style:italic">Generating…</span>';
 
     try {
+      const sender = getSender();
       // Run cold emails + LinkedIn in parallel
       const [emailRes, liRes] = await Promise.all([
-        post("/api/chain/run", { prospect: p, icp: getIcp(), step: "outreach", dossier }),
-        post("/api/chain/run", { prospect: p, icp: getIcp(), step: "linkedin", dossier, linkedinPosts: $("linkedinPosts").value }),
+        post("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "outreach", dossier }),
+        post("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "linkedin", dossier, linkedinPosts: $("linkedinPosts").value }),
       ]);
 
       // Parse 3 email variants from response
+      let emailA = "", emailB = "", emailC = "";
       if (emailRes.content) {
         const raw = emailRes.content;
         const aMatch = raw.match(/VARIANT A[\s\S]*?(?=VARIANT B|$)/i)?.[0] || "";
         const bMatch = raw.match(/VARIANT B[\s\S]*?(?=VARIANT C|$)/i)?.[0] || "";
         const cMatch = raw.match(/VARIANT C[\s\S]*/i)?.[0] || "";
-        $("emailOut-a").textContent = aMatch.trim() || raw;
-        $("emailOut-b").textContent = bMatch.trim() || "See Variant A";
-        $("emailOut-c").textContent = cMatch.trim() || "See Variant A";
+        emailA = aMatch.trim() || raw; emailB = bMatch.trim() || ""; emailC = cMatch.trim() || "";
+        $("emailOut-a").textContent = emailA;
+        $("emailOut-b").textContent = emailB || "See Variant A";
+        $("emailOut-c").textContent = emailC || "See Variant A";
 
         const count = parseInt(localStorage.getItem("apex.draftCount") || "0", 10) + 3;
         localStorage.setItem("apex.draftCount", count);
@@ -335,6 +551,13 @@ function wireChain() {
       if (liRes.content) {
         $("liOut").textContent = liRes.content;
       }
+
+      // Save emails + LinkedIn to prospect memory
+      saveProspectToMemory(p, {
+        emails: { a: emailA, b: emailB, c: emailC },
+        linkedin: liRes.content || "",
+      });
+      if (document.getElementById("tab-campaigns")?.classList.contains("active")) renderMemoryList();
 
       setStepDone(5); setStepDone(6);
     } catch (e) {
@@ -367,11 +590,14 @@ function wireChain() {
     $("followupOut").classList.remove("hidden");
     try {
       const { content, error } = await post("/api/chain/run", {
-        prospect: p, icp: getIcp(), step: "followup",
+        prospect: p, icp: getIcp(), senderProfile: getSender(), step: "followup",
         dossier, sequenceState: state,
       });
       $("followupOut").textContent = error ? "Error: " + error : content;
-      if (!error) setStepDone(7);
+      if (!error) {
+        setStepDone(7);
+        saveProspectToMemory(p, { followup: content });
+      }
     } catch (e) { $("followupOut").textContent = "Network error: " + e.message; }
     btn.textContent = "Build Sequence"; btn.disabled = false;
   });
@@ -386,11 +612,14 @@ function wireChain() {
     $("objectionOut").classList.remove("hidden");
     try {
       const { content, error } = await post("/api/chain/run", {
-        prospect: getProspect(), icp: getIcp(),
+        prospect: getProspect(), icp: getIcp(), senderProfile: getSender(),
         step: "objection", reply,
       });
       $("objectionOut").textContent = error ? "Error: " + error : content;
-      if (!error) setStepDone(8);
+      if (!error) {
+        setStepDone(8);
+        saveProspectToMemory(getProspect(), { objection: content });
+      }
     } catch (e) { $("objectionOut").textContent = "Network error: " + e.message; }
     btn.textContent = "Classify & Draft Response"; btn.disabled = false;
   });
@@ -399,8 +628,17 @@ function wireChain() {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   wireTabs();
+  wireSender();
   wireIcp();
   wireChain();
+  wireMemory();
   checkApiStatus();
   setInterval(checkApiStatus, 30000);
+
+  // Refresh memory list whenever Campaigns tab becomes active
+  document.querySelectorAll(".nav-item").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.tab === "campaigns") renderMemoryList();
+    });
+  });
 });

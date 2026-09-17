@@ -19,7 +19,7 @@
       </div>
     </div>
     <nav class="sb-nav">
-      <button class="nav-item active" data-tab="icp"><span class="nav-num">1</span>ICP Definition</button>
+      <button class="nav-item active" data-tab="icp"><span class="nav-num">1</span>Profile &amp; ICP</button>
       <button class="nav-item" data-tab="signal"><span class="nav-num">2</span>Signal Strategy</button>
       <button class="nav-item" data-tab="chain"><span class="nav-num">3</span>Agent Chain</button>
       <button class="nav-item" data-tab="campaigns"><span class="nav-num">4</span>Campaigns</button>
@@ -56,12 +56,76 @@
         <div class="step-eyebrow">STEP 1</div>
         <div class="step-hd">
           <div>
-            <h2>Customer ICP Definition</h2>
-            <p class="step-desc">Define who the system sells to, what they carry emotionally, and what a buying signal looks like. This feeds every agent prompt.</p>
+            <h2>Profile &amp; ICP</h2>
+            <p class="step-desc">Tell the system who you are and who you're selling to. Both feed every agent prompt — the messages come from you, for them.</p>
           </div>
-          <div class="step-hd-btns">
-            <button class="btn btn-outline" id="restoreIcpBtn">Restore Apex ICP</button>
-            <button class="btn btn-dark" id="icpFillBtn">Generate all fields</button>
+        </div>
+
+        <!-- About You -->
+        <div class="sender-section">
+          <div class="sender-section-hd">
+            <div>
+              <h3 class="sender-section-title">About You</h3>
+              <p class="sender-section-sub">Who is sending these messages? Agents write in your voice, introduce you naturally, and use your value prop in every message.</p>
+            </div>
+            <button class="btn btn-outline btn-sm" id="restoreSenderBtn">Restore Apex Profile</button>
+          </div>
+          <div class="icp-fields">
+            <div class="field-row">
+              <div class="field-card">
+                <div class="fc-hd"><label>Your Name</label></div>
+                <input type="text" id="sender-name" placeholder="e.g. Shantanu">
+              </div>
+              <div class="field-card">
+                <div class="fc-hd"><label>Your Role &amp; Company</label></div>
+                <input type="text" id="sender-role" placeholder="e.g. Founder, Apex Growth Partners">
+              </div>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd"><label>What you offer</label></div>
+              <textarea id="sender-offer" rows="2" placeholder="One clear sentence. e.g. We help founder-led B2B companies between 30–200 crore scale revenue without adding founder dependency."></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd"><label>Why it matters to your ICP</label></div>
+              <textarea id="sender-valueProp" rows="2" placeholder="The specific outcome your ICP gets. e.g. Founders get a professional sales engine that runs without them, freeing them to work on the business not in it."></textarea>
+            </div>
+            <div class="field-row">
+              <div class="field-card">
+                <div class="fc-hd"><label>Social proof (optional)</label></div>
+                <textarea id="sender-proof" rows="2" placeholder="e.g. Helped 3 manufacturing founders each add 20+ crore in 12 months."></textarea>
+              </div>
+              <div class="field-card">
+                <div class="fc-hd"><label>Preferred CTA</label></div>
+                <input type="text" id="sender-cta" placeholder="e.g. 15-minute conversation to see if there's a fit">
+              </div>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd"><label>Tone</label></div>
+              <select id="sender-tone">
+                <option>Peer-to-peer — like a smart colleague who genuinely gets it</option>
+                <option>Consultative — expert who asks sharp questions</option>
+                <option>Direct — no fluff, respect their time</option>
+                <option>Warm and conversational</option>
+              </select>
+            </div>
+          </div>
+          <div class="icp-save mt-12">
+            <button class="btn btn-dark btn-sm" id="saveSenderBtn">Save Profile</button>
+            <span class="saved-note" id="senderSavedNote">Saved ✓</span>
+          </div>
+        </div>
+
+        <div class="icp-divider"></div>
+
+        <!-- Customer ICP -->
+        <div class="sender-section-hd" style="margin-bottom:16px">
+          <div>
+            <h3 class="sender-section-title">Customer ICP</h3>
+            <p class="sender-section-sub">Define who you sell to. Empathy Map and NDFFO are wired directly into every email, LinkedIn message, and follow-up the system writes.</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline btn-sm" id="restoreIcpBtn">Restore Apex ICP</button>
+            <button class="btn btn-dark btn-sm" id="icpFillBtn">Generate all fields</button>
           </div>
         </div>
 
@@ -451,22 +515,43 @@
         <div class="step-eyebrow">STEP 4</div>
         <div class="step-hd">
           <div>
-            <h2>Campaigns</h2>
-            <p class="step-desc">Track approved outreach, sequence states, reply classifications, and Gmail handoffs across all active prospects.</p>
+            <h2>Prospect Memory</h2>
+            <p class="step-desc">Every prospect you run through the Agent Chain is saved here. Mark replies, note what landed, and build a self-learning system that remembers what worked.</p>
+          </div>
+          <div class="step-hd-btns">
+            <button class="btn btn-outline btn-sm" id="clearMemoryBtn">Clear All</button>
           </div>
         </div>
-        <div class="coming-next-wrap">
-          <div class="coming-next-card">
-            <div class="coming-next-arrow">→</div>
-            <h3>Coming next</h3>
-            <p>Run your agent chain on 10–20 prospects first. Once you've validated dossier quality and reply rates, this module will track active sequences, automate Gmail drafts, and surface replies that need Agent 5 classification.</p>
-            <ul>
-              <li>Prospect pipeline with status</li>
-              <li>Gmail draft creation from approved cold emails</li>
-              <li>Reply inbox with auto-classification</li>
-              <li>Sequence state tracker</li>
-            </ul>
+
+        <!-- empty state -->
+        <div id="memoryEmpty" class="memory-empty">
+          <div class="memory-empty-icon">◎</div>
+          <h3>No prospects yet</h3>
+          <p>Run the Agent Chain on a prospect — they'll appear here automatically with their full dossier, emails, and LinkedIn messages.</p>
+        </div>
+
+        <!-- memory list -->
+        <div id="memoryList" class="memory-list"></div>
+
+        <!-- prospect detail drawer -->
+        <div id="memoryDrawer" class="memory-drawer hidden">
+          <div class="drawer-header">
+            <div>
+              <div id="drawerName" class="drawer-name"></div>
+              <div id="drawerMeta" class="drawer-meta"></div>
+            </div>
+            <div class="drawer-actions">
+              <button class="btn btn-outline btn-sm" id="drawerMarkReplied">Mark Replied ✓</button>
+              <button class="btn btn-ghost btn-sm" id="drawerClose">✕ Close</button>
+            </div>
           </div>
+          <div class="drawer-tabs">
+            <button class="dtab active" data-dtab="dossier">Dossier</button>
+            <button class="dtab" data-dtab="emails">Emails</button>
+            <button class="dtab" data-dtab="linkedin">LinkedIn</button>
+            <button class="dtab" data-dtab="objection">Objection</button>
+          </div>
+          <div id="drawerContent" class="drawer-content"></div>
         </div>
       </section>
 

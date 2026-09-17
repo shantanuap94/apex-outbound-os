@@ -171,155 +171,259 @@ Be specific, concrete, and insight-driven. Avoid buzzwords. Return only valid JS
 async function handleChainRun(req, res) {
   try {
     const body = await readBody(req);
-    const { prospect, icp, step, dossier, signalContext, linkedinPosts, sequenceState, reply } = body;
+    const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply } = body;
 
-    const systemPrompt = `You are an expert B2B sales intelligence analyst and outreach strategist.
-ICP Context (what the sender sells / their target customer): ${JSON.stringify(icp || {})}
-Your job: produce sharp, specific, insight-led sales intelligence and outreach copy. Never be generic. Always tie insights back to why the sender's offering is relevant to this specific prospect.`;
+    const sender = senderProfile || {};
+    const senderName    = sender.name    || "the sender";
+    const senderRole    = sender.role    || "";
+    const senderOffer   = sender.offer   || "";
+    const senderValueProp = sender.valueProp || "";
+    const senderProof   = sender.proof   || "";
+    const senderCta     = sender.cta     || "a 15-minute conversation";
+    const senderTone    = sender.tone    || "peer-to-peer";
+    const currentYear   = new Date().getFullYear();
 
-    const p = prospect.name || "this prospect";
-    const co = prospect.company || "their company";
-    const role = prospect.title || "their role";
+    const systemPrompt = `You are a B2B outreach strategist writing on behalf of ${senderName}${senderRole ? ", " + senderRole : ""}.
+
+THE SENDER:
+- Name: ${senderName}
+- Role: ${senderRole}
+- What they offer: ${senderOffer}
+- Why it matters to their ICP: ${senderValueProp}
+${senderProof ? `- Social proof: ${senderProof}` : ""}
+- Preferred tone: ${senderTone}
+- CTA preference: ${senderCta}
+
+ICP — WHO THEY SELL TO:
+${JSON.stringify(icp || {})}
+
+CRITICAL RULES:
+1. Every message is written FROM ${senderName} — always introduce them naturally in emails (never be abrupt, never skip who you are)
+2. NEVER fabricate statistics, percentages, or data. Only use numbers that appear in the dossier or signal context
+3. Current year is ${currentYear}. Never reference any other year for "goals" or "priorities"
+4. Use the ICP's Empathy Map (think, feel, hear, see, say & do) and NDFFO (needs, desires, fears, frustrations, objections) to frame every message
+5. Be specific — every message must feel like it was written only for this person, not a template
+6. Tone: ${senderTone}`;
+
+    const p = prospect?.name || "this prospect";
+    const co = prospect?.company || "their company";
+    const role = prospect?.title || "their role";
     const dossierCtx = dossier ? `\n\nIntelligence Dossier:\n${dossier}` : "";
 
-    const researchPrompt = `Produce a full prospect intelligence brief for:
+    // ── ICP emotional shortcuts for prompt injection ──
+    const icpPains        = icp?.pains || "";
+    const icpFears        = icp?.fears || "";
+    const icpFrustrations = icp?.frustrations || "";
+    const icpDesires      = icp?.dreamOutcomes || "";
+    const icpSayLoud      = icp?.empathySayLoud || "";
+    const icpThinkPriv    = icp?.empathyThinkPrivately || "";
+    const icpFeel         = icp?.empathyFeel || "";
+    const icpActuallyDo   = icp?.empathyActuallyDo || "";
+
+    const researchPrompt = `Produce a full prospect intelligence brief for ${senderName} to send to:
 Prospect: ${JSON.stringify(prospect)}
-What the sender offers / ICP: ${JSON.stringify(icp || {})}
+What ${senderName} offers: ${senderOffer}
 ${signalContext ? `\nSignal Context (company news, research):\n${signalContext}` : ""}
+ICP psychological profile for reference: ${JSON.stringify(icp || {})}
 
 Respond in exactly these 6 sections:
 
 ## 1. Company Intelligence
 - What the company does, size, market position, competitive landscape
-- Recent signals: expansions, new products/services, leadership changes, funding, awards, press, or industry tailwinds/headwinds
+- Recent signals: expansions, new products/services, leadership changes, awards, press, or industry tailwinds/headwinds (cite only what is in the signal context — do not invent figures)
 - The 2-3 things leadership is most likely obsessed with right now
 
 ## 2. Role & Decision-Making Analysis
 - What does a ${role} actually own and care about day-to-day?
 - KPIs they are measured on
 - Where are they feeling the most pressure or friction right now?
-- Decision-maker, influencer, or champion for what the sender offers? Be specific about why.
+- Decision-maker, influencer, or champion for ${senderName}'s offer? Be specific.
 
-## 3. Empathy Map
-Think like this person. What is their inner world like right now?
-- THINK & FEEL: Their private worries, ambitions, and what success looks like to them personally
-- HEAR: What their boss, board, peers, or market is telling them
-- SEE: What they observe in their industry, competitors, and their own org
+## 3. Empathy Map (tailored to this prospect and their company)
+- THINK & FEEL: Private worries and ambitions — what does success look like for them personally?
+- HEAR: What their boss, board, peers, or market is telling them right now
+- SEE: What they observe in their industry and their own org
 - SAY & DO: How they present themselves publicly vs. how they actually behave under pressure
 
-## 4. NDFFO — Psychological Profile
-- NEEDS: The functional outcome they need right now (what must get done)
-- DESIRES: The deeper aspiration — what they really want for their career or business
-- FEARS: What keeps them up at night; what failure looks like for them
-- FRUSTRATIONS: The daily friction points, broken processes, or people problems that grind them down
-- OBJECTIONS: The exact reasons they will say no or go cold — be brutally honest
+## 4. NDFFO — Psychological Profile (this prospect specifically)
+- NEEDS: The functional outcome they need right now
+- DESIRES: The deeper career or business aspiration
+- FEARS: What keeps them up at night; what failure looks like
+- FRUSTRATIONS: Daily friction — people, processes, or market conditions
+- OBJECTIONS: The exact reasons they will say no or go cold to ${senderName}'s outreach
 
 ## 5. Ice Breaker Bank
-Write 3 specific, ready-to-use ice breakers. Each must reference a real signal (company news, role context, or personal inference) and feel like it came from someone who did their homework.
-- Ice Breaker 1 (Company Signal): [one sentence]
-- Ice Breaker 2 (Role/Pain Signal): [one sentence]
-- Ice Breaker 3 (Personal/Aspiration Signal): [one sentence]
+Write 3 specific, ready-to-use ice breakers. Each must reference a real signal from the dossier or role context — nothing invented.
+- Ice Breaker 1 (Company Signal): [one sentence — ties to a recent event or company fact]
+- Ice Breaker 2 (Role/Pain Signal): [one sentence — ties to their job pressure or a frustration]
+- Ice Breaker 3 (Personal/Aspiration Signal): [one sentence — ties to their desire or career ambition]
 
-## 6. Outreach Strategy
-- Sharpest angle: the single most compelling reason this person should care about the sender's offer, right now
-- Tone to use: (formal / direct / peer-to-peer / consultative) and why
+## 6. Outreach Strategy for ${senderName}
+- Sharpest angle: the single most compelling reason ${p} should care about ${senderOffer} right now
+- Tone to use: [per sender preference: ${senderTone}]
 - Best first channel: email or LinkedIn, and why
-- The one thing NOT to say (the generic mistake that will get this person to delete/ignore)`;
+- The one thing NOT to say (the generic line that will make ${p} delete/ignore it)
+
+## Intelligence Score: [N] / 100
+Brief note on confidence level and what is inferred vs. confirmed.`;
 
     const stepPrompts = {
       research: researchPrompt,
-      hook: `Using the research, empathy map, and NDFFO for ${p} at ${co}, write 5 opening hooks for cold outreach.
+
+      hook: `Using the research, empathy map, and NDFFO for ${p} at ${co}, write 5 opening hooks for ${senderName}'s cold outreach.
 
 Each hook must:
-- Reference a specific signal, fear, frustration, or desire — not a generic pain
-- Feel like it came from someone who understands their world, not a salesperson
+- Reference a specific signal, fear, frustration, or desire from the dossier — not a generic pain
+- Feel like it came from someone who understands their world
 - Be under 2 sentences
+
+Empathy context:
+- They feel: ${icpFeel}
+- They privately think: ${icpThinkPriv}
+- Their frustrations: ${icpFrustrations}
+- Their desires: ${icpDesires}
 
 Format as:
 1. [Label — e.g. Fear-led / Signal-led / Desire-led / Frustration-led / Contrarian]:
    [Hook text]
 
-After the 5 hooks, add one line: ★ Recommended: #[N] — [one sentence on why]`,
+After 5 hooks: ★ Recommended: #[N] — [one sentence on why]`,
 
-      email: `Using the research, empathy map, NDFFO, and ice breakers for ${p} at ${co}, write a cold email.
+      email: `Using the research, empathy map, NDFFO, and ice breakers for ${p} at ${co}, write a cold email FROM ${senderName}.${dossierCtx}
 
 Structure:
 Subject: [specific, curiosity-driven, under 8 words — no clickbait]
 ---
-[Opening line: use the strongest ice breaker or fear/frustration hook — 1 sentence]
-[Bridge: connect their pain/desire to what the sender offers — 1-2 sentences]
-[Proof or specificity: one concrete reason to believe — 1 sentence]
-[CTA: low-friction, specific — propose a 15-min call OR ask one smart qualifying question]
+[Opening line: use the strongest ice breaker or a fear/frustration hook — 1 sentence]
+[Introduce yourself: one natural sentence on who ${senderName} is and what ${senderName} does — not salesy]
+[Bridge: connect their specific pain/desire to what ${senderName} offers — 1-2 sentences]
+[Proof: one grounded, specific reason to believe — no invented percentages — 1 sentence]
+[CTA: ${senderCta} — low friction, no pressure]
 
 Rules:
 - Total body: max 100 words
-- No "I hope this finds you well", no "we help companies like yours", no buzzwords
-- Tone: peer-to-peer — like a smart colleague, not a vendor`,
+- No "I hope this finds you well", no "we help companies like yours", no buzzwords, no invented statistics
+- Tone: ${senderTone}`,
 
-      linkedin: `Using the ice breakers and personal signals for ${p}, write:${dossierCtx}
-${linkedinPosts ? `\nTheir recent LinkedIn posts for context:\n${linkedinPosts}\n` : ""}
+      linkedin: `Write a LinkedIn CONNECTION REQUEST and a FOLLOW-UP DM for ${p} at ${co}, from ${senderName}.${dossierCtx}
+${linkedinPosts ? `\nTheir recent LinkedIn posts:\n${linkedinPosts}\n` : ""}
 
-1. CONNECTION REQUEST (under 280 characters):
-Reference one specific thing about their role, company, or a shared insight. No pitch. Feel like a peer who noticed something interesting about their work.
+Emotional context for ${p}:
+- They feel: ${icpFeel}
+- They privately think: ${icpThinkPriv}
+- Their desires: ${icpDesires}
+- Their frustrations: ${icpFrustrations}
 
-2. FOLLOW-UP DM — send 3-4 days after connecting (under 400 characters):
-Open with a new angle drawn from their NDFFO (a desire or frustration). Ask one smart question or share one sharp insight. Soft CTA — no pressure.
+## CONNECTION REQUEST (under 280 characters):
+- Reference ONE specific, real thing about their work, a company signal, or something genuinely interesting about their role
+- Sound like a peer who noticed something interesting — not a vendor who wants to sell
+- No pitch. No "I'd love to connect." No "love your work."
+- Write as if only ${p} could receive this message
 
-Label each clearly.`,
+## FOLLOW-UP DM — send 3-4 days after connecting (under 400 characters):
+- Open with something warm and specific — a genuine observation about their world, not a pitch opener
+- Tap into a desire or aspiration from their NDFFO (what they privately want but rarely say): ${icpDesires}
+- Ask ONE thoughtful question that shows you understand their world — or share one real insight that earns trust
+- Introduce ${senderName} and what ${senderName} does in one natural line — only if it fits organically
+- End with the softest possible CTA: ${senderCta}
+- Tone: ${senderTone} — warm, human, no pressure
 
-      sequence: `Using the full research brief, empathy map, NDFFO, and ice breakers for ${p} at ${co}, write a 3-touch sequence:
+Label each clearly: CONNECTION REQUEST and FOLLOW-UP DM.`,
+
+      sequence: `Using the intelligence dossier for ${p} at ${co}, write a 3-touch outreach sequence FROM ${senderName}.${dossierCtx}
 
 TOUCH 1 — Day 1 · Email
-Subject: [under 8 words]
-Body: [max 80 words — open with the sharpest ice breaker, speak to their #1 fear or frustration, end with a soft CTA]
+Subject: [under 8 words — specific to this prospect]
+Body: [max 80 words — open with sharpest ice breaker, introduce ${senderName} naturally, speak to their #1 fear or frustration, soft CTA]
 
 TOUCH 2 — Day 4 · LinkedIn DM
-[under 300 chars — new angle, draw from a desire or aspiration, don't reference the email directly]
+[under 300 chars — new angle, draw from a desire or aspiration: ${icpDesires}]
 
 TOUCH 3 — Day 8 · Email (Break-up)
-[max 60 words — acknowledge no response, add one new insight or social proof, final CTA that lowers the bar even further]
+[max 60 words — acknowledge no response, add one new insight or reference a real signal, final CTA with even lower bar]
 
-Each touch must feel distinct — different angle, different emotional register.`,
+Each touch: different angle, different emotional register. No invented statistics.`,
 
-      outreach: `Using the intelligence dossier for ${p} at ${co}, write 3 cold email variants. Each must have a distinct angle and emotional register.${dossierCtx}
+      outreach: `Write 3 cold email variants FROM ${senderName} to ${p} at ${co}. Each has a distinct angle and emotional register.${dossierCtx}
+
+THE SENDER:
+- ${senderName}, ${senderRole}
+- Offer: ${senderOffer}
+- Value: ${senderValueProp}
+${senderProof ? `- Social proof (use only if relevant): ${senderProof}` : ""}
+
+ICP emotional profile to draw from:
+- Pains: ${icpPains}
+- Fears: ${icpFears}
+- Frustrations: ${icpFrustrations}
+- Dream outcomes: ${icpDesires}
+- They say out loud: ${icpSayLoud}
 
 VARIANT A — Pain-led
-Subject: [under 8 words — pain or problem framing]
-Body: [max 100 words — open with their biggest frustration or fear, bridge to the sender's solution, one proof point, soft CTA]
+Subject: [under 8 words — pain or problem framing, specific to ${p}'s world]
+Body:
+- Line 1: Open with a specific pain or frustration from the dossier — make ${p} feel understood
+- Line 2: Introduce ${senderName} naturally — one sentence on who they are and what they do (not salesy)
+- Line 3: Bridge: why this pain is exactly what ${senderName} works on
+- CTA: ${senderCta}
+Max 90 words. No invented statistics.
 
 VARIANT B — Trigger-led
-Subject: [under 8 words — reference a company signal or event]
-Body: [max 100 words — open with a specific company/industry signal, show you've done your homework, connect to the relevant outcome, CTA]
+Subject: [under 8 words — reference the specific signal or event from the dossier]
+Body:
+- Line 1: Open with the specific company or market signal (cite something real from the dossier)
+- Line 2: ${senderName} from [company] — natural, one-line intro
+- Line 3: Connect signal → relevant outcome ${senderName} helps with
+- CTA: ${senderCta}
+Max 90 words. No invented statistics.
 
 VARIANT C — Curiosity-led
-Subject: [under 8 words — provocative question or counterintuitive statement]
-Body: [max 100 words — open with a sharp insight or question that challenges their assumption, bridge to the sender's angle, CTA]
+Subject: [under 8 words — provocative question tied to their desires or fears]
+Body:
+- Line 1: A sharp question or insight that connects to ${p}'s desires (${icpDesires}) — makes them stop and think
+- Line 2: Brief intro on who ${senderName} is
+- Line 3: Connect insight to ${senderOffer}
+- CTA: ${senderCta}
+Max 90 words. No invented statistics.
 
-Rules for all variants:
-- No "I hope this finds you well", no "we help companies like yours"
-- Tone: peer-to-peer — like a smart colleague, not a vendor
-- Subject lines must stand out in a crowded inbox
-Label each variant clearly.`,
+RULES FOR ALL VARIANTS:
+- No "I hope this finds you well" · No "we help companies like yours" · No made-up percentages or data
+- Tone: ${senderTone}
+- Introduce ${senderName} naturally in every email — never be abrupt
+- Subject lines: specific, not clickbait
+Label each variant clearly: VARIANT A, VARIANT B, VARIANT C.`,
 
-      followup: `Using the intelligence dossier for ${p} at ${co}, build a follow-up sequence.${dossierCtx}
+      followup: `Using the intelligence dossier for ${p} at ${co}, build a follow-up sequence FROM ${senderName}.${dossierCtx}
 Current prospect state: ${sequenceState || "No reply to first email"}
 
-Write a 5-touch sequence tailored to this state. Each touch must:
-- Use a different angle (rotate through: pain, desire, social proof, insight, break-up)
-- Feel like a natural continuation, not a copy-paste follow-up
-- Get progressively shorter as the sequence continues
+NDFFO for context:
+- Desires: ${icpDesires}
+- Fears: ${icpFears}
+- Frustrations: ${icpFrustrations}
+
+Write a 5-touch sequence. Each touch must:
+- Use a different angle (rotate: pain → desire → social proof → insight → break-up)
+- Feel like a natural human continuation — not a copy-paste follow-up
+- Get progressively shorter
+- Reference ${senderName} in each touch naturally
+- Use NO invented statistics or made-up data
 
 TOUCH 1 — [Day X] · [Channel]
-[Content]
+[Content — warm, specific, reference what was in the first outreach]
 
 TOUCH 2 — [Day X] · [Channel]
-[Content]
+[Content — new angle, draw from a desire or aspiration]
 
-...continue through 5 touches.
+TOUCH 3 — [Day X] · [Channel]
+[Content — social proof or insight angle]
 
-End with a break-up touch that leaves the door open without being needy.`,
+TOUCH 4 — [Day X] · [Channel]
+[Content — very short, high-value insight or question]
 
-      objection: `Analyse this prospect reply from ${p} at ${co} and draft a response.
+TOUCH 5 — [Day X] · Email (Break-up)
+[Content — warm break-up, leaves the door open, no pressure, no guilt]`,
+
+      objection: `Analyse this prospect reply from ${p} at ${co} and draft a response FROM ${senderName}.
 ${dossierCtx}
 
 Their reply:
@@ -330,13 +434,13 @@ Type: [Price / Timing / No need / Competitor / Trust / Gatekeeper / Other]
 Root cause: [one sentence — what's really behind this objection]
 Urgency level: [Hot / Warm / Cold] — and why
 
-2. RECOMMENDED RESPONSE
-[max 100 words — address the root cause, not the surface objection; use an insight or reframe; end with a lower-friction CTA]
+2. RECOMMENDED RESPONSE (from ${senderName})
+[max 100 words — address the root cause, not the surface objection; use an insight or reframe; end with ${senderCta}. No invented statistics. Reference current year ${currentYear} if relevant, not past years.]
 
-3. ALTERNATIVE RESPONSE (if the above feels too direct)
-[max 80 words — softer approach, more curious, less pushback]
+3. ALTERNATIVE RESPONSE (softer approach)
+[max 80 words — more curious, less pushback, still from ${senderName}]
 
-Be honest: if this is a polite no, say so and recommend a breakup message instead.`,
+Be honest: if this is a polite no, say so and recommend a graceful break-up message instead.`,
     };
 
     const messages = [
