@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<!-- Login overlay — shown until auth is confirmed -->
+<div id="loginOverlay" class="login-overlay"></div>
+
 <div id="app">
 
   <!-- ── Sidebar ── -->
@@ -32,6 +36,10 @@
         <span class="spill" id="sdot-perplexity">Perplexity</span>
       </div>
       <div class="sb-missing" id="sbMissing"></div>
+    </div>
+    <div class="sb-user hidden" id="sbUserInfo">
+      <span id="sbUserEmail" class="sb-user-email"></span>
+      <button id="sbSignOut" class="sb-signout">Sign out</button>
     </div>
   </aside>
 
