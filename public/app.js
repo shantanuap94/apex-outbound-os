@@ -586,7 +586,7 @@ function wireChain() {
     const state   = $("sequenceState").value;
     const btn = $("buildSequenceBtn");
     btn.textContent = "Building…"; btn.disabled = true;
-    $("followupOut").textContent = "Generating sequence…";
+    $("followupOut").textContent = "Building 8-touch cadence — this takes 30–40 seconds…";
     $("followupOut").classList.remove("hidden");
     try {
       const { content, error } = await post("/api/chain/run", {
@@ -599,7 +599,7 @@ function wireChain() {
         saveProspectToMemory(p, { followup: content });
       }
     } catch (e) { $("followupOut").textContent = "Network error: " + e.message; }
-    btn.textContent = "Build Sequence"; btn.disabled = false;
+    btn.textContent = "Build 8-Touch Cadence"; btn.disabled = false;
   });
 
   // Objection Handler

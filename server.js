@@ -393,35 +393,64 @@ RULES FOR ALL VARIANTS:
 - Subject lines: specific, not clickbait
 Label each variant clearly: VARIANT A, VARIANT B, VARIANT C.`,
 
-      followup: `Using the intelligence dossier for ${p} at ${co}, build a follow-up sequence FROM ${senderName}.${dossierCtx}
-Current prospect state: ${sequenceState || "No reply to first email"}
+      followup: `Using the full intelligence dossier for ${p} at ${co}, build a complete 8-TOUCH RELATIONSHIP CADENCE from ${senderName}.${dossierCtx}
 
-NDFFO for context:
+THE SENDER: ${senderName}, ${senderRole}
+Offer: ${senderOffer}
+Value proposition: ${senderValueProp}
+${senderProof ? `Proof: ${senderProof}` : ""}
+
+ICP EMOTIONAL PROFILE:
+- Needs / pains: ${icpPains}
 - Desires: ${icpDesires}
 - Fears: ${icpFears}
 - Frustrations: ${icpFrustrations}
+- Say out loud: ${icpSayLoud}
+- Privately feel: ${icpFeel}
+- Privately think: ${icpThinkPriv}
 
-Write a 5-touch sequence. Each touch must:
-- Use a different angle (rotate: pain → desire → social proof → insight → break-up)
-- Feel like a natural human continuation — not a copy-paste follow-up
-- Get progressively shorter
-- Reference ${senderName} in each touch naturally
-- Use NO invented statistics or made-up data
+MASTER RULE: Every touch GIVES, never asks. The ask (meeting, call, order) is always the lightest possible thing after the heaviest possible giving. Use exact product / project / brand names from the dossier — never write "your products" or "your range". No invented statistics or percentages.
 
-TOUCH 1 — [Day X] · [Channel]
-[Content — warm, specific, reference what was in the first outreach]
+---
 
-TOUCH 2 — [Day X] · [Channel]
-[Content — new angle, draw from a desire or aspiration]
+TOUCH 1 — Day 1 · 💼 LinkedIn Connection Request (under 300 characters)
+Signal-led hook. Reference ONE specific real thing about ${p}'s work — a company launch, a role milestone, a recent post, or a market signal from the dossier. Write as a peer who noticed something interesting, not a vendor. No pitch. No "I'd love to connect." No "love your work." Must feel like only ${p} could receive this.
 
-TOUCH 3 — [Day X] · [Channel]
-[Content — social proof or insight angle]
+TOUCH 2 — Day 3-4 · 💼 LinkedIn DM (under 400 characters)
+Post-accept warmth. Open with a genuine observation about their world — draw from NDFFO desires: ${icpDesires}. Offer a useful document for their file — name it specifically (COA / spec / market note / case study), never say "our brochure". Ask for official email to send it on. ONE soft question. No pitch.
 
-TOUCH 4 — [Day X] · [Channel]
-[Content — very short, high-value insight or question]
+TOUCH 3 — Day 7-8 · 💼 LinkedIn DM (180-250 words for India/MENA; 100-140 for UK/US)
+"Last message from my side for now — don't want to crowd your inbox." Then: tell a story of a SIMILAR BUYER with a SIMILAR PAIN and a SPECIFIC OUTCOME. Name the exact mechanism of the problem and what changed when it was fixed — use real situations, not invented stats. Bridge to ${p}'s situation with one sentence. Reoffer the specific document for their file. Exit offer: "If not now, just say park it for Q2, no hard feelings." NO invented data.
 
-TOUCH 5 — [Day X] · Email (Break-up)
-[Content — warm break-up, leaves the door open, no pressure, no guilt]`,
+TOUCH 4 — Day 10-12 · 📧 Email (120 words max) + 💬 WhatsApp nudge (same day)
+EMAIL: Subject line — "For your file — [specific document name] / ${co}"
+6-part structure: (1) "Following up from LinkedIn — as promised..." (2) One sentence on ${p}'s specific situation — name their exact challenge by name (3) Bulleted list of 2-3 named attachments — name each document precisely (4) "Even if you never buy from us, it's a useful benchmark" — this line is non-negotiable (5) Soft CTA: 15-20 min chat, no deck, work around their timezone (6) Signature with certifications relevant to their market
+WHATSAPP (9am same day): "Hi ${p}, sent you [specific doc] on email for your ${co} file — from our LinkedIn chat. Sharing here in case email goes to spam. Let me know if you got it — ${senderName}"
+
+TOUCH 5 — Day 16-18 · 💬 WhatsApp or 💼 LinkedIn (People/Team Story — 120-160 words)
+"Was at [location] yesterday — reminded me of our conversation." Share a REAL SCENE from your ground team doing a routine quality/process/dispatch check. Name the person doing the check. Name what they were doing and why it matters for consistency. "Not for marketing — just [person] doing [routine task]." Attach: a real candid photo/30-sec video, not a brochure. Use exact product names from dossier in the story. End with ONE human question about their work. NO ASK. Only give.
+
+TOUCH 6 — Day 25-30 · 📧 Email (Market Intelligence — 100-130 words)
+"Thought this might be useful for your [their role/planning cycle] — no ask attached." Share REAL market data relevant to THEIR function — numbers they can use in their job even when evaluating other suppliers. Name 2-3 similar buyers and what they are doing in response to this data. Offer a weekly/monthly tracker on their official work email: "Would you like me to add you to our Monday [industry] tracker? Three lines, every Monday, no sales talk." This positions ${senderName} as a partner, not a salesperson.
+
+TOUCH 7 — Day 40-45 · 📧 Email or 💼 LinkedIn (Partnership Invite — 130-170 words)
+Open: "It's been [X weeks] since we connected — I've been sharing a few notes for your file." State clearly and warmly that ${senderName} is NOT looking for a one-time order. Reference a specific client tenure: "[Client type] has been with us for [X years] — that's the kind of relationship we build." Name a specific reason why a long-term fit makes sense for THIS prospect's company and role — use dossier details. Offer: plant/site visit, chai, virtual walkthrough — NOT a sales meeting. Bury the email list ask at the end as the smallest possible yes. "No rush at all — happy to stay connected and keep sharing [tracker name]."
+
+TOUCH 8 — Day 50+ · 💬 WhatsApp or 📧 Email (Festival/Human Greeting — 80-100 words)
+Choose the right festival: Diwali for India, Christmas/New Year for UK/Europe, Eid for MENA/West Africa, or relevant regional festival. Attach a REAL candid team photo — not a corporate poster, not a brochure. "These are the people who actually [hold the spec / check the COA / pack the documents]." One personal line referencing something from your earlier exchanges. NO product mention. NO CTA. Pure warmth. This is the touch that gets: "Thanks ${senderName}, let's catch up next week."
+
+---
+
+AFTER TOUCH 8 — Ongoing: Monthly tracker + next festival greeting. You never close the loop. You stay.
+
+For EACH touch, format your output as:
+
+TOUCH [N] — Day [X] · [Channel]
+[Full copy-ready message — write it out completely, ready to send]
+📎 Suggested attachment: [name it specifically, or "none"]
+[Word count in brackets]
+
+No placeholders. No [INSERT X HERE]. Write every message completely. If you need a specific detail not in the dossier, infer the most plausible version from the industry and prospect context.`,
 
       objection: `Analyse this prospect reply from ${p} at ${co} and draft a response FROM ${senderName}.
 ${dossierCtx}
@@ -455,7 +484,7 @@ Be honest: if this is a polite no, say so and recommend a graceful break-up mess
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
       },
-      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: 2500 }),
+      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: step === "followup" ? 5000 : 2500 }),
     });
     const data = await r.json();
     json(res, { content: data.choices?.[0]?.message?.content, step });
