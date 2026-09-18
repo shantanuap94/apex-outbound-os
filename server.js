@@ -632,7 +632,8 @@ async function handleProfileExtract(req, res) {
     if (fileContent) {
       sourceText = fileContent.substring(0, 12000);
     } else if (targetUrl) {
-      const r = await fetch(targetUrl, {
+      const normalizedUrl = /^https?:\/\//i.test(targetUrl) ? targetUrl : `https://${targetUrl}`;
+      const r = await fetch(normalizedUrl, {
         headers: {
           "User-Agent": "Mozilla/5.0 (compatible; ApexOutboundOS/1.0)",
           "Accept": "text/html,application/xhtml+xml,text/plain,*/*",
