@@ -219,7 +219,28 @@ function wireSender() {
     try {
       let body = {};
       if (file) {
-        const text = await file.text();
+        let text = "";
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+        if (isPdf && typeof pdfjsLib !== "undefined") {
+          try {
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+              "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const pages = [];
+            for (let i = 1; i <= Math.min(pdf.numPages, 30); i++) {
+              const page = await pdf.getPage(i);
+              const content = await page.getTextContent();
+              pages.push(content.items.map((it) => it.str).join(" "));
+            }
+            text = pages.join("\n");
+          } catch (pdfErr) {
+            // Fall back to raw text if PDF.js fails
+            text = await file.text();
+          }
+        } else {
+          text = await file.text();
+        }
         body = { fileContent: text, fileName: file.name };
       } else {
         body = { url };
@@ -255,66 +276,189 @@ function wireSender() {
   });
 }
 
-// ─── Prospect Memory ──────────────────────────────────────────────────────────
+// ─── Supabase CRM ─────────────────────────────────────────────────────────────
 const MEMORY_KEY = "apex.prospectMemory";
+let _sb = null;
+let _crmFilter = "all";
+let _crmProspects = [];
 
-function getProspectMemory() {
-  try { return JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]"); } catch { return []; }
+async function initSupabase() {
+  if (typeof supabase === "undefined") return;
+  try {
+    const cfg = await get("/api/config");
+    if (cfg.supabaseUrl && cfg.supabaseKey) {
+      _sb = supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
+      await crmLoad();
+    }
+  } catch {}
 }
 
-function saveProspectToMemory(prospect, update) {
-  const all = getProspectMemory();
-  const matchIdx = all.findIndex((e) =>
-    e.prospect?.domain === prospect.domain && e.prospect?.name === prospect.name
+async function crmLoad() {
+  if (_sb) {
+    const { data, error } = await _sb
+      .from("prospects")
+      .select("*")
+      .order("updated_at", { ascending: false });
+    if (!error && data) { _crmProspects = data; return; }
+  }
+  // localStorage fallback — map old format to flat CRM shape
+  const legacy = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
+  _crmProspects = legacy.map((e) => ({
+    id: e.id,
+    created_at: e.savedAt,
+    updated_at: e.updatedAt || e.savedAt,
+    name: e.prospect?.name || "",
+    company: e.prospect?.company || "",
+    title: e.prospect?.title || "",
+    email: e.prospect?.email || "",
+    phone: e.prospect?.phone || "",
+    linkedin_url: e.prospect?.linkedin || "",
+    domain: e.prospect?.domain || "",
+    status: e.status || "active",
+    current_touch: e.currentTouch || 0,
+    notes: e.notes || "",
+    next_action: e.nextAction || "",
+    next_action_date: e.nextActionDate || null,
+    snapshot: e.snapshot || "",
+    dossier: e.dossier || "",
+    emails: e.emails || null,
+    linkedin_messages: e.linkedin || "",
+    cadence: e.followup || "",
+    objection_response: e.objection || "",
+  }));
+}
+
+async function saveProspectToMemory(prospect, update) {
+  const patch = {};
+  if (update.snapshot !== undefined)  patch.snapshot = update.snapshot;
+  if (update.dossier  !== undefined)  patch.dossier  = update.dossier;
+  if (update.emails   !== undefined)  patch.emails   = update.emails;
+  if (update.linkedin !== undefined)  patch.linkedin_messages = update.linkedin;
+  if (update.followup !== undefined)  patch.cadence  = update.followup;
+  if (update.objection !== undefined) patch.objection_response = update.objection;
+
+  const base = {
+    name: prospect.name || "", company: prospect.company || "",
+    title: prospect.title || "", email: prospect.email || "",
+    phone: prospect.phone || "", linkedin_url: prospect.linkedin || "",
+    domain: prospect.domain || "",
+    ...patch,
+  };
+
+  const existing = _crmProspects.find((p) =>
+    (prospect.domain && p.domain === prospect.domain) ||
+    (p.name === prospect.name && p.company === prospect.company)
   );
-  if (matchIdx >= 0) {
-    all[matchIdx] = { ...all[matchIdx], ...update, updatedAt: new Date().toISOString() };
+
+  if (_sb) {
+    if (existing) {
+      const { data } = await _sb.from("prospects")
+        .update({ ...base, updated_at: new Date().toISOString() })
+        .eq("id", existing.id).select().single();
+      if (data) { const i = _crmProspects.findIndex((p) => p.id === existing.id); if (i >= 0) _crmProspects[i] = data; }
+      return existing.id;
+    } else {
+      const { data } = await _sb.from("prospects")
+        .insert({ ...base, status: "active", current_touch: 0 }).select().single();
+      if (data) _crmProspects.unshift(data);
+      return data?.id;
+    }
+  }
+
+  // localStorage fallback
+  const all = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
+  if (existing) {
+    const i = all.findIndex((e) => e.id === existing.id);
+    if (i >= 0) {
+      if (update.emails)    all[i].emails    = update.emails;
+      if (update.linkedin)  all[i].linkedin  = update.linkedin;
+      if (update.followup)  all[i].followup  = update.followup;
+      if (update.objection) all[i].objection = update.objection;
+      if (update.snapshot)  all[i].snapshot  = update.snapshot;
+      if (update.dossier)   all[i].dossier   = update.dossier;
+      all[i].updatedAt = new Date().toISOString();
+      const ci = _crmProspects.findIndex((p) => p.id === existing.id);
+      if (ci >= 0) Object.assign(_crmProspects[ci], patch, { updated_at: all[i].updatedAt });
+    }
   } else {
-    all.unshift({
-      id: Date.now().toString(),
-      savedAt: new Date().toISOString(),
-      status: "active",
-      prospect,
-      ...update,
+    const entry = { id: Date.now().toString(), savedAt: new Date().toISOString(), status: "active", prospect, ...update };
+    all.unshift(entry);
+    _crmProspects.unshift({
+      id: entry.id, created_at: entry.savedAt, updated_at: entry.savedAt,
+      name: prospect.name || "", company: prospect.company || "", title: prospect.title || "",
+      email: prospect.email || "", phone: prospect.phone || "", linkedin_url: prospect.linkedin || "",
+      domain: prospect.domain || "", status: "active", current_touch: 0,
+      notes: "", next_action: "", next_action_date: null, ...patch,
     });
   }
   try { localStorage.setItem(MEMORY_KEY, JSON.stringify(all.slice(0, 100))); } catch {}
-  return all[matchIdx >= 0 ? matchIdx : 0]?.id;
+  return _crmProspects[0]?.id;
+}
+
+async function crmUpdateFields(id, fields) {
+  const i = _crmProspects.findIndex((p) => p.id === id);
+  if (i >= 0) Object.assign(_crmProspects[i], fields);
+  if (_sb) { await _sb.from("prospects").update(fields).eq("id", id); return; }
+  const all = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
+  const li = all.findIndex((e) => e.id === id);
+  if (li >= 0) {
+    all[li].status = fields.status ?? all[li].status;
+    all[li].notes = fields.notes ?? all[li].notes;
+    all[li].nextAction = fields.next_action ?? all[li].nextAction;
+    all[li].nextActionDate = fields.next_action_date ?? all[li].nextActionDate;
+    all[li].currentTouch = fields.current_touch ?? all[li].currentTouch;
+    all[li].updatedAt = fields.updated_at ?? all[li].updatedAt;
+    try { localStorage.setItem(MEMORY_KEY, JSON.stringify(all)); } catch {}
+  }
 }
 
 function statusLabel(s) {
-  return { active: "Active", replied: "Replied ✓", meeting: "Meeting Booked", closed: "Closed" }[s] || s;
+  return { active: "Active", replied: "Replied ✓", meeting: "Meeting", closed: "Closed", cold: "Cold" }[s] || s;
 }
 function statusClass(s) {
-  return { active: "ms-active", replied: "ms-replied", meeting: "ms-meeting", closed: "ms-closed" }[s] || "ms-active";
+  return { active: "ms-active", replied: "ms-replied", meeting: "ms-meeting", closed: "ms-closed", cold: "ms-cold" }[s] || "ms-active";
 }
 
 let _currentDrawerId = null;
 
 function renderMemoryList() {
-  const all = getProspectMemory();
   const empty = $("memoryEmpty");
   const list  = $("memoryList");
   if (!list) return;
 
-  if (!all.length) {
+  const filtered = _crmFilter === "all"
+    ? _crmProspects
+    : _crmProspects.filter((p) => p.status === _crmFilter);
+
+  // Update filter pill counts
+  document.querySelectorAll(".crm-filter").forEach((pill) => {
+    const f = pill.dataset.filter;
+    const count = f === "all" ? _crmProspects.length : _crmProspects.filter((p) => p.status === f).length;
+    const badge = pill.querySelector(".filter-count");
+    if (badge) badge.textContent = count > 0 ? count : "";
+  });
+
+  if (!filtered.length) {
     if (empty) empty.style.display = "";
     list.innerHTML = "";
     return;
   }
   if (empty) empty.style.display = "none";
 
-  list.innerHTML = all.map((e) => {
-    const date = new Date(e.savedAt).toLocaleDateString("en-IN", { day:"numeric", month:"short" });
-    return `<div class="memory-row" data-id="${e.id}">
+  list.innerHTML = filtered.map((p) => {
+    const date = new Date(p.updated_at || p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    const touchBadge = p.current_touch > 0 ? `<span class="touch-badge">T${p.current_touch}</span>` : "";
+    const nextLine   = p.next_action ? `<div class="mr-next-action">→ ${p.next_action}${p.next_action_date ? " · " + p.next_action_date : ""}</div>` : "";
+    return `<div class="memory-row" data-id="${p.id}">
       <div class="mr-main">
-        <div class="mr-name">${e.prospect?.name || "Unknown"}</div>
-        <div class="mr-meta">${e.prospect?.title || ""} · ${e.prospect?.company || ""}</div>
+        <div class="mr-name">${p.name || "Unknown"} ${touchBadge}</div>
+        <div class="mr-meta">${[p.title, p.company].filter(Boolean).join(" · ")}</div>
+        ${nextLine}
       </div>
       <div class="mr-right">
-        <span class="memory-status ${statusClass(e.status)}">${statusLabel(e.status)}</span>
+        <span class="memory-status ${statusClass(p.status)}">${statusLabel(p.status)}</span>
         <span class="mr-date">${date}</span>
-        <button class="btn btn-ghost btn-sm mr-open" data-id="${e.id}">View →</button>
+        <button class="btn btn-ghost btn-sm mr-open" data-id="${p.id}">View →</button>
       </div>
     </div>`;
   }).join("");
@@ -330,15 +474,18 @@ function renderMemoryList() {
 }
 
 function openMemoryDrawer(id) {
-  const all = getProspectMemory();
-  const entry = all.find((e) => e.id === id);
+  const entry = _crmProspects.find((p) => p.id === id);
   if (!entry) return;
   _currentDrawerId = id;
 
-  $("drawerName").textContent = entry.prospect?.name || "Unknown";
-  $("drawerMeta").textContent = [entry.prospect?.title, entry.prospect?.company].filter(Boolean).join(" · ");
-  $("drawerMarkReplied").textContent = entry.status === "replied" ? "Replied ✓" : "Mark Replied";
-  $("drawerMarkReplied").classList.toggle("btn-dark", entry.status !== "replied");
+  $("drawerName").textContent = entry.name || "Unknown";
+  $("drawerMeta").textContent = [entry.title, entry.company].filter(Boolean).join(" · ");
+
+  if ($("drawerStatus"))     $("drawerStatus").value     = entry.status || "active";
+  if ($("drawerTouch"))      $("drawerTouch").value      = entry.current_touch || 0;
+  if ($("drawerNotes"))      $("drawerNotes").value      = entry.notes || "";
+  if ($("drawerNextAction")) $("drawerNextAction").value = entry.next_action || "";
+  if ($("drawerNextDate"))   $("drawerNextDate").value   = entry.next_action_date || "";
 
   renderDrawerTab("dossier", entry);
   $("memoryDrawer").classList.remove("hidden");
@@ -372,20 +519,37 @@ function renderDrawerTab(tab, entry) {
       });
     });
   } else if (tab === "linkedin") {
-    content.innerHTML = `<pre class="drawer-pre">${entry.linkedin || "No LinkedIn copy yet."}</pre>`;
+    content.innerHTML = `<pre class="drawer-pre">${entry.linkedin_messages || "No LinkedIn copy yet."}</pre>`;
+  } else if (tab === "cadence") {
+    content.innerHTML = `<pre class="drawer-pre">${entry.cadence || "No 8-touch cadence yet — run Step 7."}</pre>`;
   } else if (tab === "objection") {
-    content.innerHTML = `<pre class="drawer-pre">${entry.objection || "No objection handler yet."}</pre>`;
+    content.innerHTML = `<pre class="drawer-pre">${entry.objection_response || "No objection handler yet."}</pre>`;
   }
 }
 
 function wireMemory() {
   renderMemoryList();
 
+  // Filter pills
+  document.querySelectorAll(".crm-filter").forEach((pill) => {
+    pill.addEventListener("click", () => {
+      document.querySelectorAll(".crm-filter").forEach((p) => p.classList.remove("active"));
+      pill.classList.add("active");
+      _crmFilter = pill.dataset.filter;
+      renderMemoryList();
+    });
+  });
+
   const clearBtn = $("clearMemoryBtn");
   if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      if (!confirm("Clear all prospect memory? This cannot be undone.")) return;
+    clearBtn.addEventListener("click", async () => {
+      if (!confirm("Clear all prospects? This cannot be undone.")) return;
+      if (_sb) {
+        const ids = _crmProspects.map((p) => p.id);
+        if (ids.length) await _sb.from("prospects").delete().in("id", ids);
+      }
       localStorage.removeItem(MEMORY_KEY);
+      _crmProspects = [];
       renderMemoryList();
       $("memoryDrawer").classList.add("hidden");
     });
@@ -394,25 +558,31 @@ function wireMemory() {
   const drawerClose = $("drawerClose");
   if (drawerClose) drawerClose.addEventListener("click", () => $("memoryDrawer").classList.add("hidden"));
 
-  const markReplied = $("drawerMarkReplied");
-  if (markReplied) {
-    markReplied.addEventListener("click", () => {
+  const saveCrm = $("drawerSaveCrm");
+  if (saveCrm) {
+    saveCrm.addEventListener("click", async () => {
       if (!_currentDrawerId) return;
-      const all = getProspectMemory();
-      const idx = all.findIndex((e) => e.id === _currentDrawerId);
-      if (idx < 0) return;
-      all[idx].status = all[idx].status === "replied" ? "active" : "replied";
-      try { localStorage.setItem(MEMORY_KEY, JSON.stringify(all)); } catch {}
+      const fields = {
+        status:           $("drawerStatus").value,
+        current_touch:    parseInt($("drawerTouch").value, 10) || 0,
+        notes:            $("drawerNotes").value,
+        next_action:      $("drawerNextAction").value,
+        next_action_date: $("drawerNextDate").value || null,
+        updated_at:       new Date().toISOString(),
+      };
+      const orig = saveCrm.textContent;
+      saveCrm.textContent = "Saving…"; saveCrm.disabled = true;
+      await crmUpdateFields(_currentDrawerId, fields);
+      saveCrm.textContent = "Saved ✓";
+      setTimeout(() => { saveCrm.textContent = orig; saveCrm.disabled = false; }, 1500);
       renderMemoryList();
-      openMemoryDrawer(_currentDrawerId);
     });
   }
 
   document.querySelectorAll(".dtab").forEach((tab) => {
     tab.addEventListener("click", () => {
       if (!_currentDrawerId) return;
-      const all = getProspectMemory();
-      const entry = all.find((e) => e.id === _currentDrawerId);
+      const entry = _crmProspects.find((p) => p.id === _currentDrawerId);
       if (entry) renderDrawerTab(tab.dataset.dtab, entry);
     });
   });
@@ -560,7 +730,7 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       localStorage.setItem("apex.currentDossier", content);
 
       // Save to prospect memory
-      saveProspectToMemory(p, {
+      await saveProspectToMemory(p, {
         snapshot: $("snapshotOut").textContent,
         dossier: content,
       });
@@ -624,7 +794,7 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       }
 
       // Save emails + LinkedIn to prospect memory
-      saveProspectToMemory(p, {
+      await saveProspectToMemory(p, {
         emails: { a: emailA, b: emailB, c: emailC },
         linkedin: liRes.content || "",
       });
@@ -667,7 +837,7 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       $("followupOut").textContent = error ? "Error: " + error : content;
       if (!error) {
         setStepDone(7);
-        saveProspectToMemory(p, { followup: content });
+        await saveProspectToMemory(p, { followup: content });
       }
     } catch (e) { $("followupOut").textContent = "Network error: " + e.message; }
     btn.textContent = "Build 8-Touch Cadence"; btn.disabled = false;
@@ -689,7 +859,7 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       $("objectionOut").textContent = error ? "Error: " + error : content;
       if (!error) {
         setStepDone(8);
-        saveProspectToMemory(getProspect(), { objection: content });
+        await saveProspectToMemory(getProspect(), { objection: content });
       }
     } catch (e) { $("objectionOut").textContent = "Network error: " + e.message; }
     btn.textContent = "Classify & Draft Response"; btn.disabled = false;
@@ -697,10 +867,11 @@ Also include any recent news, leadership changes, or awards from the last 90 day
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   wireTabs();
   wireSender();
   wireIcp();
+  await initSupabase();
   wireChain();
   wireMemory();
   checkApiStatus();

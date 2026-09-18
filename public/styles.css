@@ -454,6 +454,28 @@ main { padding: 24px 32px 60px; }
 .ms-replied { background: rgba(52,199,89,.15);  color: #34c759; }
 .ms-meeting { background: rgba(255,159,10,.15); color: #ff9f0a; }
 .ms-closed  { background: rgba(142,142,147,.15); color: #8e8e93; }
+.ms-cold    { background: rgba(94,159,255,.12);  color: #5e9fff; }
+
+/* ─── CRM Filters ────────────────────────────────────────────────────────── */
+.crm-filters {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.crm-filter {
+  background: var(--bg-card); border: 1px solid var(--border); color: var(--text-2);
+  font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 20px;
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.crm-filter:hover { color: var(--text-1); border-color: rgba(255,255,255,.2); }
+.crm-filter.active { background: rgba(255,255,255,.1); color: var(--text-1); border-color: rgba(255,255,255,.3); }
+.filter-count { font-size: 10px; opacity: .6; }
+
+.touch-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,159,10,.2); color: #ff9f0a; font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px; margin-left: 4px; vertical-align: middle;
+}
+.mr-next-action { font-size: 11px; color: var(--text-3); margin-top: 3px; }
 
 /* ─── Memory Drawer ──────────────────────────────────────────────────────── */
 .memory-drawer {
@@ -491,6 +513,44 @@ main { padding: 24px 32px 60px; }
   transition: background .15s, color .15s;
 }
 .detab.active { background: rgba(255,255,255,.08); color: var(--text-1); border-color: rgba(255,255,255,.2); }
+
+/* ─── Drawer CRM Fields ───────────────────────────────────────────────────── */
+.drawer-crm-fields {
+  border-bottom: 1px solid var(--border); padding: 14px 22px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.dcf-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.dcf-row label { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.dcf-label-ml  { margin-left: 10px; }
+.dcf-row select {
+  background: var(--bg-input, rgba(255,255,255,.06)); border: 1px solid var(--border);
+  color: var(--text-1); font-size: 12.5px; padding: 5px 10px; border-radius: 7px;
+  cursor: pointer;
+}
+.dcf-text {
+  flex: 1; min-width: 180px; background: var(--bg-input, rgba(255,255,255,.06));
+  border: 1px solid var(--border); color: var(--text-1); font-size: 12.5px;
+  padding: 5px 10px; border-radius: 7px;
+}
+.dcf-date {
+  background: var(--bg-input, rgba(255,255,255,.06)); border: 1px solid var(--border);
+  color: var(--text-1); font-size: 12.5px; padding: 5px 10px; border-radius: 7px;
+  cursor: pointer;
+}
+.dcf-notes {
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.dcf-notes textarea {
+  flex: 1; background: var(--bg-input, rgba(255,255,255,.06));
+  border: 1px solid var(--border); color: var(--text-1); font-size: 12.5px;
+  padding: 8px 10px; border-radius: 7px; resize: vertical; min-height: 56px;
+  font-family: inherit; line-height: 1.5;
+}
+.dcf-notes textarea:focus, .dcf-text:focus, .dcf-date:focus, .dcf-row select:focus {
+  outline: none; border-color: rgba(255,255,255,.3);
+}
 
 /* ─── Responsive — laptop (≤ 1200px) ────────────────────────────────────── */
 @media (max-width: 1200px) {

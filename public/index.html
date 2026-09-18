@@ -536,6 +536,16 @@
           </div>
         </div>
 
+        <!-- CRM filter pills -->
+        <div class="crm-filters">
+          <button class="crm-filter active" data-filter="all">All <span class="filter-count"></span></button>
+          <button class="crm-filter" data-filter="active">Active <span class="filter-count"></span></button>
+          <button class="crm-filter" data-filter="replied">Replied <span class="filter-count"></span></button>
+          <button class="crm-filter" data-filter="meeting">Meeting <span class="filter-count"></span></button>
+          <button class="crm-filter" data-filter="closed">Closed <span class="filter-count"></span></button>
+          <button class="crm-filter" data-filter="cold">Cold <span class="filter-count"></span></button>
+        </div>
+
         <!-- empty state -->
         <div id="memoryEmpty" class="memory-empty">
           <div class="memory-empty-icon">◎</div>
@@ -554,7 +564,6 @@
               <div id="drawerMeta" class="drawer-meta"></div>
             </div>
             <div class="drawer-actions">
-              <button class="btn btn-outline btn-sm" id="drawerMarkReplied">Mark Replied ✓</button>
               <button class="btn btn-ghost btn-sm" id="drawerClose">✕ Close</button>
             </div>
           </div>
@@ -562,7 +571,42 @@
             <button class="dtab active" data-dtab="dossier">Dossier</button>
             <button class="dtab" data-dtab="emails">Emails</button>
             <button class="dtab" data-dtab="linkedin">LinkedIn</button>
+            <button class="dtab" data-dtab="cadence">Cadence</button>
             <button class="dtab" data-dtab="objection">Objection</button>
+          </div>
+          <!-- CRM fields -->
+          <div class="drawer-crm-fields">
+            <div class="dcf-row">
+              <label>Status</label>
+              <select id="drawerStatus">
+                <option value="active">Active</option>
+                <option value="replied">Replied ✓</option>
+                <option value="meeting">Meeting Booked</option>
+                <option value="closed">Closed</option>
+                <option value="cold">Cold</option>
+              </select>
+              <label class="dcf-label-ml">Touch</label>
+              <select id="drawerTouch">
+                <option value="0">Not started</option>
+                <option value="1">Touch 1</option>
+                <option value="2">Touch 2</option>
+                <option value="3">Touch 3</option>
+                <option value="4">Touch 4</option>
+                <option value="5">Touch 5</option>
+                <option value="6">Touch 6</option>
+                <option value="7">Touch 7</option>
+                <option value="8">Touch 8</option>
+              </select>
+            </div>
+            <div class="dcf-row">
+              <label>Next action</label>
+              <input type="text" id="drawerNextAction" class="dcf-text" placeholder="e.g. Send Touch 4 email">
+              <input type="date" id="drawerNextDate" class="dcf-date">
+            </div>
+            <div class="dcf-notes">
+              <textarea id="drawerNotes" rows="3" placeholder="Notes — what happened on last call? What did they say?"></textarea>
+              <button class="btn btn-dark btn-sm" id="drawerSaveCrm">Save</button>
+            </div>
           </div>
           <div id="drawerContent" class="drawer-content"></div>
         </div>
@@ -572,6 +616,8 @@
   </div>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -3,6 +3,23 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
+const pdfParse = require("pdf-parse");
+
+function normalizeExtractUrl(inputUrl) {
+  let u = (inputUrl || "").trim();
+  // Google Drive file view → direct download
+  const driveFile = u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (driveFile) return `https://drive.google.com/uc?export=download&id=${driveFile[1]}`;
+  // Google Docs → plain text export
+  const gDoc = u.match(/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/);
+  if (gDoc) return `https://docs.google.com/document/d/${gDoc[1]}/export?format=txt`;
+  // Google Sheets → CSV export
+  const gSheet = u.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (gSheet) return `https://docs.google.com/spreadsheets/d/${gSheet[1]}/export?format=csv`;
+  // Add https:// if protocol missing
+  if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
+  return u;
+}
 
 const PORT = 4173;
 
@@ -632,25 +649,39 @@ async function handleProfileExtract(req, res) {
     if (fileContent) {
       sourceText = fileContent.substring(0, 12000);
     } else if (targetUrl) {
-      const normalizedUrl = /^https?:\/\//i.test(targetUrl) ? targetUrl : `https://${targetUrl}`;
+      const normalizedUrl = normalizeExtractUrl(targetUrl);
       const r = await fetch(normalizedUrl, {
         headers: {
           "User-Agent": "Mozilla/5.0 (compatible; ApexOutboundOS/1.0)",
-          "Accept": "text/html,application/xhtml+xml,text/plain,*/*",
+          "Accept": "text/html,application/xhtml+xml,application/pdf,text/plain,*/*",
         },
         redirect: "follow",
       });
-      const raw = await r.text();
-      sourceText = raw
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-        .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "")
-        .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, "")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-        .replace(/\s+/g, " ")
-        .trim()
-        .substring(0, 10000);
+      const contentType = r.headers.get("content-type") || "";
+      if (contentType.includes("application/pdf")) {
+        const buffer = Buffer.from(await r.arrayBuffer());
+        const pdfData = await pdfParse(buffer);
+        sourceText = pdfData.text.substring(0, 10000);
+      } else {
+        const raw = await r.text();
+        // Check for binary PDF that came without the right content-type header
+        if (raw.startsWith("%PDF")) {
+          const buffer = Buffer.from(raw, "binary");
+          const pdfData = await pdfParse(buffer);
+          sourceText = pdfData.text.substring(0, 10000);
+        } else {
+          sourceText = raw
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+            .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "")
+            .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, "")
+            .replace(/<[^>]+>/g, " ")
+            .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+            .replace(/\s+/g, " ")
+            .trim()
+            .substring(0, 10000);
+        }
+      }
     }
 
     if (!sourceText) return json(res, { error: "No content found at that URL." }, 400);
@@ -693,6 +724,14 @@ Return only valid JSON with these exact field names.`,
   }
 }
 
+// ─── Config ───────────────────────────────────────────────────────────────────
+async function handleConfig(req, res) {
+  json(res, {
+    supabaseUrl: process.env.SUPABASE_URL || "",
+    supabaseKey: process.env.SUPABASE_KEY || "",
+  });
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 const POST_ROUTES = {
   "/api/icp/fill": handleIcpFill,
@@ -717,6 +756,7 @@ const server = http.createServer(async (req, res) => {
   const pathname = url.parse(req.url).pathname;
 
   if (req.method === "GET" && pathname === "/api/status") return handleStatus(req, res);
+  if (req.method === "GET" && pathname === "/api/config") return handleConfig(req, res);
 
   const runMatch = pathname.match(/^\/api\/leads\/run\/(.+)$/);
   if (req.method === "GET" && runMatch) return handleLeadsRunStatus(req, res, runMatch[1]);
@@ -738,5 +778,6 @@ server.listen(PORT, () => {
   console.log(`  OpenAI:     ${k(process.env.OPENAI_API_KEY)}`);
   console.log(`  Apollo:     ${k(process.env.APOLLO_API_KEY)}`);
   console.log(`  Perplexity: ${k(process.env.PERPLEXITY_API_KEY)}`);
-  console.log(`  Apify:      ${k(process.env.APIFY_API_KEY)}\n`);
+  console.log(`  Apify:      ${k(process.env.APIFY_API_KEY)}`);
+  console.log(`  Supabase:   ${k(process.env.SUPABASE_URL)}\n`);
 });
