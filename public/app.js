@@ -352,8 +352,8 @@ function showLoginScreen() {
   overlay.className = "login-overlay";
   overlay.innerHTML = `
     <div class="login-card">
-      <div class="login-logo">A</div>
-      <div class="login-brand">Apex Outbound OS</div>
+      <div class="login-logo">P</div>
+      <div class="login-brand">Predictable Revenue OS</div>
       <p class="login-sub">B2B Outreach Intelligence</p>
       <button id="googleSignInBtn" class="btn-google">
         <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -378,8 +378,8 @@ function showNotApprovedScreen(email) {
   overlay.className = "login-overlay";
   overlay.innerHTML = `
     <div class="login-card">
-      <div class="login-logo">A</div>
-      <div class="login-brand">Apex Outbound OS</div>
+      <div class="login-logo">P</div>
+      <div class="login-brand">Predictable Revenue OS</div>
       <p class="login-sub">Access pending approval</p>
       <p class="login-msg" style="margin-top:12px">Signed in as <strong>${email}</strong>.<br>Your account hasn't been approved yet.<br>Contact Shantanu to get access.</p>
       <button id="signOutBtn" class="btn btn-outline btn-sm" style="margin-top:20px">Sign out</button>
