@@ -622,6 +622,76 @@ function serveStatic(req, res) {
   });
 }
 
+async function handleProfileExtract(req, res) {
+  try {
+    const body = await readBody(req);
+    const { url: targetUrl, fileContent, fileName } = body;
+
+    let sourceText = "";
+
+    if (fileContent) {
+      sourceText = fileContent.substring(0, 12000);
+    } else if (targetUrl) {
+      const r = await fetch(targetUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; ApexOutboundOS/1.0)",
+          "Accept": "text/html,application/xhtml+xml,text/plain,*/*",
+        },
+        redirect: "follow",
+      });
+      const raw = await r.text();
+      sourceText = raw
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+        .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "")
+        .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+        .replace(/\s+/g, " ")
+        .trim()
+        .substring(0, 10000);
+    }
+
+    if (!sourceText) return json(res, { error: "No content found at that URL." }, 400);
+
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are extracting a sender profile from a company website, LinkedIn profile, or sales document. Extract exactly these fields as a JSON object. If a field isn't clearly stated, infer the most accurate version from the content. Never fabricate — if something truly can't be inferred, leave it as an empty string.
+
+Fields:
+- name: The sender's personal name (if a personal profile) OR company name (if a company page)
+- role: Their job title and company, e.g. "Founder, Apex Growth Partners"
+- offer: What they offer — one concise sentence describing their product or service
+- valueProp: The specific outcome their buyers get — why it matters to the customer
+- proof: A specific proof point — client name, years in business, result, award, or credential
+- cta: What they want the prospect to do next — their preferred call to action
+- tone: How they communicate — infer from the writing style (e.g. "Warm and consultative", "Direct and data-driven", "Peer-to-peer, no jargon")
+
+Return only valid JSON with these exact field names.`,
+          },
+          { role: "user", content: `Extract the sender profile from this content${fileName ? ` (file: ${fileName})` : ""}:\n\n${sourceText}` },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 800,
+      }),
+    });
+    const data = await r.json();
+    const profile = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+    json(res, { profile });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 const POST_ROUTES = {
   "/api/icp/fill": handleIcpFill,
@@ -629,6 +699,7 @@ const POST_ROUTES = {
   "/api/apollo/match": handleApolloMatch,
   "/api/perplexity/search": handlePerplexitySearch,
   "/api/leads/generate": handleLeadsGenerate,
+  "/api/profile/extract": handleProfileExtract,
 };
 
 const server = http.createServer(async (req, res) => {

@@ -70,6 +70,19 @@
             </div>
             <button class="btn btn-outline btn-sm" id="restoreSenderBtn">Restore Apex Profile</button>
           </div>
+          <!-- Extract from URL or file -->
+          <div class="profile-extract-bar">
+            <div class="profile-extract-inputs">
+              <input type="url" id="profileUrl" placeholder="Paste a URL — your website, LinkedIn, company page, sales deck…" />
+              <span class="extract-or">or</span>
+              <label class="upload-file-label" for="profileFile">Upload file <span class="upload-file-ext">.txt · .pdf · .md</span></label>
+              <input type="file" id="profileFile" accept=".txt,.pdf,.md,.csv" style="display:none">
+              <span id="profileFileName" class="upload-file-name"></span>
+            </div>
+            <button class="btn btn-outline btn-sm" id="extractProfileBtn">Extract Profile →</button>
+          </div>
+          <div id="extractStatus" class="extract-status hidden"></div>
+
           <div class="icp-fields">
             <div class="field-row">
               <div class="field-card">

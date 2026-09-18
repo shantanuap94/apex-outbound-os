@@ -390,6 +390,39 @@ main { padding: 24px 32px 60px; }
   height: 1px; background: var(--border); margin: 0 0 32px; opacity: 0.6;
 }
 
+/* ─── Profile Extract Bar ────────────────────────────────────────────────── */
+.profile-extract-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+}
+.profile-extract-inputs {
+  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+}
+.profile-extract-inputs input[type="url"] {
+  flex: 1; min-width: 0; border: 1px solid #e8e0d5; border-radius: 8px;
+  padding: 8px 12px; font-size: 13px; color: var(--text);
+  background: #fff; outline: none; transition: border .15s;
+}
+.profile-extract-inputs input[type="url"]:focus { border-color: var(--accent); }
+.profile-extract-inputs input[type="url"]::placeholder { color: #c8bfb4; }
+.extract-or { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+.upload-file-label {
+  font-size: 12px; color: var(--text-2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px; cursor: pointer; white-space: nowrap;
+  background: #fff; transition: background .15s;
+}
+.upload-file-label:hover { background: #f4f0ea; }
+.upload-file-ext { color: var(--text-3); font-size: 11px; }
+.upload-file-name { font-size: 12px; color: var(--text-2); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.extract-status {
+  font-size: 12.5px; padding: 10px 14px; border-radius: 8px;
+  margin-bottom: 12px; line-height: 1.5;
+}
+.extract-status.loading { background: #fff8f0; color: var(--text-2); border: 1px solid #f0e0c8; }
+.extract-status.success { background: #f0faf4; color: #2d7a4f; border: 1px solid #b8e0c8; }
+.extract-status.error   { background: #fdf2f2; color: #c0392b; border: 1px solid #f0b8b8; }
+
 /* ─── Prospect Memory (Campaigns tab) ───────────────────────────────────── */
 .memory-empty {
   text-align: center; padding: 60px 24px;

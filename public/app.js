@@ -191,6 +191,68 @@ function wireSender() {
   $("restoreSenderBtn").addEventListener("click", () => {
     SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && APEX_SENDER[f]) inp.value = APEX_SENDER[f]; });
   });
+
+  // File picker label
+  $("profileFile").addEventListener("change", () => {
+    const file = $("profileFile").files[0];
+    $("profileFileName").textContent = file ? file.name : "";
+  });
+
+  // Extract profile from URL or file
+  $("extractProfileBtn").addEventListener("click", async () => {
+    const url = $("profileUrl").value.trim();
+    const file = $("profileFile").files[0];
+    const status = $("extractStatus");
+
+    if (!url && !file) {
+      status.textContent = "Paste a URL or select a file first.";
+      status.className = "extract-status error";
+      status.classList.remove("hidden");
+      return;
+    }
+
+    status.textContent = "Reading content and extracting profile…";
+    status.className = "extract-status loading";
+    status.classList.remove("hidden");
+    $("extractProfileBtn").disabled = true;
+
+    try {
+      let body = {};
+      if (file) {
+        const text = await file.text();
+        body = { fileContent: text, fileName: file.name };
+      } else {
+        body = { url };
+      }
+
+      const { profile, error } = await post("/api/profile/extract", body);
+
+      if (error) {
+        status.textContent = "Could not extract profile: " + error;
+        status.className = "extract-status error";
+        return;
+      }
+
+      // Fill fields — only overwrite if extracted value is non-empty
+      const map = { name: "name", role: "role", offer: "offer", valueProp: "valueProp", proof: "proof", cta: "cta", tone: null };
+      let filled = 0;
+      SENDER_FIELDS.forEach((f) => {
+        if (f === "tone") return; // tone is a select — skip auto-fill
+        const el = $(`sender-${f}`);
+        if (el && profile[f] && profile[f].trim()) { el.value = profile[f].trim(); filled++; }
+      });
+
+      status.textContent = filled > 0
+        ? `Profile extracted — ${filled} field${filled > 1 ? "s" : ""} filled. Review and save.`
+        : "Extracted but no clear profile data found. Try a different URL or file.";
+      status.className = filled > 0 ? "extract-status success" : "extract-status error";
+    } catch (e) {
+      status.textContent = "Network error: " + e.message;
+      status.className = "extract-status error";
+    } finally {
+      $("extractProfileBtn").disabled = false;
+    }
+  });
 }
 
 // ─── Prospect Memory ──────────────────────────────────────────────────────────
