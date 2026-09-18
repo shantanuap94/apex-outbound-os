@@ -130,8 +130,6 @@ async function fillSingleField(field, seed) {
 function wireIcp() {
   loadSavedIcp();
 
-  $("restoreIcpBtn").addEventListener("click", () => fillIcpFromObj(APEX_ICP));
-
   $("icpFillBtn").addEventListener("click", async () => {
     const seed = $("icp-seedDescription").value.trim();
     if (!seed) { alert("Enter a Seed Description first, then click Generate all fields."); return; }
@@ -188,10 +186,6 @@ function saveSender() {
 function wireSender() {
   loadSavedSender();
   $("saveSenderBtn").addEventListener("click", saveSender);
-  $("restoreSenderBtn").addEventListener("click", () => {
-    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && APEX_SENDER[f]) inp.value = APEX_SENDER[f]; });
-  });
-
   // File picker label
   $("profileFile").addEventListener("change", () => {
     const file = $("profileFile").files[0];
