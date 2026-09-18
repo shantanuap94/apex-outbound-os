@@ -455,7 +455,16 @@ function wireChain() {
     const btn = $("researchPerplexityBtn");
     setRunning(btn, "Research with Perplexity");
     try {
-      const query = `Latest news about ${p.company}${p.domain ? " (" + p.domain + ")" : ""}: recent expansions, hiring announcements, awards, new clients, or leadership changes in the last 90 days.`;
+      const query = `Research ${p.name ? p.name + " at " : ""}${p.company}${p.domain ? " (" + p.domain + ")" : ""}. I need these 6 specific things:
+
+1. FOUNDING: When was ${p.company} founded? Where did they start? What did they originally make or do?
+2. EXACT PRODUCTS: List the exact product names, brand names, SKUs, or project lines that ${p.company} sells — not categories, actual names.
+3. RECENT LAUNCHES: Any new products, projects, campaigns, or expansions in the last 12 months — include specific month and year if available.
+4. PROSPECT CAREER: ${p.name ? p.name + "'s" : "The prospect's"} LinkedIn career history — past companies, past roles, years at each. Go back at least 3-5 roles.
+5. THEIR CUSTOMER: Who does ${p.company} sell to? What industries, company types, or end-users buy from them?
+6. COMPLIANCE / AUDIT: What certifications, regulations, or audits does ${p.company} live with (e.g. ISO, BRC, RERA, FSSAI, SONCAP, FDA, HACCP)?
+
+Also include any recent news, leadership changes, or awards from the last 90 days.`;
       const res = await post("/api/perplexity/search", {
         messages: [{ role: "user", content: query }],
       });

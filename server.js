@@ -226,7 +226,21 @@ What ${senderName} offers: ${senderOffer}
 ${signalContext ? `\nSignal Context (company news, research):\n${signalContext}` : ""}
 ICP psychological profile for reference: ${JSON.stringify(icp || {})}
 
-Respond in exactly these 6 sections:
+Respond in exactly these 7 sections:
+
+## 0. 10/10 Research Layer — Specific Signals
+These are the details that make outreach feel personally researched, not mass-mailed. Extract from the signal context above. These feed directly into Touch 5, 6, and 7 messages.
+
+- **Company founding year + origin story:** [year founded, city/region, what they originally made or did]
+- **Exact product / brand / project names:** [list the actual names — not "their product range". e.g. "Yummy Bowls, Rings, Mix, Noodles" not "snack products"]
+- **Recent launches with dates:** [product name + month + year — last 12 months only. e.g. "Hula Hoops Smoky Bacon, March 2025"]
+- **Prospect career history:** [past companies → past roles → approximate years, going back 3-5 positions. e.g. "DHL Supply Chain Consultant → Demand Planning at Reckitt Benckiser Ireland → KP Snacks"]
+- **Their customer / end-user:** [who ${co} sells to — industry, company type, or end consumer]
+- **Compliance / audit context:** [certifications or regulations they live with — BRC, ISO, RERA, FSSAI, SONCAP, FDA, HACCP, etc.]
+- **Geography + logistics context:** [where they ship, ports or routes they use, freight/supply chain considerations]
+- **A coincidence or connection:** [anything that creates a human moment — a shared location, a market they both serve, an unusual parallel]
+
+If any field is not available in the signal context: mark it "Not found — research manually." Do not invent.
 
 ## 1. Company Intelligence
 - What the company does, size, market position, competitive landscape
@@ -253,10 +267,10 @@ Respond in exactly these 6 sections:
 - OBJECTIONS: The exact reasons they will say no or go cold to ${senderName}'s outreach
 
 ## 5. Ice Breaker Bank
-Write 3 specific, ready-to-use ice breakers. Each must reference a real signal from the dossier or role context — nothing invented.
-- Ice Breaker 1 (Company Signal): [one sentence — ties to a recent event or company fact]
-- Ice Breaker 2 (Role/Pain Signal): [one sentence — ties to their job pressure or a frustration]
-- Ice Breaker 3 (Personal/Aspiration Signal): [one sentence — ties to their desire or career ambition]
+Write 3 specific, ready-to-use ice breakers. Each must reference a real signal from Section 0 or the role context — nothing invented.
+- Ice Breaker 1 (Company / Product Signal): [one sentence — names an exact product, launch, or company fact from Section 0]
+- Ice Breaker 2 (Role / Pain Signal): [one sentence — ties to their job pressure or a frustration]
+- Ice Breaker 3 (Personal / Career Signal): [one sentence — ties to their career history or aspiration from Section 0]
 
 ## 6. Outreach Strategy for ${senderName}
 - Sharpest angle: the single most compelling reason ${p} should care about ${senderOffer} right now
@@ -265,7 +279,7 @@ Write 3 specific, ready-to-use ice breakers. Each must reference a real signal f
 - The one thing NOT to say (the generic line that will make ${p} delete/ignore it)
 
 ## Intelligence Score: [N] / 100
-Brief note on confidence level and what is inferred vs. confirmed.`;
+Brief note on confidence level and what is confirmed from research vs. inferred.`;
 
     const stepPrompts = {
       research: researchPrompt,
@@ -484,7 +498,7 @@ Be honest: if this is a polite no, say so and recommend a graceful break-up mess
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
       },
-      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: step === "followup" ? 5000 : 2500 }),
+      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: step === "followup" ? 5000 : step === "research" ? 3500 : 2500 }),
     });
     const data = await r.json();
     json(res, { content: data.choices?.[0]?.message?.content, step });
