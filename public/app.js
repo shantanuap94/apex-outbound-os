@@ -481,6 +481,91 @@ function showLoginScreen() {
         </div>
       </section>
 
+      <!-- PLATFORM -->
+      <section class="lp-section lp-platform-section">
+        <div class="lp-section-inner">
+
+          <div class="lp-platform-header">
+            <div class="lp-platform-name-block">
+              <div class="lp-section-label">02 / PLATFORM</div>
+              <h2 class="lp-platform-h2">Apex</h2>
+              <p class="lp-platform-tagline">The AI-Native engine inside Predictable Revenue OS.</p>
+            </div>
+            <p class="lp-platform-intro">Five layers profile your buyer, research every prospect, compose every message, run every cadence, and remember every interaction — all built around your exact ICP and voice. Every layer reads from the one above it. Every output traces back to a real data source.</p>
+          </div>
+
+          <div class="lp-layers-label">One platform, five layers</div>
+          <div class="lp-layers">
+            <div class="lp-layer">
+              <div class="lp-layer-left">
+                <div class="lp-layer-name">ICP Core</div>
+                <div class="lp-layer-role">Your buyer foundation</div>
+              </div>
+              <p class="lp-layer-desc">The profile you build once: who you are, who you sell to, your offer, your proof, your tone. Every research brief, every message, every cadence touch is shaped by this layer. Change it once — everything downstream updates.</p>
+            </div>
+            <div class="lp-layer">
+              <div class="lp-layer-left">
+                <div class="lp-layer-name">Scout</div>
+                <div class="lp-layer-role">Research agent</div>
+              </div>
+              <p class="lp-layer-desc">Reads your prospect's company, their products by name, their career history, recent moves, and likely pains. Builds a 360° dossier in under 8 minutes. The research a senior SDR takes half a day to do — done before your next meeting.</p>
+            </div>
+            <div class="lp-layer">
+              <div class="lp-layer-left">
+                <div class="lp-layer-name">Composer</div>
+                <div class="lp-layer-role">Outreach engine</div>
+              </div>
+              <p class="lp-layer-desc">Writes from the dossier, not from a template. References their actual products, their specific situation, their career arc. Outputs cold email, LinkedIn connection request, LinkedIn DM, and follow-ups — all in your voice, not a generic AI voice.</p>
+            </div>
+            <div class="lp-layer">
+              <div class="lp-layer-left">
+                <div class="lp-layer-name">Cadence</div>
+                <div class="lp-layer-role">Multi-touch sequencer</div>
+              </div>
+              <p class="lp-layer-desc">8 touches across email, LinkedIn, and WhatsApp. Each touch gives before it asks. Touch 4 is where most replies come in. Touch 7 converts silence into a shared email. Touch 8 converts goodwill into a meeting.</p>
+            </div>
+            <div class="lp-layer">
+              <div class="lp-layer-left">
+                <div class="lp-layer-name">Pulse</div>
+                <div class="lp-layer-role">CRM memory</div>
+              </div>
+              <p class="lp-layer-desc">Tracks every prospect's status, every touch sent, every reply received, and every next action due. Built-in pipeline filters, notes, and cadence manager. Your entire outbound operation — visible in one screen.</p>
+            </div>
+          </div>
+
+          <div class="lp-apart">
+            <div class="lp-layers-label">What sets Apex apart</div>
+            <div class="lp-apart-grid">
+              <div class="lp-apart-item">
+                <div class="lp-apart-title">Product-level personalisation</div>
+                <p>Not company-level. Not headline-level. Messages reference their actual product names, recent launches, and business moves — the kind that makes a buyer stop mid-scroll.</p>
+              </div>
+              <div class="lp-apart-item">
+                <div class="lp-apart-title">Writes in your voice</div>
+                <p>Every message sounds like it came from you. Your tone, your proof, your offer, your style — not a generic AI voice that every other SDR is also using.</p>
+              </div>
+              <div class="lp-apart-item">
+                <div class="lp-apart-title">Sequences that give first</div>
+                <p>Every touch delivers value before it asks. The system is designed to earn the reply — not beg for it. Buyers feel the difference.</p>
+              </div>
+              <div class="lp-apart-item">
+                <div class="lp-apart-title">Built-in multi-channel cadence</div>
+                <p>Email, LinkedIn, and WhatsApp — managed in one place. No stitching together three separate tools, a spreadsheet, and a VA to run follow-ups.</p>
+              </div>
+              <div class="lp-apart-item">
+                <div class="lp-apart-title">Compound memory</div>
+                <p>Every prospect interaction is stored and tracked. The system gets sharper with every campaign — context carries forward, nothing resets to zero.</p>
+              </div>
+              <div class="lp-apart-item">
+                <div class="lp-apart-title">One screen, zero stack</div>
+                <p>Research, write, send, track. The whole outbound motion in a single tool — not spread across Apollo, ChatGPT, a sequencing tool, and a CRM.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       <!-- PROBLEM -->
       <section class="lp-section">
         <div class="lp-section-inner">

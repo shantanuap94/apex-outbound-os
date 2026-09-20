@@ -306,6 +306,77 @@ a { color: var(--accent); }
   .lp-wt-row-label { width: 36px; font-size: 10px; }
 }
 
+/* Platform section */
+.lp-platform-section { background: #09090d; }
+.lp-platform-header {
+  display: grid; grid-template-columns: 280px 1fr; gap: 64px;
+  align-items: start; margin-bottom: 64px;
+}
+.lp-platform-h2 {
+  font-size: 52px; font-weight: 900; color: #fff;
+  letter-spacing: -2px; line-height: 1; margin-bottom: 10px;
+}
+.lp-platform-tagline {
+  font-size: 13px; color: rgba(255,255,255,.35); line-height: 1.5;
+}
+.lp-platform-intro {
+  font-size: 15px; color: rgba(255,255,255,.48); line-height: 1.85;
+  padding-top: 52px;
+}
+.lp-layers-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 2.5px;
+  text-transform: uppercase; color: rgba(255,255,255,.3);
+  margin-bottom: 0; padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.lp-layers { display: flex; flex-direction: column; margin-bottom: 64px; }
+.lp-layer {
+  display: grid; grid-template-columns: 200px 1fr; gap: 40px;
+  align-items: start; padding: 24px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.lp-layer:last-child { border-bottom: none; }
+.lp-layer-left { padding-top: 2px; }
+.lp-layer-name {
+  font-size: 16px; font-weight: 800; color: #fff;
+  letter-spacing: -.3px; margin-bottom: 4px;
+}
+.lp-layer-role {
+  font-size: 11px; color: var(--accent, #6b7cf7);
+  font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+}
+.lp-layer-desc {
+  font-size: 13.5px; color: rgba(255,255,255,.42); line-height: 1.85; margin: 0;
+}
+
+/* What sets Apex apart */
+.lp-apart { margin-top: 64px; }
+.lp-apart-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0; margin-top: 20px;
+}
+.lp-apart-item {
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding: 24px 28px 24px 0;
+}
+.lp-apart-item:nth-child(3n) { padding-right: 0; }
+.lp-apart-title {
+  font-size: 13.5px; font-weight: 700; color: #fff;
+  margin-bottom: 8px; line-height: 1.4;
+}
+.lp-apart-item p {
+  font-size: 12.5px; color: rgba(255,255,255,.38); line-height: 1.8; margin: 0;
+}
+
+@media (max-width: 720px) {
+  .lp-platform-header { grid-template-columns: 1fr; gap: 20px; }
+  .lp-platform-intro { padding-top: 0; }
+  .lp-platform-h2 { font-size: 40px; }
+  .lp-layer { grid-template-columns: 1fr; gap: 8px; padding: 20px 0; }
+  .lp-apart-grid { grid-template-columns: 1fr; }
+  .lp-apart-item { padding: 20px 0; }
+}
+
 /* Problem cards */
 .lp-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .lp-card {
