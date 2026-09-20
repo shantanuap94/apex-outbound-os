@@ -354,6 +354,8 @@ function showLoginScreen() {
 
   overlay.innerHTML = `
     <div class="lp-page">
+
+      <!-- NAV -->
       <nav class="lp-nav">
         <div class="lp-nav-brand">
           <div class="lp-logo-icon">P</div>
@@ -362,82 +364,150 @@ function showLoginScreen() {
         <button class="btn-google btn-google-nav" id="googleSignInBtn">${googleSvg} Sign in</button>
       </nav>
 
+      <!-- HERO -->
       <section class="lp-hero">
-        <div class="lp-eyebrow">B2B OUTREACH INTELLIGENCE</div>
-        <h1 class="lp-h1">Future Proof Your Enterprise.</h1>
-        <p class="lp-hero-body">Predictable Revenue helps you acquire high-value customers on demand.<br>10X faster and cheaper.</p>
+        <div class="lp-eyebrow">FOR B2B FOUNDERS &amp; SALES LEADERS</div>
+        <h1 class="lp-h1">Stop Guessing.<br>Start Engineering<br>Your Pipeline.</h1>
+        <p class="lp-hero-body">The only system that combines AI prospect research, hyper-personalised outreach, and compound 8-touch cadences — so your team spends time closing enterprise clients, not chasing leads that were never warm.</p>
         <div class="lp-hero-cta">
-          <button class="btn-google btn-google-lg" id="googleSignInBtnHero">${googleSvg} Get Access — Sign in with Google</button>
-          <p class="lp-hero-note">Invite-only · Access approved by admin</p>
+          <button class="btn-google btn-google-lg" id="googleSignInBtnHero">${googleSvg}&nbsp; Get Early Access — Sign in with Google</button>
+          <p class="lp-hero-note">Invite-only &middot; Access reviewed personally by admin</p>
         </div>
       </section>
 
+      <!-- STATS BAR -->
+      <div class="lp-stats-bar">
+        <div class="lp-stat">
+          <span class="lp-stat-num">&lt;&nbsp;8 min</span>
+          <span class="lp-stat-label">Full 360° dossier per prospect</span>
+        </div>
+        <div class="lp-stat-div"></div>
+        <div class="lp-stat">
+          <span class="lp-stat-num">8 touches</span>
+          <span class="lp-stat-label">Email + LinkedIn + WhatsApp</span>
+        </div>
+        <div class="lp-stat-div"></div>
+        <div class="lp-stat">
+          <span class="lp-stat-num">10/10</span>
+          <span class="lp-stat-label">Personalisation — product-level specificity</span>
+        </div>
+        <div class="lp-stat-div"></div>
+        <div class="lp-stat">
+          <span class="lp-stat-num">0</span>
+          <span class="lp-stat-label">Generic templates. Ever.</span>
+        </div>
+      </div>
+
+      <!-- PROBLEM -->
       <section class="lp-section">
         <div class="lp-section-inner">
-          <div class="lp-section-label">THE PROBLEM</div>
-          <h2 class="lp-section-h2">Enterprise sales is broken.</h2>
+          <div class="lp-section-label">WHY YOUR OUTBOUND IS FAILING</div>
+          <h2 class="lp-section-h2">The enterprise buyer gets 200+ cold emails a week.<br>Yours looks like the other 199.</h2>
           <div class="lp-cards">
             <div class="lp-card">
+              <div class="lp-card-accent"></div>
               <div class="lp-card-num">01</div>
-              <h3>Research takes hours, not minutes</h3>
-              <p>Sales teams spend 70% of their time on admin and research. By the time they reach out, the moment has passed.</p>
+              <h3>Your team researches. They don't sell.</h3>
+              <p>3–4 hours per prospect. By the time the email goes out, the insight is stale — and they still sent a template. That's 70% of your payroll spent on work that doesn't close deals.</p>
             </div>
             <div class="lp-card">
+              <div class="lp-card-accent"></div>
               <div class="lp-card-num">02</div>
-              <h3>Generic outreach gets ignored</h3>
-              <p>"Hi [First Name], I noticed your company…" — enterprise buyers delete 90% of cold outreach before reading line two.</p>
+              <h3>Your "personalisation" is a merge tag.</h3>
+              <p>Using their first name and job title isn't personalisation. Enterprise buyers recognise a template in line one. Real personalisation means their specific products, recent company moves, career history.</p>
             </div>
             <div class="lp-card">
+              <div class="lp-card-accent"></div>
               <div class="lp-card-num">03</div>
-              <h3>Revenue stays unpredictable</h3>
-              <p>Without a system, you get feast or famine. Great months followed by pipeline droughts. No compound effect.</p>
+              <h3>No system = no predictable pipeline.</h3>
+              <p>Good week, dead month. Founder-dependent deals. Random revenue. The problem isn't your product or your people — it's the absence of a repeatable, compounding outbound system.</p>
             </div>
           </div>
         </div>
       </section>
 
+      <!-- HOW IT WORKS -->
       <section class="lp-section lp-section-alt">
         <div class="lp-section-inner">
           <div class="lp-section-label">HOW IT WORKS</div>
-          <h2 class="lp-section-h2">One system. Predictable results.</h2>
+          <h2 class="lp-section-h2">Four steps. Compounding results.<br>Zero guesswork.</h2>
           <div class="lp-steps">
             <div class="lp-step">
               <div class="lp-step-num">1</div>
               <div class="lp-step-body">
-                <h3>Deep Prospect Research</h3>
-                <p>AI builds a 360° dossier on every target — their products, recent moves, career history, and real pains — in minutes, not hours. Your reps spend time selling, not searching.</p>
+                <h3>Define your ICP and voice — once</h3>
+                <p>Tell the system who you are, who you sell to, and what you offer. Every research brief, every message, every cadence touch is written from your voice — not a generic AI voice. Set it once. It runs forever.</p>
               </div>
             </div>
             <div class="lp-step">
               <div class="lp-step-num">2</div>
               <div class="lp-step-body">
-                <h3>Hyper-Personalised Outreach</h3>
-                <p>Messages that reference their actual product names, company milestones, and specific pains. The kind that stops a senior buyer cold — and makes them reply.</p>
+                <h3>AI builds a 360° dossier in under 8 minutes</h3>
+                <p>Enter a prospect's name and company. The system researches their actual products by name, company history, role trajectory, recent moves, and likely pains. What a senior SDR takes half a day to do — done before your next meeting.</p>
               </div>
             </div>
             <div class="lp-step">
               <div class="lp-step-num">3</div>
               <div class="lp-step-body">
-                <h3>Compound Cadences</h3>
-                <p>8-touch sequences across email, LinkedIn, and WhatsApp. Each touch gives before it asks. The system compounds — every campaign gets sharper over time.</p>
+                <h3>Outreach written from the dossier — not a template</h3>
+                <p>Messages that reference their real product names, specific situation, and actual frustrations. The kind that makes a senior buyer stop mid-scroll and think "this person actually did their homework." That's the only message worth sending.</p>
+              </div>
+            </div>
+            <div class="lp-step">
+              <div class="lp-step-num">4</div>
+              <div class="lp-step-body">
+                <h3>8-touch cadence across email, LinkedIn + WhatsApp</h3>
+                <p>Every touch gives before it asks. Touch 4 is where most replies come in. Touch 7 is where silent prospects finally engage. Touch 8 converts months of goodwill into a meeting. The system tracks it all — you just show up for the conversation.</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      <!-- WHO IT'S FOR -->
+      <section class="lp-section">
+        <div class="lp-section-inner">
+          <div class="lp-section-label">WHO THIS IS BUILT FOR</div>
+          <h2 class="lp-section-h2">Built for the people doing<br>the hard work of B2B growth.</h2>
+          <div class="lp-for-grid">
+            <div class="lp-for-card">
+              <div class="lp-for-role">B2B Founders</div>
+              <ul class="lp-for-list">
+                <li>You are the sales team — and you cannot scale yourself</li>
+                <li>Your best relationships came from persistence, not from systems. You now need the system.</li>
+                <li>You're losing enterprise deals to competitors who out-research and out-follow-up you</li>
+                <li>Revenue is tied to your calendar. Your calendar is full. Pipeline suffers.</li>
+              </ul>
+            </div>
+            <div class="lp-for-card">
+              <div class="lp-for-role">Sales Leaders &amp; SDR Teams</div>
+              <ul class="lp-for-list">
+                <li>Your reps spend 70% of their day on research and admin, not conversations</li>
+                <li>Your sequences are running but your reply rates say they shouldn't be</li>
+                <li>You need to show the board a system, not just effort and headcount</li>
+                <li>One great rep shouldn't be carrying the whole team's number</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FINAL CTA -->
       <section class="lp-section lp-final-cta">
         <div class="lp-section-inner lp-cta-center">
-          <h2 class="lp-section-h2">Ready to build a predictable revenue engine?</h2>
-          <p class="lp-cta-sub">Join the waitlist. Access is approved by invite only.</p>
-          <button class="btn-google btn-google-lg" id="googleSignInBtnCta">${googleSvg} Get Access — Sign in with Google</button>
+          <div class="lp-eyebrow">GET STARTED</div>
+          <h2 class="lp-cta-h2">The system your competitors<br>don't have yet.</h2>
+          <p class="lp-cta-sub">Early access is limited. Each user gets a personal onboarding session to configure the system around their exact ICP and voice.</p>
+          <button class="btn-google btn-google-lg" id="googleSignInBtnCta">${googleSvg}&nbsp; Get Early Access — Sign in with Google</button>
+          <p class="lp-hero-note" style="margin-top:16px">Invite-only &middot; Access reviewed personally</p>
         </div>
       </section>
 
       <footer class="lp-footer">
-        <span>© 2025 Predictable Revenue OS</span>
-        <span>Powered by AI · Built for enterprise sales teams</span>
+        <span>&copy; 2025 Predictable Revenue OS</span>
+        <span>Powered by AI &middot; Built for serious B2B revenue teams</span>
       </footer>
+
     </div>
     <p id="loginMsg" class="lp-toast"></p>`;
 
