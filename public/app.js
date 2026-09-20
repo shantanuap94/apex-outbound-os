@@ -343,27 +343,112 @@ function bootApp(session) {
 function showLoginScreen() {
   const overlay = document.getElementById("loginOverlay");
   if (!overlay) return;
-  overlay.className = "login-overlay";
+  overlay.className = "login-overlay lp-mode";
+
+  const googleSvg = `<svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  </svg>`;
+
   overlay.innerHTML = `
-    <div class="login-card">
-      <div class="login-logo">P</div>
-      <div class="login-brand">Predictable Revenue OS</div>
-      <p class="login-sub">B2B Outreach Intelligence</p>
-      <button id="googleSignInBtn" class="btn-google">
-        <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        </svg>
-        Sign in with Google
-      </button>
-      <p id="loginMsg" class="login-msg"></p>
-    </div>`;
-  document.getElementById("googleSignInBtn").addEventListener("click", async () => {
-    document.getElementById("loginMsg").textContent = "Redirecting to Google…";
+    <div class="lp-page">
+      <nav class="lp-nav">
+        <div class="lp-nav-brand">
+          <div class="lp-logo-icon">P</div>
+          <div class="lp-nav-name">Predictable Revenue OS</div>
+        </div>
+        <button class="btn-google btn-google-nav" id="googleSignInBtn">${googleSvg} Sign in</button>
+      </nav>
+
+      <section class="lp-hero">
+        <div class="lp-eyebrow">B2B OUTREACH INTELLIGENCE</div>
+        <h1 class="lp-h1">Future Proof Your Enterprise.</h1>
+        <p class="lp-hero-body">Predictable Revenue helps you acquire high-value customers on demand.<br>10X faster and cheaper.</p>
+        <div class="lp-hero-cta">
+          <button class="btn-google btn-google-lg" id="googleSignInBtnHero">${googleSvg} Get Access — Sign in with Google</button>
+          <p class="lp-hero-note">Invite-only · Access approved by admin</p>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="lp-section-inner">
+          <div class="lp-section-label">THE PROBLEM</div>
+          <h2 class="lp-section-h2">Enterprise sales is broken.</h2>
+          <div class="lp-cards">
+            <div class="lp-card">
+              <div class="lp-card-num">01</div>
+              <h3>Research takes hours, not minutes</h3>
+              <p>Sales teams spend 70% of their time on admin and research. By the time they reach out, the moment has passed.</p>
+            </div>
+            <div class="lp-card">
+              <div class="lp-card-num">02</div>
+              <h3>Generic outreach gets ignored</h3>
+              <p>"Hi [First Name], I noticed your company…" — enterprise buyers delete 90% of cold outreach before reading line two.</p>
+            </div>
+            <div class="lp-card">
+              <div class="lp-card-num">03</div>
+              <h3>Revenue stays unpredictable</h3>
+              <p>Without a system, you get feast or famine. Great months followed by pipeline droughts. No compound effect.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-section-alt">
+        <div class="lp-section-inner">
+          <div class="lp-section-label">HOW IT WORKS</div>
+          <h2 class="lp-section-h2">One system. Predictable results.</h2>
+          <div class="lp-steps">
+            <div class="lp-step">
+              <div class="lp-step-num">1</div>
+              <div class="lp-step-body">
+                <h3>Deep Prospect Research</h3>
+                <p>AI builds a 360° dossier on every target — their products, recent moves, career history, and real pains — in minutes, not hours. Your reps spend time selling, not searching.</p>
+              </div>
+            </div>
+            <div class="lp-step">
+              <div class="lp-step-num">2</div>
+              <div class="lp-step-body">
+                <h3>Hyper-Personalised Outreach</h3>
+                <p>Messages that reference their actual product names, company milestones, and specific pains. The kind that stops a senior buyer cold — and makes them reply.</p>
+              </div>
+            </div>
+            <div class="lp-step">
+              <div class="lp-step-num">3</div>
+              <div class="lp-step-body">
+                <h3>Compound Cadences</h3>
+                <p>8-touch sequences across email, LinkedIn, and WhatsApp. Each touch gives before it asks. The system compounds — every campaign gets sharper over time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-final-cta">
+        <div class="lp-section-inner lp-cta-center">
+          <h2 class="lp-section-h2">Ready to build a predictable revenue engine?</h2>
+          <p class="lp-cta-sub">Join the waitlist. Access is approved by invite only.</p>
+          <button class="btn-google btn-google-lg" id="googleSignInBtnCta">${googleSvg} Get Access — Sign in with Google</button>
+        </div>
+      </section>
+
+      <footer class="lp-footer">
+        <span>© 2025 Predictable Revenue OS</span>
+        <span>Powered by AI · Built for enterprise sales teams</span>
+      </footer>
+    </div>
+    <p id="loginMsg" class="lp-toast"></p>`;
+
+  const handleSignIn = async () => {
+    const msg = document.getElementById("loginMsg");
+    if (msg) msg.textContent = "Redirecting to Google…";
     await _sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
-  });
+  };
+  document.getElementById("googleSignInBtn").addEventListener("click", handleSignIn);
+  document.getElementById("googleSignInBtnHero").addEventListener("click", handleSignIn);
+  document.getElementById("googleSignInBtnCta").addEventListener("click", handleSignIn);
 }
 
 function showNotApprovedScreen(email) {
