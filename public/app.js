@@ -367,8 +367,10 @@ function showLoginScreen() {
       <!-- HERO -->
       <section class="lp-hero">
         <div class="lp-eyebrow">FOR B2B FOUNDERS &amp; SALES LEADERS</div>
-        <h1 class="lp-h1">Stop Guessing.<br>Start Engineering<br>Your Pipeline.</h1>
-        <p class="lp-hero-body">The only system that combines AI prospect research, hyper-personalised outreach, and compound 8-touch cadences — so your team spends time closing enterprise clients, not chasing leads that were never warm.</p>
+        <h1 class="lp-h1">The Future of B2B Revenue.</h1>
+        <p class="lp-hero-deck">Enterprise clients acquired on demand.</p>
+        <p class="lp-hero-proof">10&times; faster and cheaper.</p>
+        <p class="lp-hero-body">Predictable Revenue OS works alongside your sales team to research prospects, write outreach that gets replies, and run cadences that compound — using an AI-Native approach built around your exact ICP and voice.</p>
         <div class="lp-hero-cta">
           <button class="btn-google btn-google-lg" id="googleSignInBtnHero">${googleSvg}&nbsp; Get Early Access — Sign in with Google</button>
           <p class="lp-hero-note">Invite-only &middot; Access reviewed personally by admin</p>
