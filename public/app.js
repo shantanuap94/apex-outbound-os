@@ -400,6 +400,87 @@ function showLoginScreen() {
         </div>
       </div>
 
+      <!-- OFFERING -->
+      <section class="lp-section lp-offering-section">
+        <div class="lp-section-inner">
+
+          <div class="lp-offering-top">
+            <div class="lp-offering-lede">
+              <div class="lp-section-label">01 / OFFERING</div>
+              <h2 class="lp-offering-h2">10&times; output from your sales team</h2>
+              <p class="lp-offering-p">Predictable Revenue OS takes your existing outbound motion — your ICP, your targets, your voice — and runs it through an AI-Native engine that researches faster, writes better, and follows up longer than any human team could.</p>
+              <p class="lp-offering-p">10&times; takes different shapes. On some programs it shows up as speed — dossiers in minutes instead of hours. On others it shows up as reach — ten prospects worked in parallel instead of one. Often it's both. The system configures around what matters most to your business.</p>
+            </div>
+            <div class="lp-why-now">
+              <div class="lp-why-label">Why now</div>
+              <p class="lp-why-p">With agentic AI, the cost of prospect research and personalised outreach is falling toward zero. For years, most of the labour in outbound was manual — research, writing, follow-up. AI now does that work, which means enterprise-grade outbound is within reach for a single founder or a lean sales team.</p>
+            </div>
+          </div>
+
+          <div class="lp-offering-stats">
+            <div class="lp-off-stat">
+              <span class="lp-off-num">4 hrs &rarr; 8 min</span>
+              <span class="lp-off-label">Prospect research time</span>
+            </div>
+            <div class="lp-off-stat-div"></div>
+            <div class="lp-off-stat">
+              <span class="lp-off-num">8 touches</span>
+              <span class="lp-off-label">Across email, LinkedIn + WhatsApp</span>
+            </div>
+            <div class="lp-off-stat-div"></div>
+            <div class="lp-off-stat">
+              <span class="lp-off-num">10/10</span>
+              <span class="lp-off-label">Personalisation — product-level specificity</span>
+            </div>
+          </div>
+
+          <div class="lp-where-time">
+            <div class="lp-wt-label">Where the time goes</div>
+            <p class="lp-wt-sub">When AI writes the research and the outreach, manual work collapses. The time that comes back goes straight into conversations.</p>
+            <div class="lp-wt-rows">
+              <div class="lp-wt-row">
+                <span class="lp-wt-row-label">Before</span>
+                <div class="lp-wt-bars">
+                  <div class="lp-wt-bar lp-wt-research" style="width:38%"><span>Research</span></div>
+                  <div class="lp-wt-bar lp-wt-writing" style="width:28%"><span>Writing</span></div>
+                  <div class="lp-wt-bar lp-wt-followup" style="width:20%"><span>Follow-up</span></div>
+                  <div class="lp-wt-bar lp-wt-convo" style="width:14%"><span>Conversations</span></div>
+                </div>
+              </div>
+              <div class="lp-wt-row">
+                <span class="lp-wt-row-label">After</span>
+                <div class="lp-wt-bars">
+                  <div class="lp-wt-bar lp-wt-research" style="width:5%"></div>
+                  <div class="lp-wt-bar lp-wt-writing" style="width:5%"></div>
+                  <div class="lp-wt-bar lp-wt-followup" style="width:8%"></div>
+                  <div class="lp-wt-bar lp-wt-convo" style="width:82%"><span>Conversations &amp; Closing</span></div>
+                </div>
+              </div>
+            </div>
+            <p class="lp-wt-note">Bar widths are illustrative.</p>
+          </div>
+
+          <div class="lp-delivery">
+            <div class="lp-wt-label">How it's built</div>
+            <div class="lp-delivery-grid">
+              <div class="lp-delivery-item">
+                <div class="lp-delivery-title">System</div>
+                <p>One platform — ICP definition, prospect research, outreach generation, and 8-touch cadence — all connected. Set it up once. It runs your outbound forever.</p>
+              </div>
+              <div class="lp-delivery-item">
+                <div class="lp-delivery-title">Intelligence</div>
+                <p>AI-Native research agents that build 360° dossiers on every prospect and write every message in your exact voice — not a generic AI voice.</p>
+              </div>
+              <div class="lp-delivery-item">
+                <div class="lp-delivery-title">Simplicity</div>
+                <p>One tool, not five. No stitching together a prospecting stack. Research, write, send, follow up — the whole motion runs from a single screen.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       <!-- PROBLEM -->
       <section class="lp-section">
         <div class="lp-section-inner">
