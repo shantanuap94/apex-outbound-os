@@ -488,8 +488,8 @@ function showLoginScreen() {
           <div class="lp-platform-header">
             <div class="lp-platform-name-block">
               <div class="lp-section-label">02 / PLATFORM</div>
-              <h2 class="lp-platform-h2">Apex</h2>
-              <p class="lp-platform-tagline">The AI-Native engine inside Predictable Revenue OS.</p>
+              <h2 class="lp-platform-h2">Predictable Revenue OS</h2>
+              <p class="lp-platform-tagline">The AI-Native outbound engine.</p>
             </div>
             <p class="lp-platform-intro">Five layers profile your buyer, research every prospect, compose every message, run every cadence, and remember every interaction — all built around your exact ICP and voice. Every layer reads from the one above it. Every output traces back to a real data source.</p>
           </div>
@@ -534,7 +534,7 @@ function showLoginScreen() {
           </div>
 
           <div class="lp-apart">
-            <div class="lp-layers-label">What sets Apex apart</div>
+            <div class="lp-layers-label">What sets it apart</div>
             <div class="lp-apart-grid">
               <div class="lp-apart-item">
                 <div class="lp-apart-title">Product-level personalisation</div>
