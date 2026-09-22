@@ -336,8 +336,12 @@ Rules:
 - No "I hope this finds you well", no "we help companies like yours", no buzzwords, no invented statistics
 - Tone: ${senderTone}`,
 
-      linkedin: `Write a LinkedIn CONNECTION REQUEST and a FOLLOW-UP DM for ${p} at ${co}, from ${senderName}.${dossierCtx}
+      linkedin: `Write a LinkedIn CONNECTION REQUEST and a FOLLOW-UP DM for ${p} (${role}) at ${co}, from ${senderName}.${dossierCtx}
 ${linkedinPosts ? `\nTheir recent LinkedIn posts:\n${linkedinPosts}\n` : ""}
+
+THE SENDER (${p} does not know them):
+- ${senderName}, ${senderRole}
+- Company: ${senderOffer}
 
 Emotional context for ${p}:
 - They feel: ${icpFeel}
@@ -345,84 +349,164 @@ Emotional context for ${p}:
 - Their desires: ${icpDesires}
 - Their frustrations: ${icpFrustrations}
 
-## CONNECTION REQUEST (under 280 characters):
-- Reference ONE specific, real thing about their work, a company signal, or something genuinely interesting about their role
-- Sound like a peer who noticed something interesting — not a vendor who wants to sell
-- No pitch. No "I'd love to connect." No "love your work."
-- Write as if only ${p} could receive this message
+---
 
-## FOLLOW-UP DM — send 3-4 days after connecting (under 400 characters):
-- Open with something warm and specific — a genuine observation about their world, not a pitch opener
-- Tap into a desire or aspiration from their NDFFO (what they privately want but rarely say): ${icpDesires}
-- Ask ONE thoughtful question that shows you understand their world — or share one real insight that earns trust
-- Introduce ${senderName} and what ${senderName} does in one natural line — only if it fits organically
-- End with the softest possible CTA: ${senderCta}
-- Tone: ${senderTone} — warm, human, no pressure
+## CONNECTION REQUEST (under 280 characters — strict):
+
+Formula: "Hi [Name], [ONE specific signal from dossier — name the actual product/launch/fact/career move]. I'm [${senderName}] from [company], [1 short line on what the company does]. Would love to connect."
+
+BAD (do not write this): "Vivek, your emphasis on seamless efficiency and compliance deeply resonates. I'm Shantanu from TBI Corn. Would love to connect."
+WHY BAD: sycophantic, vague, no real signal, sounds like a bot.
+
+GOOD (write this): "Hi Vivek, noticed Cremica just added 6 extruded snack SKUs to the Crunch range. I'm Shantanu from TBI Corn — BSE-listed corn processor, supplying to ITC and Haldiram's. Would love to connect."
+WHY GOOD: names the actual product/signal, introduces the sender with a credibility hook, sounds like a peer.
+
+Rules:
+- The signal MUST name something REAL and SPECIFIC — a product name, a launch, an expansion. NOT "your work in food manufacturing" or "your focus on supply chain efficiency."
+- Introduce ${senderName} with one authority hook — company name + one credential (listed status, named client)
+- No sycophancy: no "deeply resonates", "love your work", "great profile", "inspiring journey"
+- Under 280 characters strictly
+
+---
+
+## FOLLOW-UP DM — send 3-4 days after connecting (write as long as needed — DO NOT compress into 400 characters):
+
+This DM has 6 mandatory parts. Write them in order. Do not skip or merge parts.
+
+PART 1 — SOFT RESTART (1 sentence):
+Acknowledge the connection naturally. Something like: "Thanks for accepting — LinkedIn has a habit of burying things, so wanted to follow up properly."
+
+PART 2 — THEIR WORLD (2-3 sentences):
+"I was thinking about your world..." — then describe ${p}'s specific situation using named facts from the dossier: their products, their company's market position, their recent expansion, their role. Make ${p} feel you actually looked. Not "the food industry" — name Cremica, name the fruit crush range, name the specific expansion. Use what the dossier gives you.
+
+PART 3 — EXACT PAIN MECHANISM (1-2 sentences):
+Name the specific operational problem, not the category. Not "supply chain challenges" but the actual headache: inconsistent particle size affecting yield on the extruder, OTIF pressure from a large retail account, supplier consolidation risk, seasonal volume spikes with long lead times. Draw from: ${icpFrustrations}
+
+PART 4 — COMPANY CONTEXT (2 sentences max):
+"${senderName} here is from [company] — [one factual, specific line on what the company does, its credentials, why it's relevant]. This context: [why this matters to ${p}'s specific situation]." Positioned as context, not pitch. Use only what's in the sender profile.
+
+PART 5 — OFFER FOR THEIR FILE (1-2 sentences):
+Offer something specific and useful — a COA, a spec sheet, a market note, a landed cost comparison. Use the phrase: "no strings attached, even if you're not looking to switch." This is value delivery, not a pitch.
+
+PART 6 — DOUBLE ASK (2 lines):
+First ask: their official email ("so I can send it properly rather than LinkedIn messaging").
+Second ask: a 20-minute call or quick catch-up — frame as low-pressure: "even just 20 minutes — no commitment at all."
+
+Tone: ${senderTone} — conversational, warm, peer-to-peer. No corporate language. No "I hope this message finds you well." Write it like a real person wrote it.
+
+---
 
 Label each clearly: CONNECTION REQUEST and FOLLOW-UP DM.`,
 
       sequence: `Using the intelligence dossier for ${p} at ${co}, write a 3-touch outreach sequence FROM ${senderName}.${dossierCtx}
 
+CONTEXT: This is high-ticket B2B outreach with a long sales cycle. The goal of this sequence is to start a relationship, not close a deal. Each touch adds value — gives something real — and never repeats the same angle twice. No word count restrictions: write as much as the message needs to be specific and credible.
+
+THE SENDER: ${senderName}, ${senderRole} — ${senderOffer}
+${senderProof ? `Proof (use named, never invent): ${senderProof}` : ""}
+
 TOUCH 1 — Day 1 · Email
-Subject: [under 8 words — specific to this prospect]
-Body: [max 80 words — open with sharpest ice breaker, introduce ${senderName} naturally, speak to their #1 fear or frustration, soft CTA]
+Subject: [specific to this prospect — reference a product, launch, or company signal]
+Body:
+- Line 1: ICEBREAKER — one specific, named, researched signal about ${p} or ${co} from the dossier
+- Line 2: Sender intro with authority — name, role, company, credentials (named clients, years operating, certifications)
+- Lines 3-4: Bridge — connect their specific situation to what ${senderName} offers. Technical and specific — name the ingredient, the mechanism, the outcome.
+- Line 5: Proof — named client or credential. Never invent.
+- Line 6: CTA — offer to send company profile, COA, spec sheet, or sample. "No commitment at all."
+- Full signature: name · role · company · contact
 
 TOUCH 2 — Day 4 · LinkedIn DM
-[under 300 chars — new angle, draw from a desire or aspiration: ${icpDesires}]
+- Different angle from Touch 1 — draw from a desire or aspiration: ${icpDesires}
+- Conversational, warm, peer tone — not a follow-up reminder
+- Offer something new (a market insight, a specific document, a relevant question about their process)
+- Soft ask for their official email to continue properly
 
 TOUCH 3 — Day 8 · Email (Break-up)
-[max 60 words — acknowledge no response, add one new insight or reference a real signal, final CTA with even lower bar]
+- Acknowledge no response — warmly, not passive-aggressively
+- Add one new piece of genuine value: a market note, a technical insight, or a specific piece of information relevant to their product line
+- Final CTA with the lowest possible bar: "even if timing isn't right, happy to keep this for when it is"
+- Leave the door open — this is a long-cycle business
 
 Each touch: different angle, different emotional register. No invented statistics.`,
 
-      outreach: `Write 3 cold email variants FROM ${senderName} to ${p} at ${co}. Each has a distinct angle and emotional register.${dossierCtx}
+      outreach: `Write 3 cold email variants FROM ${senderName} to ${p} (${role}) at ${co}. The prospect does not know ${senderName} — every email must introduce the sender naturally.${dossierCtx}
 
-THE SENDER:
+THE SENDER (introduce in every email — they are a stranger to ${p}):
 - ${senderName}, ${senderRole}
-- Offer: ${senderOffer}
-- Value: ${senderValueProp}
-${senderProof ? `- Social proof (use only if relevant): ${senderProof}` : ""}
+- Company offer: ${senderOffer}
+- Why it matters to buyers like ${p}: ${senderValueProp}
+- CTA preference: ${senderCta}
 
-ICP emotional profile to draw from:
+NAMED PROOF — you MUST use these in Line 5 of every variant, verbatim, never invent alternatives:
+${senderProof ? senderProof : "No proof provided — use company credentials factually instead (years operating, listed status, plant count)."}
+
+ICP emotional profile (draw from these to make the bridge feel understood, not generic):
 - Pains: ${icpPains}
 - Fears: ${icpFears}
 - Frustrations: ${icpFrustrations}
 - Dream outcomes: ${icpDesires}
-- They say out loud: ${icpSayLoud}
+- What they say out loud: ${icpSayLoud}
 
-VARIANT A — Pain-led
-Subject: [under 8 words — pain or problem framing, specific to ${p}'s world]
-Body:
-- Line 1: Open with a specific pain or frustration from the dossier — make ${p} feel understood
-- Line 2: Introduce ${senderName} naturally — one sentence on who they are and what they do (not salesy)
-- Line 3: Bridge: why this pain is exactly what ${senderName} works on
-- CTA: ${senderCta}
-Max 90 words. No invented statistics.
+MANDATORY STRUCTURE FOR EVERY VARIANT — do not deviate:
+
+LINE 1 — ICEBREAKER (this is non-negotiable):
+Open with ONE specific, researched observation about ${p} or ${co}. It must name an actual product, brand, recent launch, campaign, market move, or career signal pulled from the Intelligence Dossier. This is what separates this email from 199 others in their inbox. Do NOT open with a pain statement. Do NOT open with "I noticed you're in the food industry." Name the actual thing — a specific product, a specific launch, a specific fact.
+Example quality: "Noticed Cremica's fruit crush range just launched 10 new variants in June" NOT "As a supply chain leader in the food industry..."
+
+LINE 2 — SENDER INTRO (always second, never first):
+"I'm ${senderName} — [one natural sentence: their exact role, company name, what the company does and its credentials. Factual, not salesy.]"
+Example: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE listed corn processing company based in India, milling since 1999 across 4 plants."
+
+LINES 3-4 — BRIDGE (this is where the variants differ):
+Connect ${p}'s specific situation to ${senderName}'s offer. Use technical/specific language — name the exact ingredient, mechanism, or outcome. Not "corn products" but "corn grits, where particle size uniformity, consistent expansion and oil uptake make a real difference to line efficiency and OTIF planning."
+
+LINE 5 — PROOF:
+One named, specific reason to believe — named clients, not percentages. Use only what's provided in the sender's social proof. Never invent.
+
+LINE 6 — CTA:
+Soft, low-friction ask. Include the phrase "no commitment at all" in this section. ${senderCta}. Offer something specific and useful: spec sheet, COA, sample, landed cost — name it.
+
+SIGN OFF: ${senderName} · ${senderRole}
+
+---
+
+VARIANT A — Pain-led bridge
+Subject: [under 8 words — tie to a specific pain in ${p}'s world, not generic — reference something real from the dossier]
+CRITICAL: Line 1 of this variant MUST still be a specific icebreaker (a named product, signal, or fact from the dossier) — NOT a pain statement. "Pain-led" describes ONLY the bridge in Lines 3-4. The icebreaker rule is non-negotiable across all three variants.
+BAD opener (do not do this): "Struggling with ingredient deviations affecting your product quality, Vivek?"
+GOOD opener: "Saw that Cremica just expanded its extruded snacks line — 6 new SKUs added to the Cremica Crunch range."
+Bridge angle: In Lines 3-4, name the exact operational pain or frustration (from NDFFO) that ${senderName}'s offer solves. Use the mechanism, not just the category. Make ${p} feel understood.
 
 VARIANT B — Trigger-led
-Subject: [under 8 words — reference the specific signal or event from the dossier]
-Body:
-- Line 1: Open with the specific company or market signal (cite something real from the dossier)
-- Line 2: ${senderName} from [company] — natural, one-line intro
-- Line 3: Connect signal → relevant outcome ${senderName} helps with
-- CTA: ${senderCta}
-Max 90 words. No invented statistics.
+Subject: [under 8 words — reference the specific signal, launch, or event from the dossier]
+Bridge angle: Reference the specific trigger or company signal from the dossier (recent launch, expansion, market move, Rs investment announced). Connect it to what ${senderName} offers.
 
 VARIANT C — Curiosity-led
-Subject: [under 8 words — provocative question tied to their desires or fears]
-Body:
-- Line 1: A sharp question or insight that connects to ${p}'s desires (${icpDesires}) — makes them stop and think
-- Line 2: Brief intro on who ${senderName} is
-- Line 3: Connect insight to ${senderOffer}
-- CTA: ${senderCta}
-Max 90 words. No invented statistics.
+Subject: [under 8 words — a sharp question tied to their desires or fears, specific to their industry/role]
+Bridge angle: A sharp insight or question that connects to ${p}'s desire (${icpDesires}). Makes them think "this is relevant to my situation right now." Not a hypothetical fantasy — grounded in a real market or operational truth.
 
-RULES FOR ALL VARIANTS:
-- No "I hope this finds you well" · No "we help companies like yours" · No made-up percentages or data
+GLOBAL RULES:
+
+WORD COUNT — NO ARTIFICIAL LIMIT:
+This is high-ticket B2B, not SaaS mass email. The prospect is a procurement manager, a category buyer, or a supply chain head at a food manufacturer. They need real information to make a decision. A capped email signals mass production — it tells the reader "this was generated in bulk and the sender didn't have time to say anything real." Write as long as the message needs to be. Do not pad. Do not compress if you have something real to say. A 200-word email that is specific and credible beats a 75-word email that is vague. Always.
+
+This is a long sales cycle business. The email is the FIRST step in a process that involves: sending company profile, COA, spec sheets, samples (250kg+ trial), and eventually an order. The email's job is to start a relationship and earn the right to send those materials — not to close a deal. Write with that arc in mind.
+
+AUTHORITY:
+The sender must come across as credible and established. Include credentials that earn trust: years in operation, listed company status, plant count, named clients, certifications, capacity. These are not boasts — they are the proof that makes the prospect comfortable sending a sample request to a real supplier. Place authority early (Line 2 — after the icebreaker), not buried.
+
+OTHER RULES:
+- "Hope this finds you well" — never
+- "We help companies like yours" — never
+- Fabricated statistics or percentages — never
+- Use only named proof from the sender's social proof field. If none given, describe the company's credentials factually.
 - Tone: ${senderTone}
-- Introduce ${senderName} naturally in every email — never be abrupt
-- Subject lines: specific, not clickbait
-Label each variant clearly: VARIANT A, VARIANT B, VARIANT C.`,
+- Subject lines: specific, not clickbait. Format: "[Specific relevant topic for ${co}] | [sender's company name]"
+- Every variant must draw a DIFFERENT icebreaker from different dossier signals
+- No email may start with a pain statement — icebreaker always comes first
+- End with full signature: name · role · company · contact/email · website if available
+
+Label each clearly: VARIANT A, VARIANT B, VARIANT C.`,
 
       followup: `Using the full intelligence dossier for ${p} at ${co}, build a complete 8-TOUCH RELATIONSHIP CADENCE from ${senderName}.${dossierCtx}
 

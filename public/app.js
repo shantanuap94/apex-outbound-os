@@ -762,7 +762,7 @@ async function saveProspectToMemory(prospect, update) {
     (p.name === prospect.name && p.company === prospect.company)
   );
 
-  if (_sb) {
+  if (_sb && _userId) {
     if (existing) {
       const { data } = await _sb.from("prospects")
         .update({ ...base, updated_at: new Date().toISOString() })
@@ -810,7 +810,7 @@ async function saveProspectToMemory(prospect, update) {
 async function crmUpdateFields(id, fields) {
   const i = _crmProspects.findIndex((p) => p.id === id);
   if (i >= 0) Object.assign(_crmProspects[i], fields);
-  if (_sb) { await _sb.from("prospects").update(fields).eq("id", id); return; }
+  if (_sb && _userId) { await _sb.from("prospects").update(fields).eq("id", id); return; }
   const all = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
   const li = all.findIndex((e) => e.id === id);
   if (li >= 0) {
@@ -1065,7 +1065,26 @@ function wireChain() {
       } else {
         const person = res.person || {};
         const org = person.organization || {};
+
+        // Verify the returned company matches what was searched
+        const searchedDomain = (p.domain || "").toLowerCase().replace(/^www\./, "");
+        const searchedCompany = (p.company || "").toLowerCase();
+        const returnedDomain = (org.primary_domain || "").toLowerCase().replace(/^www\./, "");
+        const returnedCompany = (org.name || "").toLowerCase();
+
+        const domainMatch = searchedDomain && returnedDomain && (
+          returnedDomain === searchedDomain ||
+          returnedDomain.includes(searchedDomain) ||
+          searchedDomain.includes(returnedDomain)
+        );
+        const companyMatch = searchedCompany && returnedCompany && (
+          returnedCompany.includes(searchedCompany.split(" ")[0]) ||
+          searchedCompany.includes(returnedCompany.split(" ")[0])
+        );
+        const isCompanyMismatch = (searchedDomain || searchedCompany) && !domainMatch && !companyMatch;
+
         const snap = [
+          isCompanyMismatch ? `⚠️ COMPANY MISMATCH — searched for "${p.company || p.domain}" but Apollo returned "${org.name || returnedDomain}". Verify before proceeding.` : "",
           org.name ? `Company: ${org.name}` : "",
           org.estimated_num_employees ? `Headcount: ~${org.estimated_num_employees}` : "",
           org.industry ? `Industry: ${org.industry}` : "",
@@ -1079,7 +1098,7 @@ function wireChain() {
           person.match_confidence ? `Match confidence: ${person.match_confidence}` : "",
         ].filter(Boolean).join("\n");
         $("snapshotOut").textContent = snap || "Apollo enrichment returned no data.";
-        setStepDone(2);
+        if (!isCompanyMismatch) setStepDone(2);
         if (person.email && !$("pFirstName").value) {
           const nameParts = (person.name || "").split(" ");
           $("pFirstName").value = nameParts[0] || "";
