@@ -443,137 +443,123 @@ TOUCH 3 — Day 8 · Email (Break-up)
 
 Each touch: different angle, different emotional register. No invented statistics.`,
 
-      outreach: `Write 3 cold email variants FROM ${senderName} to ${p} (${role}) at ${co}. The prospect does not know ${senderName} — every email must introduce the sender naturally.${dossierCtx}
+      outreach: `Write a 4-EMAIL NURTURE SEQUENCE FROM ${senderName} to ${p} (${role}) at ${co}. Goal: get a 20-minute meeting. Emails send every 2 days. Each email takes a different angle. The prospect does not know ${senderName} — Email 1 must introduce the sender fully.${dossierCtx}
 
-THE SENDER (introduce in every email — they are a stranger to ${p}):
+THE SENDER:
 - ${senderName}, ${senderRole}
 - Company offer: ${senderOffer}
 - Why it matters to buyers like ${p}: ${senderValueProp}
-- CTA preference: ${senderCta}
+- Proof (use verbatim, never invent): ${senderProof ? senderProof : "Use company credentials factually — years operating, listed status, plant count."}
 
-NAMED PROOF — you MUST use these in Line 5 of every variant, verbatim, never invent alternatives:
-${senderProof ? senderProof : "No proof provided — use company credentials factually instead (years operating, listed status, plant count)."}
-
-ICP emotional profile (draw from these to make the bridge feel understood, not generic):
+ICP emotional profile:
 - Pains: ${icpPains}
 - Fears: ${icpFears}
 - Frustrations: ${icpFrustrations}
 - Dream outcomes: ${icpDesires}
 - What they say out loud: ${icpSayLoud}
+- Privately think: ${icpThinkPriv}
 
-MANDATORY STRUCTURE FOR EVERY VARIANT — do not deviate:
+POSITIONING RULE — applies to all 4 emails:
+Do NOT position as a replacement for their existing supplier. Position as a SECOND SOURCE that improves supply chain reliability. Most procurement managers already have a primary supplier and won't switch. But they will add a second qualified source to de-risk their line. Every email should feel like a supply chain upgrade, not a disruption.
 
-LINE 1 — ICEBREAKER (this is non-negotiable):
-Open with ONE specific, researched observation about ${p} or ${co}. It must name an actual product, brand, recent launch, campaign, market move, or career signal pulled from the Intelligence Dossier. This is what separates this email from 199 others in their inbox. Do NOT open with a pain statement. Do NOT open with "I noticed you're in the food industry." Name the actual thing — a specific product, a specific launch, a specific fact.
-Example quality: "Noticed Cremica's fruit crush range just launched 10 new variants in June" NOT "As a supply chain leader in the food industry..."
+---
 
-LINE 2 — SENDER INTRO + AUTHORITY BLOCK (always second, never first):
-This is NOT one sentence. This is 3-5 sentences. The prospect is a stranger — they need to know who they are hearing from and why the sender is worth reading.
+EMAIL 1 — Day 1 · Pain-led
 
-Write a mini authority block that includes ALL of the following, if available from the sender profile:
-- Full name and role
-- Company name (with BSE/NSE listed status if applicable)
-- What the company makes — name the actual product categories (corn grits, fine corn flour, corn starch — not "corn products")
-- Years in operation (e.g. "milling since 1999")
-- Plant count or manufacturing scale
-- Named clients (ITC, Pratap Snacks, Haldiram's, Balaji Wafers — not "major snack brands")
-- Relevant certifications (FSSAI, ISO, HACCP, BRC, etc.)
-- Capacity (tonnes/day, annual output, etc. if known)
+STRUCTURE (mandatory — do not deviate):
 
-Example (3 sentences — write this quality):
-"I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company based in India, with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. We're ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified, and we export to West Africa, MENA, and Europe."
+LINE 1 — ICEBREAKER:
+One specific, researched observation about ${p} or ${co}. Must name an actual product, launch, expansion, or career signal from the dossier. This is what separates this email from 199 others. Do NOT open with a pain statement. Name the actual thing.
+GOOD: "Saw that Cremica just expanded its extruded snacks line — 6 new SKUs added to the Cremica Crunch range."
+BAD: "Struggling with ingredient deviations, Santosh?"
 
-IMPORTANT — ONLY USE WHAT THE SENDER PROFILE PROVIDES:
-Do not invent locations, certifications, plant names, client names, or product categories. Use only what is explicitly in the sender's profile (senderName, senderRole, senderOffer, senderProof, senderCta). If a detail is not provided, describe the company factually and generically — never fabricate specifics. "Based in India" is safe when no city/region is given. Do not add corn starch, modified starch, wet-milled products, or any ingredient not mentioned in the sender's offer field.
+LINE 2 — SENDER INTRO + AUTHORITY BLOCK:
+Not one sentence — 3-5 sentences. The prospect is a stranger. They need to know who is writing and why it's worth reading. Include ALL available from the sender profile: full name and role, company name (BSE/NSE listed status if applicable), exact product categories (not "corn products" — name them), years in operation, plant count, named clients, certifications, capacity. This block earns the right to keep reading. Do not compress.
+Example quality: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified."
 
-This block is what earns the right to keep reading. Do not compress it into one line.
+ONLY USE WHAT THE SENDER PROFILE PROVIDES. Do not invent plant names, certifications, clients, or product categories.
 
-LINES 3-4 — BRIDGE (this is where the variants differ):
-Connect ${p}'s specific situation to ${senderName}'s offer. Use technical/specific language — name the exact ingredient, mechanism, or outcome. Not "corn products" but "corn grits, where particle size uniformity, consistent expansion and oil uptake make a real difference to line efficiency and OTIF planning."
-
-IMPORTANT — WEAVE IN NDFFO AND EMPATHY:
-The bridge must reflect what ${p} privately feels, fears, or desires (drawn from the ICP emotional profile). Make them feel understood, not sold to. Reference their actual world — their products by name, their role pressures, their company's current moment. This is not a generic bridge — it must read as if you know their situation specifically.
-
-Example: Don't write "supply chain challenges are common in the industry." Write "When you're running [specific product line] and you need consistent particle size run to run — because a deviation in corn grit size means rejected batches, wasted line time, and a call from the QA head — that's the exact place where supplier consistency becomes a real business question, not just a spec on paper."
+LINES 3-4 — BRIDGE (pain angle):
+Name the exact operational pain from the ICP. Not "supply chain challenges" — the actual mechanism: inconsistent particle size, batch deviations, QA escalations, OTIF pressure. Make ${p} feel understood. Reference their specific products, their company's current situation, their role pressure. Draw from: ${icpFrustrations} and ${icpFears}.
 
 LINE 5 — PROOF:
-One named, specific reason to believe — named clients, not percentages. Use only what's provided in the sender's social proof. Never invent.
-IMPORTANT: Do NOT repeat the client names or certifications already stated in Line 2's authority block. Instead, add one specific detail that deepens the proof — e.g. a volume reference ("same spec across 50,000 tons/month"), a specific outcome ("zero batch rejections in 18 months of supply to ITC"), a process detail ("every lot ships with a full COA and mill certificate"), or a geography note ("supplying across India, MENA, and West Africa"). If you have nothing to add, skip Line 5 and go straight to Line 6.
+One specific detail that deepens credibility beyond Line 2. Do NOT repeat the same client names. Add a new layer: a volume reference, a process detail, a geography note, or a specific outcome. If nothing to add, skip this line.
 
 LINE 6 — CTA:
-Ask them to share their current spec so you can send a matched sample. Exact framing: "If you could share your current [corn grit / flour] spec, I'd be happy to send a matched sample — no commitment at all." Do NOT position as a replacement for their existing supplier. Position as a second source that improves supply chain reliability — most procurement managers already have a primary supplier and won't switch, but they will add a second qualified source to de-risk their line. The CTA should feel like a natural next step, not a sales push.
+Ask them to share their current spec so you can send a matched sample. "If you could share your current spec, I'd be happy to send a matched sample — no commitment at all." Low friction. No meeting ask yet.
 
+END: One genuine, curious question about their work. Not a CTA to buy. This is what gets a reply.
+GOOD: "Quick question — how often does your team benchmark your current corn supplier's COA against the spec you signed off on?"
 SIGN OFF: ${senderName} · ${senderRole}
 
 ---
 
-VARIANT A — Pain-led bridge
-Subject: [under 8 words — tie to a specific pain in ${p}'s world, not generic — reference something real from the dossier]
-CRITICAL: Line 1 of this variant MUST still be a specific icebreaker (a named product, signal, or fact from the dossier) — NOT a pain statement. "Pain-led" describes ONLY the bridge in Lines 3-4. The icebreaker rule is non-negotiable across all three variants.
-BAD opener (do not do this): "Struggling with ingredient deviations affecting your product quality, Vivek?"
-GOOD opener: "Saw that Cremica just expanded its extruded snacks line — 6 new SKUs added to the Cremica Crunch range."
-Bridge angle: In Lines 3-4, name the exact operational pain or frustration (from NDFFO) that ${senderName}'s offer solves. Use the mechanism, not just the category. Make ${p} feel understood.
+EMAIL 2 — Day 3 · Trigger-led
 
-VARIANT B — Trigger-led
-Subject: [under 8 words — reference the specific signal, launch, or event from the dossier]
-Bridge angle: Reference the specific trigger or company signal from the dossier (recent launch, expansion, market move, Rs investment announced). Connect it to what ${senderName} offers.
+Different emotional register from Email 1. Lead with a SPECIFIC TRIGGER from the dossier — a company launch, expansion, investment, new product line, market move. Frame it as an opportunity, not a problem. The bridge connects this trigger to why having a second qualified source matters right now — not someday, but specifically because of this trigger.
 
-VARIANT C — Curiosity-led
-Subject: [under 8 words — a sharp question tied to their desires or fears, specific to their industry/role]
-Bridge angle: A sharp insight or question that connects to ${p}'s desire (${icpDesires}). Makes them think "this is relevant to my situation right now." Not a hypothetical fantasy — grounded in a real market or operational truth.
+No full authority block needed — they've seen it. One short credibility reminder is enough: "[Company name], [one credential]."
 
-GLOBAL RULES:
+CTA: Reoffer the sample/spec exchange. OR offer something specific for their file — a COA, a grade comparison, a market note. Name it precisely. "No strings attached."
 
-THE 3-LAYER FRAMEWORK — every 10/10 email has all three. If you miss one, it sounds like AI:
-LAYER 1 — EMPATHY MAP: Before writing, internalize what ${p} lives daily — what they think, feel, say, do, and what their real pains and gains are in their role. This is invisible to the reader but drives every word choice.
-LAYER 2 — NDFFO: Needs / Desires / Fears / Frustrations / Dream Outcome. The bridge (Lines 3-4) must make ${p} feel understood — not just described. Reference their specific fear or desire, not the category. "Batch rejection at your scale" not "supply chain challenges."
-LAYER 3 — MESSAGE ARCHITECTURE: Real Hook → Human Empathy → Micro-Value → Partnership Invite. This is the visible structure. Most AI emails only do Layer 3 without the first two behind it. That's what makes them sound hollow.
+End with a soft question tied to the trigger: something that makes them answer yes or no, not ignore.
 
-WORD COUNT — GEOGRAPHY-BASED:
-- India/MENA/West Africa prospects: 180–250 words. Relationship markets. Context matters. They read.
-- UK/US/Europe prospects: 100–140 words max. They skim. Get to the point faster.
-Do not pad. Do not compress if you have something real to say. Long and credible beats short and vague — but long and fluffy loses immediately.
+---
 
-This is a long sales cycle business. The email earns the right to receive the prospect's spec, send a matched sample, and start a conversation — it does not close a deal. Write with that arc in mind. Most buyers already have a primary supplier. Do not ask them to switch. Position TBI Corn as a second qualified source that adds supply chain reliability — a de-risk, not a disruption.
+EMAIL 3 — Day 5 · Curiosity/Insight-led
 
-AUTHORITY:
-The sender must come across as credible and established. Include credentials that earn trust: years in operation, listed status, plant count, named clients, certifications. Place authority early (Line 2 — after the icebreaker), not buried at the end.
+Lead with a sharp market insight or operational truth that is useful to ${p} regardless of whether they buy from ${senderName}. Give them something they can use in their job — a benchmark, a trend, a data point about ingredient quality standards, a procurement practice observation. Make them think "this person actually knows this space."
+
+This email does NOT ask for the spec or the sample. It earns credibility through genuine usefulness.
+
+Soft meeting mention at the end — not a hard ask. Something like: "Happy to walk through how we've approached this with [named client type] if 20 minutes ever makes sense — no deck, just a conversation."
+
+End with a question that opens a door: curious about their current process or how they handle a specific challenge.
+
+---
+
+EMAIL 4 — Day 7 · Objection pre-empt + direct meeting ask
+
+This is the highest-converting email in a B2B procurement sequence. Open by naming the elephant in the room directly: "You almost certainly already have a corn supplier. Most procurement leads I talk to do."
+
+Then flip it: that's exactly why 20 minutes is worth it. Not to replace anyone — but to have a qualified second source ready before they need one. A batch deviation, a capacity shortfall, a supplier quality issue — these don't announce themselves. The procurement managers who handle them best are the ones who already have a second source qualified and on file.
+
+Name a specific, realistic scenario where a second source would have saved them: a batch rejection during a peak production run, a supplier missing spec on a large order. Keep it real — no invented statistics.
+
+Direct ask for a 20-minute call. Suggest 2 specific time windows (e.g. "Tuesday or Thursday morning — happy to work around your calendar"). Frame it as: "Enough time to share our spec and COA, you tell me if it's even worth running a sample trial. That's it."
+
+If they're not ready: "If timing isn't right, just say park it for Q2 — no hard feelings. I'll keep the door open."
+
+---
+
+GLOBAL RULES FOR ALL 4 EMAILS:
+
+WORD COUNT:
+- India/MENA/West Africa: 180–250 words. Relationship markets. They read.
+- UK/US/Europe: 100–140 words. They skim.
+Do not pad. Long and credible beats short and vague. Long and fluffy loses immediately.
 
 SENTENCE STRUCTURE — SHORT AND PUNCHY:
-Max 15 words per sentence where possible. One idea per sentence. Use a full stop instead of a comma when in doubt. Short sentences read faster, hit harder, and sound more human.
+Max 15 words per sentence. One idea per sentence. Full stop instead of comma when in doubt.
 BAD: "The ingredients you source for your biscuit manufacturing lines, particularly when you're running multiple SKUs at national scale, require a level of consistency that goes beyond what the spec sheet alone can guarantee."
-GOOD: "The spec sheet looks fine. The COA matches. But batch 47 behaves differently from batch 3. At Britannia's volume, that's not a line note — that's a stoppage."
+GOOD: "The spec sheet looks fine. The COA matches. But batch 47 behaves differently from batch 3. At this volume, that's not a line note — that's a stoppage."
 
-USE CONTRACTIONS — always:
-you're / we've / it's / don't / that's / I'm / we're / they've / you'll
-Contractions make sentences sound human. "I am Shantanu" sounds like a press release. "I'm Shantanu" sounds like a person.
+USE CONTRACTIONS — always: you're / we've / it's / don't / that's / I'm / we're / they've / you'll
 
-END WITH A SOFT QUESTION — not a CTA to buy:
-The last line before the signature must be one genuine, curious question about their work or process. It should make them think, not pressure them to act. This is what gets a reply.
-GOOD: "Quick question — how often does your team audit new vendors for commodity ingredients?"
-GOOD: "Curious — is the ingredient validation for the new bakery range still in progress, or has that been locked in?"
-BAD: "Would love to set up a call to discuss how we can support your procurement goals."
-
-BANNED PHRASES — never write these:
-- "Hope this finds you well"
-- "We help companies like yours"
-- "Just following up"
-- "Circling back"
-- "Would love to connect and exchange notes"
+BANNED PHRASES:
+- "Hope this finds you well" / "Just following up" / "Circling back" / "As per my last email"
+- "We help companies like yours" / "Would love to connect and exchange notes"
 - "Leverage synergies" / "seamless efficiency" / "value proposition" / "end-to-end solution"
-- Any fabricated percentage or statistic
+- Any fabricated percentage or statistic not from the dossier
 
-OTHER RULES:
-- Tone: ${senderTone}
-- Subject lines: specific, not clickbait. Format: "[Specific relevant topic for ${co}] | [sender's company name]"
-- Every variant must draw a DIFFERENT icebreaker from different dossier signals
-- No email may start with a pain statement — icebreaker always comes first
-- Use only named proof from the sender's social proof field. Never invent.
-- Do not invent locations, plant names, certifications, or product categories not in the sender profile
-- End with full signature: name · role · company · contact/email · website if available
-- Write like you met this person at an exhibition and you're following up the next morning. Warm. Human. Peer to peer.
+TONE: ${senderTone} — warm, peer-to-peer, expert but not arrogant. Write like you met this person at an industry event and you're following up the next morning.
 
-Label each clearly: VARIANT A, VARIANT B, VARIANT C.`,
+Subject lines: specific, not clickbait, under 8 words. Reference a real thing from the dossier.
+
+Do not invent locations, plant names, certifications, or product categories not in the sender profile.
+Use only named proof from the sender's social proof field. Never invent.
+
+Label each clearly: EMAIL 1, EMAIL 2, EMAIL 3, EMAIL 4 with the day and angle.`,
 
       followup: `Using the full intelligence dossier for ${p} at ${co}, build a complete 8-TOUCH RELATIONSHIP CADENCE from ${senderName}.${dossierCtx}
 
