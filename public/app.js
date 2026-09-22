@@ -878,7 +878,7 @@ async function getSuccessfulPatterns(limit = 2) {
 async function logReplyToMemory(prospectId, replyText, classification) {
   if (!_sb || !prospectId) return;
   const now = new Date().toISOString();
-  await _sb.from('outreach_sends').insert({
+  const { error: iErr } = await _sb.from('outreach_sends').insert({
     prospect_id: prospectId,
     channel: 'email',
     body: replyText,
@@ -886,6 +886,7 @@ async function logReplyToMemory(prospectId, replyText, classification) {
     reply_classification: classification,
     replied_at: now,
   });
+  if (iErr) throw iErr;
   const cached = _crmProspects.find((p) => p.id === prospectId);
   const newCount = (cached?.reply_count || 0) + 1;
   const patch = { last_reply_at: now, reply_count: newCount, active_email_idx: 0 };
