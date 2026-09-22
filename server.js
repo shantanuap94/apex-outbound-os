@@ -523,27 +523,54 @@ Bridge angle: A sharp insight or question that connects to ${p}'s desire (${icpD
 
 GLOBAL RULES:
 
-WORD COUNT — NO ARTIFICIAL LIMIT:
-This is high-ticket B2B, not SaaS mass email. The prospect is a procurement manager, a category buyer, or a supply chain head at a food manufacturer. They need real information to make a decision. A capped email signals mass production — it tells the reader "this was generated in bulk and the sender didn't have time to say anything real." Write as long as the message needs to be. Do not pad. Do not compress if you have something real to say. A 200-word email that is specific and credible beats a 75-word email that is vague. Always.
+THE 3-LAYER FRAMEWORK — every 10/10 email has all three. If you miss one, it sounds like AI:
+LAYER 1 — EMPATHY MAP: Before writing, internalize what ${p} lives daily — what they think, feel, say, do, and what their real pains and gains are in their role. This is invisible to the reader but drives every word choice.
+LAYER 2 — NDFFO: Needs / Desires / Fears / Frustrations / Dream Outcome. The bridge (Lines 3-4) must make ${p} feel understood — not just described. Reference their specific fear or desire, not the category. "Batch rejection at your scale" not "supply chain challenges."
+LAYER 3 — MESSAGE ARCHITECTURE: Real Hook → Human Empathy → Micro-Value → Partnership Invite. This is the visible structure. Most AI emails only do Layer 3 without the first two behind it. That's what makes them sound hollow.
 
-This is a long sales cycle business. The email is the FIRST step in a process that involves: sending company profile, COA, spec sheets, samples (250kg+ trial), and eventually an order. The email's job is to start a relationship and earn the right to send those materials — not to close a deal. Write with that arc in mind.
+WORD COUNT — GEOGRAPHY-BASED:
+- India/MENA/West Africa prospects: 180–250 words. Relationship markets. Context matters. They read.
+- UK/US/Europe prospects: 100–140 words max. They skim. Get to the point faster.
+Do not pad. Do not compress if you have something real to say. Long and credible beats short and vague — but long and fluffy loses immediately.
+
+This is a long sales cycle business. The email earns the right to send a COA, spec sheets, and a 250kg sample — it does not close a deal. Write with that arc in mind.
 
 AUTHORITY:
-The sender must come across as credible and established. Include credentials that earn trust: years in operation, listed company status, plant count, named clients, certifications, capacity. These are not boasts — they are the proof that makes the prospect comfortable sending a sample request to a real supplier. Place authority early (Line 2 — after the icebreaker), not buried.
+The sender must come across as credible and established. Include credentials that earn trust: years in operation, listed status, plant count, named clients, certifications. Place authority early (Line 2 — after the icebreaker), not buried at the end.
+
+SENTENCE STRUCTURE — SHORT AND PUNCHY:
+Max 15 words per sentence where possible. One idea per sentence. Use a full stop instead of a comma when in doubt. Short sentences read faster, hit harder, and sound more human.
+BAD: "The ingredients you source for your biscuit manufacturing lines, particularly when you're running multiple SKUs at national scale, require a level of consistency that goes beyond what the spec sheet alone can guarantee."
+GOOD: "The spec sheet looks fine. The COA matches. But batch 47 behaves differently from batch 3. At Britannia's volume, that's not a line note — that's a stoppage."
+
+USE CONTRACTIONS — always:
+you're / we've / it's / don't / that's / I'm / we're / they've / you'll
+Contractions make sentences sound human. "I am Shantanu" sounds like a press release. "I'm Shantanu" sounds like a person.
+
+END WITH A SOFT QUESTION — not a CTA to buy:
+The last line before the signature must be one genuine, curious question about their work or process. It should make them think, not pressure them to act. This is what gets a reply.
+GOOD: "Quick question — how often does your team audit new vendors for commodity ingredients?"
+GOOD: "Curious — is the ingredient validation for the new bakery range still in progress, or has that been locked in?"
+BAD: "Would love to set up a call to discuss how we can support your procurement goals."
+
+BANNED PHRASES — never write these:
+- "Hope this finds you well"
+- "We help companies like yours"
+- "Just following up"
+- "Circling back"
+- "Would love to connect and exchange notes"
+- "Leverage synergies" / "seamless efficiency" / "value proposition" / "end-to-end solution"
+- Any fabricated percentage or statistic
 
 OTHER RULES:
-- "Hope this finds you well" — never
-- "We help companies like yours" — never
-- Fabricated statistics or percentages — never
-- Use only named proof from the sender's social proof field. If none given, describe the company's credentials factually.
 - Tone: ${senderTone}
 - Subject lines: specific, not clickbait. Format: "[Specific relevant topic for ${co}] | [sender's company name]"
 - Every variant must draw a DIFFERENT icebreaker from different dossier signals
 - No email may start with a pain statement — icebreaker always comes first
+- Use only named proof from the sender's social proof field. Never invent.
+- Do not invent locations, plant names, certifications, or product categories not in the sender profile
 - End with full signature: name · role · company · contact/email · website if available
-
-LANGUAGE RULE — WRITE SIMPLE:
-Use the language a smart 12-year-old would understand. Short sentences. No jargon unless it is a technical term the buyer actually uses (like "COA", "OTIF", "extruder"). No corporate phrases like "leverage synergies", "seamless efficiency", "value proposition", "end-to-end solution". If you can replace a long word with a short one, do it. Clear is better than impressive.
+- Write like you met this person at an exhibition and you're following up the next morning. Warm. Human. Peer to peer.
 
 Label each clearly: VARIANT A, VARIANT B, VARIANT C.`,
 
