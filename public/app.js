@@ -1013,29 +1013,14 @@ function openMemoryDrawer(id) {
 function renderDrawerTab(tab, entry) {
   const content = $("drawerContent");
   document.querySelectorAll(".dtab").forEach((t) => t.classList.toggle("active", t.dataset.dtab === tab));
+  const clearBtn = $("drawerClearContent");
+  if (clearBtn) clearBtn.style.display = (tab === "emails" || tab === "linkedin") ? "inline-flex" : "none";
 
   if (tab === "dossier") {
     content.innerHTML = `<pre class="drawer-pre">${entry.dossier || "No dossier yet — run the Agent Chain first."}</pre>`;
   } else if (tab === "emails") {
-    const a = entry.emails?.a || ""; const b = entry.emails?.b || ""; const c = entry.emails?.c || "";
-    content.innerHTML = `
-      <div class="drawer-email-tabs">
-        <button class="detab active" data-v="a">Variant A</button>
-        <button class="detab" data-v="b">Variant B</button>
-        <button class="detab" data-v="c">Variant C</button>
-      </div>
-      <pre class="drawer-pre detab-a">${a || "No emails yet."}</pre>
-      <pre class="drawer-pre detab-b hidden">${b}</pre>
-      <pre class="drawer-pre detab-c hidden">${c}</pre>`;
-    content.querySelectorAll(".detab").forEach((t) => {
-      t.addEventListener("click", () => {
-        content.querySelectorAll(".detab").forEach((x) => x.classList.remove("active"));
-        t.classList.add("active");
-        ["a","b","c"].forEach((v) => {
-          content.querySelector(`.detab-${v}`)?.classList.toggle("hidden", v !== t.dataset.v);
-        });
-      });
-    });
+    const seq = entry.emails?.sequence || entry.emails?.a || "";
+    content.innerHTML = `<pre class="drawer-pre">${seq || "No emails yet — run Generate Outreach."}</pre>`;
   } else if (tab === "linkedin") {
     content.innerHTML = `<pre class="drawer-pre">${entry.linkedin_messages || "No LinkedIn copy yet."}</pre>`;
   } else if (tab === "cadence") {
@@ -1075,6 +1060,21 @@ function wireMemory() {
 
   const drawerClose = $("drawerClose");
   if (drawerClose) drawerClose.addEventListener("click", () => $("memoryDrawer").classList.add("hidden"));
+
+  const clearBtn = $("drawerClearContent");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", async () => {
+      if (!_currentDrawerId) return;
+      const activeTab = document.querySelector(".dtab.active")?.dataset.dtab;
+      if (!confirm(`Clear stored ${activeTab} for this prospect? This cannot be undone.`)) return;
+      const field = activeTab === "emails" ? { emails: null } : { linkedin_messages: null };
+      clearBtn.textContent = "Clearing…";
+      await crmUpdateFields(_currentDrawerId, field);
+      clearBtn.textContent = "Clear";
+      const entry = _crmProspects.find((p) => p.id === _currentDrawerId);
+      if (entry) renderDrawerTab(activeTab, entry);
+    });
+  }
 
   const saveCrm = $("drawerSaveCrm");
   if (saveCrm) {
@@ -1331,41 +1331,21 @@ Also include any recent news, leadership changes, or awards from the last 90 day
           (_, full) => { if (liOutEl) liOutEl.textContent = full; }),
       ]);
 
-      // Parse 4 email sequence from response (EMAIL 1 / EMAIL 2 / EMAIL 3 / EMAIL 4)
-      let emailA = "", emailB = "", emailC = "";
-      if (emailRes.content) {
-        const raw = emailRes.content;
-        // Try new 4-email format first, fall back to old VARIANT format
-        const e1 = raw.match(/EMAIL 1[\s\S]*?(?=EMAIL 2|$)/i)?.[0] || "";
-        const e2 = raw.match(/EMAIL 2[\s\S]*?(?=EMAIL 3|$)/i)?.[0] || "";
-        const e3 = raw.match(/EMAIL 3[\s\S]*?(?=EMAIL 4|$)/i)?.[0] || "";
-        const e4 = raw.match(/EMAIL 4[\s\S]*/i)?.[0] || "";
-        if (e1) {
-          emailA = e1.trim(); emailB = e2.trim();
-          emailC = e3.trim() + (e4 ? "\n\n" + "─".repeat(60) + "\n\n" + e4.trim() : "");
-        } else {
-          const aMatch = raw.match(/VARIANT A[\s\S]*?(?=VARIANT B|$)/i)?.[0] || "";
-          const bMatch = raw.match(/VARIANT B[\s\S]*?(?=VARIANT C|$)/i)?.[0] || "";
-          const cMatch = raw.match(/VARIANT C[\s\S]*/i)?.[0] || "";
-          emailA = aMatch.trim() || raw; emailB = bMatch.trim() || ""; emailC = cMatch.trim() || "";
-        }
-        $("emailOut-a").textContent = emailA;
-        $("emailOut-b").textContent = emailB || "See Email 1";
-        $("emailOut-c").textContent = emailC || "See Email 1";
+      const emailContent = emailRes.content || "";
+      const liContent    = liRes.content   || "";
 
-        const count = parseInt(localStorage.getItem("apex.draftCount") || "0", 10) + 3;
+      if (emailContent) {
+        $("emailOut-a").textContent = emailContent;
+        const count = parseInt(localStorage.getItem("apex.draftCount") || "0", 10) + 4;
         localStorage.setItem("apex.draftCount", count);
         updateCounters();
       }
+      if (liContent) $("liOut").textContent = liContent;
 
-      if (liRes.content) {
-        $("liOut").textContent = liRes.content;
-      }
-
-      // Save emails + LinkedIn to prospect memory
+      // Save full sequence + LinkedIn to prospect memory
       await saveProspectToMemory(p, {
-        emails: { a: emailA, b: emailB, c: emailC },
-        linkedin: liRes.content || "",
+        emails: { sequence: emailContent },
+        linkedin: liContent,
       });
       if (document.getElementById("tab-campaigns")?.classList.contains("active")) renderMemoryList();
 
@@ -1376,18 +1356,6 @@ Also include any recent news, leadership changes, or awards from the last 90 day
     resetBtn(btn, "Generate Outreach →");
   });
 
-  // Email variant tabs
-  document.querySelectorAll(".etab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".etab").forEach((t) => t.classList.remove("active"));
-      tab.classList.add("active");
-      const v = tab.dataset.variant;
-      ["a","b","c"].forEach((x) => {
-        const el = $(`emailOut-${x}`);
-        if (el) el.classList.toggle("hidden", x !== v);
-      });
-    });
-  });
 
   // Build Follow-up Sequence
   $("buildSequenceBtn").addEventListener("click", async () => {
