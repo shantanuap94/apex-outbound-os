@@ -860,6 +860,21 @@ function parseReplyClassification(text) {
   return 'objection';
 }
 
+async function getSuccessfulPatterns(limit = 2) {
+  if (!_sb) return [];
+  try {
+    const { data, error } = await _sb
+      .from('outreach_sends')
+      .select('body, subject')
+      .in('reply_classification', ['positive_interest', 'meeting_booked'])
+      .not('body', 'is', null)
+      .order('replied_at', { ascending: false })
+      .limit(limit);
+    if (error || !data) return [];
+    return data;
+  } catch (_) { return []; }
+}
+
 async function logReplyToMemory(prospectId, replyText, classification) {
   if (!_sb || !prospectId) return;
   const now = new Date().toISOString();
@@ -1271,11 +1286,12 @@ Also include any recent news, leadership changes, or awards from the last 90 day
 
     try {
       const sender = getSender();
+      const fewShotExamples = await getSuccessfulPatterns(2);
       // Run cold emails + LinkedIn in parallel — both use SSE streaming
       const emailOutEl = $("emailOut-a");
       const liOutEl = $("liOut");
       const [emailRes, liRes] = await Promise.all([
-        postStream("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "outreach", dossier },
+        postStream("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "outreach", dossier, fewShotExamples },
           (_, full) => { if (emailOutEl) emailOutEl.textContent = full; }),
         postStream("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "linkedin", dossier, linkedinPosts: $("linkedinPosts").value },
           (_, full) => { if (liOutEl) liOutEl.textContent = full; }),

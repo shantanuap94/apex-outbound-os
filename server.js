@@ -221,7 +221,7 @@ async function handleChainRun(req, res) {
 
   try {
     const body = await readBody(req);
-    const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply } = body;
+    const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply, fewShotExamples } = body;
 
     const sender = senderProfile || {};
     const senderName    = sender.name    || "the sender";
@@ -505,7 +505,13 @@ Do NOT position as a replacement for their existing supplier. Position as a SECO
 
 ---
 
-EMAIL 1 — Day 1 · Pain-led
+${fewShotExamples && fewShotExamples.length > 0 ? `REAL EXAMPLES THAT GOT REPLIES — study these for tone, length, and specificity. Do not copy them. Use them to calibrate how direct and detailed your emails should be:
+
+${fewShotExamples.map((ex, i) => `--- Example ${i + 1} ---\nSubject: ${ex.subject || "(no subject)"}\n${ex.body}`).join("\n\n")}
+
+---
+
+` : ""}EMAIL 1 — Day 1 · Pain-led
 
 STRUCTURE (mandatory — do not deviate):
 
