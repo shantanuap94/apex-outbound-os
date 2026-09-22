@@ -65,7 +65,7 @@ async function checkApiStatus() {
 function updateCounters() {
   const dossiers = parseInt(localStorage.getItem("apex.dossierCount") || "0", 10);
   const drafts   = parseInt(localStorage.getItem("apex.draftCount")   || "0", 10);
-  const p = $("ctr-prospects"); if (p) p.textContent = "0 prospects";
+  const pc = _crmProspects?.length || 0; const p = $("ctr-prospects"); if (p) p.textContent = `${pc} prospect${pc !== 1 ? "s" : ""}`;
   const d = $("ctr-dossiers");  if (d) d.textContent = `${dossiers} dossier${dossiers !== 1 ? "s" : ""}`;
   const r = $("ctr-drafts");    if (r) r.textContent = `${drafts} drafts ready`;
 }
@@ -710,7 +710,7 @@ async function crmLoad() {
       .from("prospects")
       .select("*")
       .order("updated_at", { ascending: false });
-    if (!error && data) { _crmProspects = data; return; }
+    if (!error && data) { _crmProspects = data; updateCounters(); return; }
   }
   // localStorage fallback — map old format to flat CRM shape
   const legacy = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
@@ -737,6 +737,7 @@ async function crmLoad() {
     cadence: e.followup || "",
     objection_response: e.objection || "",
   }));
+  updateCounters();
 }
 
 async function saveProspectToMemory(prospect, update) {
