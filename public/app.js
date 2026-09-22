@@ -919,6 +919,7 @@ function statusClass(s) {
 }
 function getSequenceBadge(p) {
   if (p.meeting_booked) return '';
+  if (p.status && p.status !== 'active') return '';
   const idx = p.active_email_idx;
   if (idx === null || idx === undefined) return '';
   if (idx === 0) return '<span class="seq-badge seq-paused">Replied</span>';
