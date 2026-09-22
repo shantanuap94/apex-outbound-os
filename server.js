@@ -498,6 +498,7 @@ Example: Don't write "supply chain challenges are common in the industry." Write
 
 LINE 5 — PROOF:
 One named, specific reason to believe — named clients, not percentages. Use only what's provided in the sender's social proof. Never invent.
+IMPORTANT: Do NOT repeat the client names or certifications already stated in Line 2's authority block. Instead, add one specific detail that deepens the proof — e.g. a volume reference ("same spec across 50,000 tons/month"), a specific outcome ("zero batch rejections in 18 months of supply to ITC"), a process detail ("every lot ships with a full COA and mill certificate"), or a geography note ("supplying across India, MENA, and West Africa"). If you have nothing to add, skip Line 5 and go straight to Line 6.
 
 LINE 6 — CTA:
 Soft, low-friction ask. Include the phrase "no commitment at all" in this section. ${senderCta}. Offer something specific and useful: spec sheet, COA, sample, landed cost — name it.
