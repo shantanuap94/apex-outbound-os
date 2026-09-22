@@ -1073,6 +1073,7 @@ function wireMemory() {
   if (saveCrm) {
     saveCrm.addEventListener("click", async () => {
       if (!_currentDrawerId) return;
+      const prevStatus = _crmProspects.find((p) => p.id === _currentDrawerId)?.status;
       const fields = {
         status:           $("drawerStatus").value,
         current_touch:    parseInt($("drawerTouch").value, 10) || 0,
@@ -1084,6 +1085,13 @@ function wireMemory() {
       const orig = saveCrm.textContent;
       saveCrm.textContent = "Saving…"; saveCrm.disabled = true;
       await crmUpdateFields(_currentDrawerId, fields);
+      const newStatus = fields.status;
+      if (['replied', 'meeting', 'closed'].includes(newStatus) && newStatus !== prevStatus) {
+        const classification = newStatus === 'meeting' ? 'meeting_booked'
+                             : newStatus === 'closed'  ? 'opt_out'
+                             : 'positive_interest';
+        await logReplyToMemory(_currentDrawerId, fields.notes || '', classification);
+      }
       saveCrm.textContent = "Saved ✓";
       setTimeout(() => { saveCrm.textContent = orig; saveCrm.disabled = false; }, 1500);
       renderMemoryList();
