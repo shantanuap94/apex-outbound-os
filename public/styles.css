@@ -887,6 +887,18 @@ main { padding: 24px 32px 60px; }
 }
 .mr-next-action { font-size: 11px; color: var(--text-3); margin-top: 3px; }
 
+.seq-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px; margin-left: 4px; vertical-align: middle;
+}
+.seq-1      { background: rgba(99,115,255,.18); color: #8b9aff; }
+.seq-2      { background: rgba(94,159,255,.18); color: #5e9fff; }
+.seq-3      { background: rgba(52,199,89,.14);  color: #34c759; }
+.seq-4      { background: rgba(255,159,10,.22); color: #ff9f0a; }
+.seq-paused { background: rgba(52,199,89,.14);  color: #34c759; }
+.seq-done   { background: rgba(142,142,147,.15); color: #8e8e93; }
+
 /* ─── Memory Drawer ──────────────────────────────────────────────────────── */
 .memory-drawer {
   background: var(--bg-card); border: 1px solid var(--border);

@@ -917,6 +917,16 @@ function statusLabel(s) {
 function statusClass(s) {
   return { active: "ms-active", replied: "ms-replied", meeting: "ms-meeting", closed: "ms-closed", cold: "ms-cold" }[s] || "ms-active";
 }
+function getSequenceBadge(p) {
+  if (p.meeting_booked) return '';
+  const idx = p.active_email_idx;
+  if (idx === null || idx === undefined) return '';
+  if (idx === 0) return '<span class="seq-badge seq-paused">Replied</span>';
+  const map = { 1: 'E1 Due', 2: 'E2 Due', 3: 'E3 Due', 4: 'E4 Due' };
+  return map[idx]
+    ? `<span class="seq-badge seq-${idx}">${map[idx]}</span>`
+    : '<span class="seq-badge seq-done">Seq Done</span>';
+}
 
 let _currentDrawerId = null;
 
@@ -947,10 +957,11 @@ function renderMemoryList() {
   list.innerHTML = filtered.map((p) => {
     const date = new Date(p.updated_at || p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
     const touchBadge = p.current_touch > 0 ? `<span class="touch-badge">T${p.current_touch}</span>` : "";
+    const seqBadge   = getSequenceBadge(p);
     const nextLine   = p.next_action ? `<div class="mr-next-action">→ ${p.next_action}${p.next_action_date ? " · " + p.next_action_date : ""}</div>` : "";
     return `<div class="memory-row" data-id="${p.id}">
       <div class="mr-main">
-        <div class="mr-name">${p.name || "Unknown"} ${touchBadge}</div>
+        <div class="mr-name">${p.name || "Unknown"} ${touchBadge}${seqBadge}</div>
         <div class="mr-meta">${[p.title, p.company].filter(Boolean).join(" · ")}</div>
         ${nextLine}
       </div>
