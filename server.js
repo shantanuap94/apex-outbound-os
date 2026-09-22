@@ -481,7 +481,10 @@ Write a mini authority block that includes ALL of the following, if available fr
 - Capacity (tonnes/day, annual output, etc. if known)
 
 Example (3 sentences — write this quality):
-"I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company based in Ratlam, Madhya Pradesh, milling since 1999. We run 4 plants and supply corn grits, fine corn flour, and corn starch to ITC, Pratap Snacks, Balaji Wafers, and Haldiram's — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive your line efficiency and OTIF reliability. We're FSSAI, ISO 22000, and HACCP certified, and we export to the UK, MENA, and West Africa."
+"I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company based in India, with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. We're ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified, and we export to West Africa, MENA, and Europe."
+
+IMPORTANT — ONLY USE WHAT THE SENDER PROFILE PROVIDES:
+Do not invent locations, certifications, plant names, client names, or product categories. Use only what is explicitly in the sender's profile (senderName, senderRole, senderOffer, senderProof, senderCta). If a detail is not provided, describe the company factually and generically — never fabricate specifics. "Based in India" is safe when no city/region is given. Do not add corn starch, modified starch, wet-milled products, or any ingredient not mentioned in the sender's offer field.
 
 This block is what earns the right to keep reading. Do not compress it into one line.
 
