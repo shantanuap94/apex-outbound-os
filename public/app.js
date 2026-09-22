@@ -783,12 +783,12 @@ async function saveProspectToMemory(prospect, update) {
   if (existing) {
     const i = all.findIndex((e) => e.id === existing.id);
     if (i >= 0) {
-      if (update.emails)    all[i].emails    = update.emails;
-      if (update.linkedin)  all[i].linkedin  = update.linkedin;
-      if (update.followup)  all[i].followup  = update.followup;
-      if (update.objection) all[i].objection = update.objection;
-      if (update.snapshot)  all[i].snapshot  = update.snapshot;
-      if (update.dossier)   all[i].dossier   = update.dossier;
+      if (update.emails   !== undefined) all[i].emails    = update.emails;
+      if (update.linkedin !== undefined) all[i].linkedin  = update.linkedin;
+      if (update.followup !== undefined) all[i].followup  = update.followup;
+      if (update.objection !== undefined) all[i].objection = update.objection;
+      if (update.snapshot !== undefined) all[i].snapshot  = update.snapshot;
+      if (update.dossier  !== undefined) all[i].dossier   = update.dossier;
       all[i].updatedAt = new Date().toISOString();
       const ci = _crmProspects.findIndex((p) => p.id === existing.id);
       if (ci >= 0) Object.assign(_crmProspects[ci], patch, { updated_at: all[i].updatedAt });
@@ -1161,10 +1161,12 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       $("dossierOut").textContent = content;
       localStorage.setItem("apex.currentDossier", content);
 
-      // Save to prospect memory
+      // Save to prospect memory — clear stale emails so memory shows fresh state
       await saveProspectToMemory(p, {
         snapshot: $("snapshotOut").textContent,
         dossier: content,
+        emails: null,
+        linkedin: null,
       });
       if (document.getElementById("tab-campaigns")?.classList.contains("active")) renderMemoryList();
 
