@@ -852,6 +852,33 @@ async function saveProspectToMemory(prospect, update) {
   return _crmProspects[0]?.id;
 }
 
+function parseReplyClassification(text) {
+  const t = text.toLowerCase();
+  if (/meeting.booked|confirmed.*meeting|booked.*call|agreed.*meet|we.re on|let.s do it/i.test(t)) return 'meeting_booked';
+  if (/positive.interest|interested|open to|happy to|would love|love to|keen to|sounds good|let.s connect|let.s talk|send.*spec|send.*sample/i.test(t)) return 'positive_interest';
+  if (/opt.out|unsubscribe|remove.*list|not interested|don.t contact|stop emailing|please remove/i.test(t)) return 'opt_out';
+  return 'objection';
+}
+
+async function logReplyToMemory(prospectId, replyText, classification) {
+  if (!_sb || !prospectId) return;
+  const now = new Date().toISOString();
+  await _sb.from('outreach_sends').insert({
+    prospect_id: prospectId,
+    channel: 'email',
+    body: replyText,
+    reply_text: replyText,
+    reply_classification: classification,
+    replied_at: now,
+  });
+  const cached = _crmProspects.find((p) => p.id === prospectId);
+  const newCount = (cached?.reply_count || 0) + 1;
+  const patch = { last_reply_at: now, reply_count: newCount, active_email_idx: 0 };
+  if (classification === 'meeting_booked') patch.meeting_booked = true;
+  await _sb.from('prospects').update(patch).eq('id', prospectId);
+  if (cached) Object.assign(cached, patch);
+}
+
 async function crmUpdateFields(id, fields) {
   const i = _crmProspects.findIndex((p) => p.id === id);
   if (i >= 0) Object.assign(_crmProspects[i], fields);
@@ -1261,9 +1288,11 @@ Also include any recent news, leadership changes, or awards from the last 90 day
         // Try new 4-email format first, fall back to old VARIANT format
         const e1 = raw.match(/EMAIL 1[\s\S]*?(?=EMAIL 2|$)/i)?.[0] || "";
         const e2 = raw.match(/EMAIL 2[\s\S]*?(?=EMAIL 3|$)/i)?.[0] || "";
-        const e3tail = raw.match(/EMAIL 3[\s\S]*/i)?.[0] || "";
+        const e3 = raw.match(/EMAIL 3[\s\S]*?(?=EMAIL 4|$)/i)?.[0] || "";
+        const e4 = raw.match(/EMAIL 4[\s\S]*/i)?.[0] || "";
         if (e1) {
-          emailA = e1.trim(); emailB = e2.trim(); emailC = e3tail.trim();
+          emailA = e1.trim(); emailB = e2.trim();
+          emailC = e3.trim() + (e4 ? "\n\n" + "─".repeat(60) + "\n\n" + e4.trim() : "");
         } else {
           const aMatch = raw.match(/VARIANT A[\s\S]*?(?=VARIANT B|$)/i)?.[0] || "";
           const bMatch = raw.match(/VARIANT B[\s\S]*?(?=VARIANT C|$)/i)?.[0] || "";
@@ -1349,7 +1378,9 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       $("objectionOut").textContent = error ? "Error: " + error : content;
       if (!error) {
         setStepDone(8);
-        await saveProspectToMemory(getProspect(), { objection: content });
+        const prospectId = await saveProspectToMemory(getProspect(), { objection: content });
+        const classification = parseReplyClassification(content);
+        await logReplyToMemory(prospectId, reply, classification);
       }
     } catch (e) { $("objectionOut").textContent = "Network error: " + e.message; }
     btn.textContent = "Classify & Draft Response"; btn.disabled = false;
