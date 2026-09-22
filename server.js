@@ -424,9 +424,9 @@ Subject: [specific to this prospect — reference a product, launch, or company 
 Body:
 - Line 1: ICEBREAKER — one specific, named, researched signal about ${p} or ${co} from the dossier
 - Line 2: Sender intro with authority — name, role, company, credentials (named clients, years operating, certifications)
-- Lines 3-4: Bridge — connect their specific situation to what ${senderName} offers. Technical and specific — name the ingredient, the mechanism, the outcome.
+- Lines 3-4: Bridge — connect their specific situation to what ${senderName} offers. Technical and specific — name the ingredient, the mechanism, the outcome. Do NOT position as a replacement for their current supplier — position as a second source that improves supply chain reliability. Most procurement managers have a primary supplier and won't switch, but they will add a second qualified source to de-risk their line. Make this feel like an upgrade to their supply chain, not a disruption.
 - Line 5: Proof — named client or credential. Never invent.
-- Line 6: CTA — offer to send company profile, COA, spec sheet, or sample. "No commitment at all."
+- Line 6: CTA — ask them to share their current spec so you can send a matched sample. "If you could share your current spec, I'd be happy to send a matched sample — no commitment at all."
 - Full signature: name · role · company · contact
 
 TOUCH 2 — Day 4 · LinkedIn DM
@@ -501,7 +501,7 @@ One named, specific reason to believe — named clients, not percentages. Use on
 IMPORTANT: Do NOT repeat the client names or certifications already stated in Line 2's authority block. Instead, add one specific detail that deepens the proof — e.g. a volume reference ("same spec across 50,000 tons/month"), a specific outcome ("zero batch rejections in 18 months of supply to ITC"), a process detail ("every lot ships with a full COA and mill certificate"), or a geography note ("supplying across India, MENA, and West Africa"). If you have nothing to add, skip Line 5 and go straight to Line 6.
 
 LINE 6 — CTA:
-Soft, low-friction ask. Include the phrase "no commitment at all" in this section. ${senderCta}. Offer something specific and useful: spec sheet, COA, sample, landed cost — name it.
+Ask them to share their current spec so you can send a matched sample. Exact framing: "If you could share your current [corn grit / flour] spec, I'd be happy to send a matched sample — no commitment at all." Do NOT position as a replacement for their existing supplier. Position as a second source that improves supply chain reliability — most procurement managers already have a primary supplier and won't switch, but they will add a second qualified source to de-risk their line. The CTA should feel like a natural next step, not a sales push.
 
 SIGN OFF: ${senderName} · ${senderRole}
 
@@ -534,7 +534,7 @@ WORD COUNT — GEOGRAPHY-BASED:
 - UK/US/Europe prospects: 100–140 words max. They skim. Get to the point faster.
 Do not pad. Do not compress if you have something real to say. Long and credible beats short and vague — but long and fluffy loses immediately.
 
-This is a long sales cycle business. The email earns the right to send a COA, spec sheets, and a 250kg sample — it does not close a deal. Write with that arc in mind.
+This is a long sales cycle business. The email earns the right to receive the prospect's spec, send a matched sample, and start a conversation — it does not close a deal. Write with that arc in mind. Most buyers already have a primary supplier. Do not ask them to switch. Position TBI Corn as a second qualified source that adds supply chain reliability — a de-risk, not a disruption.
 
 AUTHORITY:
 The sender must come across as credible and established. Include credentials that earn trust: years in operation, listed status, plant count, named clients, certifications. Place authority early (Line 2 — after the icebreaker), not buried at the end.
