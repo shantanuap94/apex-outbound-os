@@ -890,14 +890,20 @@ async function logReplyToMemory(prospectId, replyText, classification) {
   const newCount = (cached?.reply_count || 0) + 1;
   const patch = { last_reply_at: now, reply_count: newCount, active_email_idx: 0 };
   if (classification === 'meeting_booked') patch.meeting_booked = true;
-  await _sb.from('prospects').update(patch).eq('id', prospectId);
+  const { error: pErr } = await _sb.from('prospects').update(patch).eq('id', prospectId);
+  if (pErr) throw pErr;
   if (cached) Object.assign(cached, patch);
 }
 
 async function crmUpdateFields(id, fields) {
   const i = _crmProspects.findIndex((p) => p.id === id);
   if (i >= 0) Object.assign(_crmProspects[i], fields);
-  if (_sb && _userId) { await _sb.from("prospects").update(fields).eq("id", id); return; }
+  if (_sb && _userId) {
+    const { error } = await _sb.from("prospects").update(fields).eq("id", id);
+    if (error) throw error;
+    return;
+  }
+  if (_sb && !_userId) throw new Error("Session expired — please sign in again");
   const all = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
   const li = all.findIndex((e) => e.id === id);
   if (li >= 0) {
@@ -1084,17 +1090,24 @@ function wireMemory() {
       };
       const orig = saveCrm.textContent;
       saveCrm.textContent = "Saving…"; saveCrm.disabled = true;
-      await crmUpdateFields(_currentDrawerId, fields);
-      const newStatus = fields.status;
-      if (['replied', 'meeting', 'closed'].includes(newStatus) && newStatus !== prevStatus) {
-        const classification = newStatus === 'meeting' ? 'meeting_booked'
-                             : newStatus === 'closed'  ? 'opt_out'
-                             : 'positive_interest';
-        await logReplyToMemory(_currentDrawerId, fields.notes || '', classification);
+      try {
+        await crmUpdateFields(_currentDrawerId, fields);
+        const newStatus = fields.status;
+        if (['replied', 'meeting', 'closed'].includes(newStatus) && newStatus !== prevStatus) {
+          const classification = newStatus === 'meeting' ? 'meeting_booked'
+                               : newStatus === 'closed'  ? 'opt_out'
+                               : 'positive_interest';
+          await logReplyToMemory(_currentDrawerId, fields.notes || '', classification);
+        }
+        saveCrm.textContent = "Saved ✓";
+        setTimeout(() => { saveCrm.textContent = orig; saveCrm.disabled = false; }, 1500);
+        renderMemoryList();
+      } catch (e) {
+        console.error("CRM save error:", e);
+        saveCrm.textContent = "Save failed";
+        saveCrm.disabled = false;
+        alert(e.message || "Save failed — check console for details");
       }
-      saveCrm.textContent = "Saved ✓";
-      setTimeout(() => { saveCrm.textContent = orig; saveCrm.disabled = false; }, 1500);
-      renderMemoryList();
     });
   }
 
