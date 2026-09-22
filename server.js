@@ -445,8 +445,16 @@ Each touch: different angle, different emotional register. No invented statistic
 
       outreach: `Write a 4-EMAIL NURTURE SEQUENCE FROM ${senderName} to ${p} (${role}) at ${co}. Goal: get a 20-minute meeting. Emails send every 2 days. Each email takes a different angle. The prospect does not know ${senderName} — Email 1 must introduce the sender fully.${dossierCtx}
 
+CRITICAL — READ BEFORE WRITING ANYTHING:
+- The sender's name is ${senderName}. Use this EXACT name in every email. Do not change it, shorten it, replace it with a placeholder, or invent a different name. If you write any name other than "${senderName}", you have failed.
+- The sender's role is ${senderRole}. Use verbatim.
+- SIGNATURE FORMAT — exact, nothing else: ${senderName} · ${senderRole}. Do NOT add a company tagline, slogan, "Leader in X Industry", or any text you invented. The signature is only name and role.
+- PRODUCT CATEGORIES — only use what is in the offer field below. Do not add, infer, or invent any other product: no "Indian yellow maize", no "corn starch", no "modified starch", no wet-milled products, no grain categories not explicitly named.
+- YEARS/NUMBERS — do not calculate or estimate years of experience. Use the exact phrasing from the offer field verbatim (e.g. "milling since 1999"). Do not convert this to "23+ years" or any other number you calculated.
+
 THE SENDER:
-- ${senderName}, ${senderRole}
+- Name: ${senderName} (use exactly — no substitutions)
+- Role: ${senderRole}
 - Company offer: ${senderOffer}
 - Why it matters to buyers like ${p}: ${senderValueProp}
 - Proof (use verbatim, never invent): ${senderProof ? senderProof : "Use company credentials factually — years operating, listed status, plant count."}
@@ -469,9 +477,22 @@ EMAIL 1 — Day 1 · Pain-led
 STRUCTURE (mandatory — do not deviate):
 
 LINE 1 — ICEBREAKER:
-One specific, researched observation about ${p} or ${co}. Must name an actual product, launch, expansion, or career signal from the dossier. This is what separates this email from 199 others. Do NOT open with a pain statement. Name the actual thing.
+One specific, researched observation about ${p} or ${co}. Must name an ACTUAL PRODUCT, BRAND, LAUNCH, or SPECIFIC FACT from the dossier's raw signals — not a generic compliment.
+
+IGNORE the pre-written "Ice Breaker Bank" examples in the dossier if they are generic. Go back to the raw signals in Section 0 and Section 1 of the dossier — the actual product names, expansion details, launch dates, company facts — and build a sharper icebreaker from those.
+
+BANNED icebreaker patterns — never write these:
+- "I've been following [company]'s impressive move to..."
+- "A testament to your growth / market leadership / impressive expansion"
+- "Congrats on [generic achievement]"
+- "Your [adjective] journey / rapid ascension / incredible story"
+- Any generic compliment that could apply to any company
+
+GOOD: "Gopal Snacks is rolling out 26 new products by November — that kind of push across Gathiya, Bhujia, and extruded lines puts real pressure on corn grit consistency run to run."
 GOOD: "Saw that Cremica just expanded its extruded snacks line — 6 new SKUs added to the Cremica Crunch range."
-BAD: "Struggling with ingredient deviations, Santosh?"
+BAD: "I've been following Gopal Snacks' impressive move to add 26 new products — a testament to your market growth."
+
+The icebreaker must name something specific — a product, a launch, a number, a fact. If it could be sent to any company in the same industry, it is not specific enough. Rewrite it.
 
 LINE 2 — SENDER INTRO + AUTHORITY BLOCK:
 Not one sentence — 3-5 sentences. The prospect is a stranger. They need to know who is writing and why it's worth reading. Include ALL available from the sender profile: full name and role, company name (BSE/NSE listed status if applicable), exact product categories (not "corn products" — name them), years in operation, plant count, named clients, certifications, capacity. This block earns the right to keep reading. Do not compress.
@@ -550,7 +571,12 @@ BANNED PHRASES:
 - "Hope this finds you well" / "Just following up" / "Circling back" / "As per my last email"
 - "We help companies like yours" / "Would love to connect and exchange notes"
 - "Leverage synergies" / "seamless efficiency" / "value proposition" / "end-to-end solution"
-- Any fabricated percentage or statistic not from the dossier
+- "A testament to your growth / market leadership / impressive move"
+- "Congrats on [achievement]" as an opener
+- "innovative snack manufacturers" / "premium corn products" / "industry-leading expertise"
+- "Leader in [X] Industry" — never add this to a signature or anywhere
+- Any fabricated percentage, statistic, or trend not directly from the dossier
+- Any company tagline or slogan you invented for the sender
 
 TONE: ${senderTone} — warm, peer-to-peer, expert but not arrogant. Write like you met this person at an industry event and you're following up the next morning.
 
