@@ -373,8 +373,12 @@ Rules:
 
 This DM has 6 mandatory parts. Write them in order. Do not skip or merge parts.
 
-PART 1 — SOFT RESTART (1 sentence):
-Acknowledge the connection naturally. Something like: "Thanks for accepting — LinkedIn has a habit of burying things, so wanted to follow up properly."
+PART 1 — WARM GREETING (2 sentences max):
+The ONLY contact before this DM was the connection request. There has been no exchange, no prior conversation, no calls. Do NOT say "during our initial exchange" or "from our earlier chat" — nothing like that happened.
+
+Open with genuine warmth: "Hi [Name], appreciate the connection — really glad to have you in my network." Then one simple human sentence that acknowledges their role or company genuinely (not flatteringly — specifically).
+
+Example: "Hi Shailesh, appreciate the connection — really glad to have you in my network. I have followed Britannia's expansion for a while and your role sits right at the centre of where product innovation meets procurement reality."
 
 PART 2 — THEIR WORLD (2-3 sentences):
 "I was thinking about your world..." — then describe ${p}'s specific situation using named facts from the dossier: their products, their company's market position, their recent expansion, their role. Make ${p} feel you actually looked. Not "the food industry" — name Cremica, name the fruit crush range, name the specific expansion. Use what the dossier gives you.
@@ -388,11 +392,21 @@ PART 4 — COMPANY CONTEXT (2 sentences max):
 PART 5 — OFFER FOR THEIR FILE (1-2 sentences):
 Offer something specific and useful — a COA, a spec sheet, a market note, a landed cost comparison. Use the phrase: "no strings attached, even if you're not looking to switch." This is value delivery, not a pitch.
 
-PART 6 — DOUBLE ASK (2 lines):
-First ask: their official email ("so I can send it properly rather than LinkedIn messaging").
-Second ask: a 20-minute call or quick catch-up — frame as low-pressure: "even just 20 minutes — no commitment at all."
+PART 6 — SOFT CLOSE (rapport-first, no meeting ask yet):
+The goal of this DM is to build trust and start a human connection. Do NOT ask for a meeting or call in this message — that comes later in the sequence after more rapport is built.
 
-Tone: ${senderTone} — conversational, warm, peer-to-peer. No corporate language. No "I hope this message finds you well." Write it like a real person wrote it.
+End with something like: "Would love to get to know you properly. If it ever makes sense, I'd be glad to share a sample or find some way I can genuinely add value to this connection. No rush at all — just good to be connected."
+
+Then sign off warmly: Best, [Name]
+
+IMPORTANT RULES FOR THIS DM:
+- Simple, human language — short sentences, no corporate phrases
+- Warm and personal, not transactional
+- No meeting request in this message — only a soft offer of value and a genuine human close
+- No "I hope this message finds you well", no "I wanted to reach out"
+- Write like a real person sent it from their phone
+
+Tone: ${senderTone} — conversational, warm, peer-to-peer.
 
 ---
 
@@ -453,12 +467,31 @@ LINE 1 — ICEBREAKER (this is non-negotiable):
 Open with ONE specific, researched observation about ${p} or ${co}. It must name an actual product, brand, recent launch, campaign, market move, or career signal pulled from the Intelligence Dossier. This is what separates this email from 199 others in their inbox. Do NOT open with a pain statement. Do NOT open with "I noticed you're in the food industry." Name the actual thing — a specific product, a specific launch, a specific fact.
 Example quality: "Noticed Cremica's fruit crush range just launched 10 new variants in June" NOT "As a supply chain leader in the food industry..."
 
-LINE 2 — SENDER INTRO (always second, never first):
-"I'm ${senderName} — [one natural sentence: their exact role, company name, what the company does and its credentials. Factual, not salesy.]"
-Example: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE listed corn processing company based in India, milling since 1999 across 4 plants."
+LINE 2 — SENDER INTRO + AUTHORITY BLOCK (always second, never first):
+This is NOT one sentence. This is 3-5 sentences. The prospect is a stranger — they need to know who they are hearing from and why the sender is worth reading.
+
+Write a mini authority block that includes ALL of the following, if available from the sender profile:
+- Full name and role
+- Company name (with BSE/NSE listed status if applicable)
+- What the company makes — name the actual product categories (corn grits, fine corn flour, corn starch — not "corn products")
+- Years in operation (e.g. "milling since 1999")
+- Plant count or manufacturing scale
+- Named clients (ITC, Pratap Snacks, Haldiram's, Balaji Wafers — not "major snack brands")
+- Relevant certifications (FSSAI, ISO, HACCP, BRC, etc.)
+- Capacity (tonnes/day, annual output, etc. if known)
+
+Example (3 sentences — write this quality):
+"I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company based in Ratlam, Madhya Pradesh, milling since 1999. We run 4 plants and supply corn grits, fine corn flour, and corn starch to ITC, Pratap Snacks, Balaji Wafers, and Haldiram's — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive your line efficiency and OTIF reliability. We're FSSAI, ISO 22000, and HACCP certified, and we export to the UK, MENA, and West Africa."
+
+This block is what earns the right to keep reading. Do not compress it into one line.
 
 LINES 3-4 — BRIDGE (this is where the variants differ):
 Connect ${p}'s specific situation to ${senderName}'s offer. Use technical/specific language — name the exact ingredient, mechanism, or outcome. Not "corn products" but "corn grits, where particle size uniformity, consistent expansion and oil uptake make a real difference to line efficiency and OTIF planning."
+
+IMPORTANT — WEAVE IN NDFFO AND EMPATHY:
+The bridge must reflect what ${p} privately feels, fears, or desires (drawn from the ICP emotional profile). Make them feel understood, not sold to. Reference their actual world — their products by name, their role pressures, their company's current moment. This is not a generic bridge — it must read as if you know their situation specifically.
+
+Example: Don't write "supply chain challenges are common in the industry." Write "When you're running [specific product line] and you need consistent particle size run to run — because a deviation in corn grit size means rejected batches, wasted line time, and a call from the QA head — that's the exact place where supplier consistency becomes a real business question, not just a spec on paper."
 
 LINE 5 — PROOF:
 One named, specific reason to believe — named clients, not percentages. Use only what's provided in the sender's social proof. Never invent.
@@ -505,6 +538,9 @@ OTHER RULES:
 - Every variant must draw a DIFFERENT icebreaker from different dossier signals
 - No email may start with a pain statement — icebreaker always comes first
 - End with full signature: name · role · company · contact/email · website if available
+
+LANGUAGE RULE — WRITE SIMPLE:
+Use the language a smart 12-year-old would understand. Short sentences. No jargon unless it is a technical term the buyer actually uses (like "COA", "OTIF", "extruder"). No corporate phrases like "leverage synergies", "seamless efficiency", "value proposition", "end-to-end solution". If you can replace a long word with a short one, do it. Clear is better than impressive.
 
 Label each clearly: VARIANT A, VARIANT B, VARIANT C.`,
 
