@@ -185,7 +185,40 @@ Be specific, concrete, and insight-driven. Avoid buzzwords. Return only valid JS
   }
 }
 
+// ─── Context Compression ─────────────────────────────────────────────────────
+function compressContext(apolloData, perplexityText, manualSignals) {
+  const signals = [];
+  if (manualSignals) signals.push(...manualSignals.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 8));
+  if (perplexityText) {
+    // Pull first 600 chars of Perplexity output as the key intel
+    signals.push(perplexityText.trim().substring(0, 600));
+  }
+  return {
+    company:   apolloData?.organization?.name || apolloData?.company || 'Unknown',
+    headcount: apolloData?.organization?.estimated_num_employees || apolloData?.headcount || 'Unknown',
+    location:  apolloData?.organization?.city || apolloData?.location || 'Unknown',
+    title:     apolloData?.title || apolloData?.job_title || 'Unknown',
+    email:     apolloData?.email || apolloData?.work_email || null,
+    confidence: apolloData ? 'high' : 'none',
+    signals:   signals.filter(Boolean),
+  };
+}
+
+// ─── Chain Run (SSE streaming) ─────────────────────────────────────────────────
 async function handleChainRun(req, res) {
+  // Set SSE headers immediately — keeps connection alive past any proxy timeout
+  res.writeHead(200, {
+    'Content-Type':      'text/event-stream',
+    'Cache-Control':     'no-cache',
+    'Connection':        'keep-alive',
+    'X-Accel-Buffering': 'no',
+    'Access-Control-Allow-Origin': '*',
+  });
+
+  const sendEvent = (payload) => {
+    try { res.write(`data: ${JSON.stringify(payload)}\n\n`); } catch (_) {}
+  };
+
   try {
     const body = await readBody(req);
     const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply } = body;
@@ -672,18 +705,59 @@ Be honest: if this is a polite no, say so and recommend a graceful break-up mess
       { role: "user", content: stepPrompts[step] || body.prompt || "" },
     ];
 
+    const maxTokens = step === "followup" ? 5000 : step === "research" ? 3500 : 2500;
+
+    sendEvent({ step, status: 'processing' });
+
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
       },
-      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: step === "followup" ? 5000 : step === "research" ? 3500 : 2500 }),
+      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: maxTokens, stream: true }),
     });
-    const data = await r.json();
-    json(res, { content: data.choices?.[0]?.message?.content, step });
+
+    if (!r.ok) {
+      const errText = await r.text();
+      sendEvent({ step, status: 'error', error: `OpenAI ${r.status}: ${errText.substring(0, 200)}` });
+      res.end();
+      return;
+    }
+
+    // Stream tokens to the client as they arrive
+    let fullContent = '';
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+
+      for (const line of lines) {
+        const payload = line.slice(6).trim();
+        if (payload === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(payload);
+          const token = parsed.choices?.[0]?.delta?.content;
+          if (token) {
+            fullContent += token;
+            sendEvent({ step, status: 'token', token });
+          }
+        } catch (_) {}
+      }
+    }
+
+    sendEvent({ step, status: 'done', content: fullContent });
+    res.end();
   } catch (e) {
-    json(res, { error: e.message }, 500);
+    try {
+      sendEvent({ step: step || 'unknown', status: 'error', error: e.message });
+      res.end();
+    } catch (_) {}
   }
 }
 
@@ -702,10 +776,29 @@ async function handlePerplexitySearch(req, res) {
         max_tokens: 1024,
       }),
     });
+
+    if (!r.ok) {
+      const errText = await r.text();
+      console.warn(`Perplexity ${r.status}:`, errText.substring(0, 200));
+      // Graceful degradation — return empty result with confidence flag
+      return json(res, {
+        confidence: 'none',
+        choices: [{ message: { content: '' } }],
+        _degraded: true,
+        _reason: `Perplexity returned ${r.status}`,
+      });
+    }
+
     const data = await r.json();
-    json(res, data);
+    json(res, { ...data, confidence: 'high' });
   } catch (e) {
-    json(res, { error: e.message }, 500);
+    console.error('Perplexity search failed:', e.message);
+    json(res, {
+      confidence: 'none',
+      choices: [{ message: { content: '' } }],
+      _degraded: true,
+      _reason: e.message,
+    });
   }
 }
 
@@ -720,10 +813,41 @@ async function handleApolloMatch(req, res) {
       },
       body: JSON.stringify(body),
     });
+
+    if (r.status === 429) {
+      console.warn('Apollo rate limit hit — returning degraded result');
+      return json(res, {
+        confidence: 'none',
+        _degraded: true,
+        _reason: 'Apollo rate limit (429) — enrichment unavailable',
+        person: null,
+        organization: null,
+      });
+    }
+
+    if (!r.ok) {
+      const errText = await r.text();
+      console.warn(`Apollo ${r.status}:`, errText.substring(0, 200));
+      return json(res, {
+        confidence: 'none',
+        _degraded: true,
+        _reason: `Apollo returned ${r.status}`,
+        person: null,
+        organization: null,
+      });
+    }
+
     const data = await r.json();
-    json(res, data);
+    json(res, { ...data, confidence: 'high' });
   } catch (e) {
-    json(res, { error: e.message }, 500);
+    console.error('Apollo match failed:', e.message);
+    json(res, {
+      confidence: 'none',
+      _degraded: true,
+      _reason: e.message,
+      person: null,
+      organization: null,
+    });
   }
 }
 
@@ -895,6 +1019,30 @@ async function handleConfig(req, res) {
   });
 }
 
+// ─── Health ───────────────────────────────────────────────────────────────────
+async function handleHealth(req, res) {
+  const start = Date.now();
+  try {
+    // Lightweight smoke test — one token from OpenAI confirms the key and network are live
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+      body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
+    });
+    const ok = r.ok;
+    json(res, {
+      status: ok ? "ok" : "degraded",
+      latency_ms: Date.now() - start,
+      openai: ok ? "connected" : `error ${r.status}`,
+      apollo: process.env.APOLLO_API_KEY ? "key_set" : "missing",
+      perplexity: process.env.PERPLEXITY_API_KEY ? "key_set" : "missing",
+      supabase: process.env.SUPABASE_URL ? "key_set" : "missing",
+    }, ok ? 200 : 503);
+  } catch (e) {
+    json(res, { status: "error", error: e.message, latency_ms: Date.now() - start }, 503);
+  }
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 const POST_ROUTES = {
   "/api/icp/fill": handleIcpFill,
@@ -920,6 +1068,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && pathname === "/api/status") return handleStatus(req, res);
   if (req.method === "GET" && pathname === "/api/config") return handleConfig(req, res);
+  if (req.method === "GET" && pathname === "/api/health") return handleHealth(req, res);
 
   const runMatch = pathname.match(/^\/api\/leads\/run\/(.+)$/);
   if (req.method === "GET" && runMatch) return handleLeadsRunStatus(req, res, runMatch[1]);
@@ -943,4 +1092,19 @@ server.listen(PORT, () => {
   console.log(`  Perplexity: ${k(process.env.PERPLEXITY_API_KEY)}`);
   console.log(`  Apify:      ${k(process.env.APIFY_API_KEY)}`);
   console.log(`  Supabase:   ${k(process.env.SUPABASE_URL)}\n`);
+});
+
+// ─── Graceful shutdown ────────────────────────────────────────────────────────
+// Render sends SIGTERM before killing the old instance on every deploy.
+// This gives in-flight SSE streams up to 25s to complete before the process exits.
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received — draining in-flight requests (max 25s)...");
+  server.close(() => {
+    console.log("All connections closed. Exiting cleanly.");
+    process.exit(0);
+  });
+  setTimeout(() => {
+    console.error("Drain timeout exceeded — forcing exit.");
+    process.exit(1);
+  }, 25000);
 });

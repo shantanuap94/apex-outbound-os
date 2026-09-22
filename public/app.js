@@ -45,6 +45,50 @@ function post(path, body) {
 }
 function get(path) { return fetch(API + path).then((r) => r.json()); }
 
+// ─── SSE chain helper ─────────────────────────────────────────────────────────
+// Replaces post() for /api/chain/run — streams tokens to an optional onToken
+// callback and resolves with { content, step } when done.
+function postStream(path, body, onToken) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const res = await fetch(API + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) { resolve({ error: `HTTP ${res.status}` }); return; }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      let fullContent = "";
+      let step = body.step || "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop(); // keep incomplete line in buffer
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const evt = JSON.parse(line.slice(6));
+            if (evt.status === "token" && evt.token) {
+              fullContent += evt.token;
+              if (onToken) onToken(evt.token, fullContent);
+            }
+            if (evt.status === "done") { step = evt.step || step; fullContent = evt.content || fullContent; }
+            if (evt.status === "error") { resolve({ error: evt.error || "Unknown error" }); return; }
+          } catch (_) {}
+        }
+      }
+      resolve({ content: fullContent, step });
+    } catch (e) { resolve({ error: e.message }); }
+  });
+}
+
 // ─── API Status ───────────────────────────────────────────────────────────────
 async function checkApiStatus() {
   try {
@@ -1150,13 +1194,13 @@ Also include any recent news, leadership changes, or awards from the last 90 day
     setRunning(btn, "Run Agent 1 — Research");
     $("dossierOut").innerHTML = '<span class="dossier-empty">Researching…</span>';
     try {
-      const { content, error } = await post("/api/chain/run", {
+      const { content, error } = await postStream("/api/chain/run", {
         prospect: p,
         icp: getIcp(),
         senderProfile: getSender(),
         step: "research",
         signalContext: $("signalContext").value,
-      });
+      }, (_, full) => { $("dossierOut").textContent = full; });
       if (error) { $("dossierOut").textContent = "Error: " + error; return; }
       $("dossierOut").textContent = content;
       localStorage.setItem("apex.currentDossier", content);
@@ -1200,23 +1244,35 @@ Also include any recent news, leadership changes, or awards from the last 90 day
 
     try {
       const sender = getSender();
-      // Run cold emails + LinkedIn in parallel
+      // Run cold emails + LinkedIn in parallel — both use SSE streaming
+      const emailOutEl = $("emailOut-a");
+      const liOutEl = $("liOut");
       const [emailRes, liRes] = await Promise.all([
-        post("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "outreach", dossier }),
-        post("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "linkedin", dossier, linkedinPosts: $("linkedinPosts").value }),
+        postStream("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "outreach", dossier },
+          (_, full) => { if (emailOutEl) emailOutEl.textContent = full; }),
+        postStream("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "linkedin", dossier, linkedinPosts: $("linkedinPosts").value },
+          (_, full) => { if (liOutEl) liOutEl.textContent = full; }),
       ]);
 
-      // Parse 3 email variants from response
+      // Parse 4 email sequence from response (EMAIL 1 / EMAIL 2 / EMAIL 3 / EMAIL 4)
       let emailA = "", emailB = "", emailC = "";
       if (emailRes.content) {
         const raw = emailRes.content;
-        const aMatch = raw.match(/VARIANT A[\s\S]*?(?=VARIANT B|$)/i)?.[0] || "";
-        const bMatch = raw.match(/VARIANT B[\s\S]*?(?=VARIANT C|$)/i)?.[0] || "";
-        const cMatch = raw.match(/VARIANT C[\s\S]*/i)?.[0] || "";
-        emailA = aMatch.trim() || raw; emailB = bMatch.trim() || ""; emailC = cMatch.trim() || "";
+        // Try new 4-email format first, fall back to old VARIANT format
+        const e1 = raw.match(/EMAIL 1[\s\S]*?(?=EMAIL 2|$)/i)?.[0] || "";
+        const e2 = raw.match(/EMAIL 2[\s\S]*?(?=EMAIL 3|$)/i)?.[0] || "";
+        const e3tail = raw.match(/EMAIL 3[\s\S]*/i)?.[0] || "";
+        if (e1) {
+          emailA = e1.trim(); emailB = e2.trim(); emailC = e3tail.trim();
+        } else {
+          const aMatch = raw.match(/VARIANT A[\s\S]*?(?=VARIANT B|$)/i)?.[0] || "";
+          const bMatch = raw.match(/VARIANT B[\s\S]*?(?=VARIANT C|$)/i)?.[0] || "";
+          const cMatch = raw.match(/VARIANT C[\s\S]*/i)?.[0] || "";
+          emailA = aMatch.trim() || raw; emailB = bMatch.trim() || ""; emailC = cMatch.trim() || "";
+        }
         $("emailOut-a").textContent = emailA;
-        $("emailOut-b").textContent = emailB || "See Variant A";
-        $("emailOut-c").textContent = emailC || "See Variant A";
+        $("emailOut-b").textContent = emailB || "See Email 1";
+        $("emailOut-c").textContent = emailC || "See Email 1";
 
         const count = parseInt(localStorage.getItem("apex.draftCount") || "0", 10) + 3;
         localStorage.setItem("apex.draftCount", count);
@@ -1264,10 +1320,10 @@ Also include any recent news, leadership changes, or awards from the last 90 day
     $("followupOut").textContent = "Building 8-touch cadence — this takes 30–40 seconds…";
     $("followupOut").classList.remove("hidden");
     try {
-      const { content, error } = await post("/api/chain/run", {
+      const { content, error } = await postStream("/api/chain/run", {
         prospect: p, icp: getIcp(), senderProfile: getSender(), step: "followup",
         dossier, sequenceState: state,
-      });
+      }, (_, full) => { $("followupOut").textContent = full; });
       $("followupOut").textContent = error ? "Error: " + error : content;
       if (!error) {
         setStepDone(7);
@@ -1286,10 +1342,10 @@ Also include any recent news, leadership changes, or awards from the last 90 day
     $("objectionOut").textContent = "Analysing reply…";
     $("objectionOut").classList.remove("hidden");
     try {
-      const { content, error } = await post("/api/chain/run", {
+      const { content, error } = await postStream("/api/chain/run", {
         prospect: getProspect(), icp: getIcp(), senderProfile: getSender(),
         step: "objection", reply,
-      });
+      }, (_, full) => { $("objectionOut").textContent = full; });
       $("objectionOut").textContent = error ? "Error: " + error : content;
       if (!error) {
         setStepDone(8);
