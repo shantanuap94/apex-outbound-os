@@ -256,9 +256,15 @@
         </div>
 
         <div class="icp-save mt-16">
+          <input type="text" id="icpProfileName" placeholder="Profile name (e.g. Indian Snack Buyers)" style="flex:1;min-width:160px;max-width:260px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg-2);color:var(--text-1);font-size:13px">
           <button class="btn btn-dark" id="icpSaveBtn">Save ICP</button>
           <button class="btn btn-outline" id="icpClearBtn">Clear</button>
           <span class="saved-note" id="icpSavedNote">Saved ✓</span>
+        </div>
+        <div class="icp-save" style="margin-top:8px">
+          <select id="icpProfileSelect" style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg-2);color:var(--text-1);font-size:13px;cursor:pointer">
+            <option value="">— Load saved profile —</option>
+          </select>
         </div>
       </section>
 

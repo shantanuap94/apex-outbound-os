@@ -140,13 +140,76 @@ function loadSavedIcp() {
   } catch {}
 }
 
-function saveIcp() {
+async function saveIcp() {
   const data = {};
   ICP_FIELDS.forEach((f) => { const inp = $(`icp-${f}`); if (inp) data[f] = inp.value; });
   localStorage.setItem("apex.icp", JSON.stringify(data));
   const note = $("icpSavedNote");
-  note.classList.add("show");
-  setTimeout(() => note.classList.remove("show"), 2000);
+  if (_sb && _userId) {
+    const name = ($("icpProfileName")?.value || "").trim();
+    if (!name) {
+      note.classList.add("show");
+      setTimeout(() => note.classList.remove("show"), 2000);
+      return;
+    }
+    try {
+      const { error } = await _sb.from("icp_profiles").upsert(
+        { user_id: _userId, name, data, updated_at: new Date().toISOString() },
+        { onConflict: "user_id,name" }
+      );
+      if (error) throw error;
+      note.classList.add("show");
+      setTimeout(() => note.classList.remove("show"), 2000);
+      await loadIcpProfiles();
+    } catch (e) {
+      const orig = note.textContent;
+      note.textContent = "Save failed";
+      note.classList.add("show");
+      alert(e.message || "Failed to save ICP profile");
+      setTimeout(() => { note.classList.remove("show"); note.textContent = orig; }, 2000);
+    }
+  } else {
+    note.classList.add("show");
+    setTimeout(() => note.classList.remove("show"), 2000);
+  }
+}
+
+async function loadIcpProfiles() {
+  if (!_sb || !_userId) return;
+  try {
+    const { data, error } = await _sb
+      .from("icp_profiles")
+      .select("id, name")
+      .order("updated_at", { ascending: false });
+    if (error || !data) return;
+    const sel = $("icpProfileSelect");
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Load saved profile —</option>';
+    data.forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+    if (current) sel.value = current;
+  } catch {}
+}
+
+async function loadIcpProfile(id) {
+  if (!_sb || !id) return;
+  try {
+    const { data, error } = await _sb
+      .from("icp_profiles")
+      .select("name, data")
+      .eq("id", id)
+      .single();
+    if (error || !data) return;
+    const nameInp = $("icpProfileName");
+    if (nameInp) nameInp.value = data.name;
+    fillIcpFromObj(data.data || {});
+    localStorage.setItem("apex.icp", JSON.stringify(data.data || {}));
+  } catch {}
 }
 
 function getIcp() {
@@ -202,7 +265,12 @@ function wireIcp() {
   $("icpSaveBtn").addEventListener("click", saveIcp);
   $("icpClearBtn").addEventListener("click", () => {
     ICP_FIELDS.forEach((f) => { const inp = $(`icp-${f}`); if (inp) inp.value = ""; });
+    const nameInp = $("icpProfileName");
+    if (nameInp) nameInp.value = "";
   });
+  const icpSel = $("icpProfileSelect");
+  if (icpSel) icpSel.addEventListener("change", () => { if (icpSel.value) loadIcpProfile(icpSel.value); });
+  loadIcpProfiles();
 }
 
 // ─── Sender Profile ───────────────────────────────────────────────────────────
