@@ -938,6 +938,7 @@ main { padding: 24px 32px 60px; }
 .seq-done    { background: rgba(142,142,147,.15); color: #8e8e93; }
 .seq-overdue { background: rgba(255,59,48,.18);   color: #ff3b30; }
 .seq-pending { background: rgba(142,142,147,.10); color: var(--text-3); }
+.seq-supp    { background: rgba(255,59,48,.12);   color: #ff6b6b; font-size: 12px; }
 
 .seq-status-bar {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -1020,6 +1021,68 @@ main { padding: 24px 32px 60px; }
 }
 .dcf-notes textarea:focus, .dcf-text:focus, .dcf-date:focus, .dcf-row select:focus {
   outline: none; border-color: rgba(255,255,255,.3);
+}
+
+/* ─── Suppression ────────────────────────────────────────────────────────── */
+.supp-panel {
+  margin: 10px 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+.supp-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; cursor: pointer; user-select: none;
+  font-size: 12px; font-weight: 600; color: var(--text-2);
+  background: var(--bg-2);
+}
+.supp-panel-header:hover { background: var(--bg-3); }
+.supp-count-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,59,48,.18); color: #ff3b30;
+  font-size: 10px; font-weight: 700; padding: 1px 6px;
+  border-radius: 10px; margin-left: 6px;
+}
+.supp-toggle-arrow { font-size: 10px; color: var(--text-3); }
+.supp-panel-body { padding: 10px 14px 12px; }
+.supp-add-row {
+  display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+}
+.supp-add-input {
+  flex: 1; height: 32px; padding: 0 10px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--bg-2);
+  color: var(--text-1); font-size: 12px;
+}
+.supp-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+.supp-empty { font-size: 11.5px; color: var(--text-3); margin: 0; padding: 6px 0; }
+.supp-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 7px; background: var(--bg-2);
+  font-size: 12px;
+}
+.supp-email { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-1); }
+.supp-reason {
+  font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px;
+  background: rgba(255,59,48,.12); color: #ff6b6b; text-transform: uppercase;
+}
+.supp-remove { font-size: 11px; padding: 2px 8px; }
+
+/* Suppressed row in CRM list */
+.row-suppressed { opacity: 0.55; }
+.row-suppressed .mr-name { text-decoration: line-through; text-decoration-color: rgba(255,59,48,.5); }
+
+/* Suppress button in drawer footer */
+.dcf-notes-actions {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px;
+}
+.supp-btn {
+  font-size: 11px; color: var(--text-3); padding: 4px 10px;
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.supp-btn:hover, .btn-suppress-active {
+  color: #ff3b30 !important; border-color: rgba(255,59,48,.4) !important;
+  background: rgba(255,59,48,.07) !important;
 }
 
 /* ─── Responsive — laptop (≤ 1200px) ────────────────────────────────────── */

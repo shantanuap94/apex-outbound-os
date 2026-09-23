@@ -402,6 +402,7 @@ const MEMORY_KEY = "apex.prospectMemory";
 let _sb = null;
 let _crmFilter = "all";
 let _crmProspects = [];
+let _suppressionList = []; // [{email, reason, id}]
 let _userId = null;
 let _appBooted = false;
 
@@ -834,10 +835,11 @@ function showNotApprovedScreen(email) {
 
 async function crmLoad() {
   if (_sb) {
-    const { data, error } = await _sb
-      .from("prospects")
-      .select("*")
-      .order("updated_at", { ascending: false });
+    const [prospectsResult] = await Promise.all([
+      _sb.from("prospects").select("*").order("updated_at", { ascending: false }),
+      loadSuppressionList(),
+    ]);
+    const { data, error } = prospectsResult;
     if (!error && data) { _crmProspects = data; updateCounters(); return; }
   }
   // localStorage fallback — map old format to flat CRM shape
@@ -866,6 +868,71 @@ async function crmLoad() {
     objection_response: e.objection || "",
   }));
   updateCounters();
+}
+
+// ─── Suppression List ─────────────────────────────────────────────────────────
+async function loadSuppressionList() {
+  if (!_sb || !_userId) return;
+  const { data, error } = await _sb
+    .from("suppression_list")
+    .select("id, email, reason, created_at")
+    .order("created_at", { ascending: false });
+  if (!error && data) _suppressionList = data;
+  renderSuppressionPanel();
+}
+
+function isSuppressed(email) {
+  if (!email) return false;
+  return _suppressionList.some((s) => s.email.toLowerCase() === email.toLowerCase());
+}
+
+async function suppressEmail(email, reason = "manual", prospectId = null) {
+  if (!email || !_sb || !_userId) return;
+  const record = { user_id: _userId, email: email.toLowerCase(), reason };
+  if (prospectId) record.prospect_id = prospectId;
+  const { data, error } = await _sb
+    .from("suppression_list")
+    .upsert(record, { onConflict: "user_id,email" })
+    .select("id, email, reason, created_at")
+    .single();
+  if (!error && data) {
+    const existing = _suppressionList.findIndex((s) => s.email === data.email);
+    if (existing >= 0) _suppressionList[existing] = data;
+    else _suppressionList.unshift(data);
+  }
+  renderSuppressionPanel();
+  renderMemoryList();
+}
+
+async function unsuppressEmail(email) {
+  if (!email || !_sb || !_userId) return;
+  await _sb.from("suppression_list")
+    .delete()
+    .eq("user_id", _userId)
+    .eq("email", email.toLowerCase());
+  _suppressionList = _suppressionList.filter((s) => s.email !== email.toLowerCase());
+  renderSuppressionPanel();
+  renderMemoryList();
+}
+
+function renderSuppressionPanel() {
+  const panel = $("suppressionList");
+  const count = $("suppressionCount");
+  if (count) count.textContent = _suppressionList.length;
+  if (!panel) return;
+  if (!_suppressionList.length) {
+    panel.innerHTML = '<p class="supp-empty">No suppressed emails. Bounces, unsubscribes, and manually suppressed contacts appear here.</p>';
+    return;
+  }
+  panel.innerHTML = _suppressionList.map((s) => `
+    <div class="supp-row">
+      <span class="supp-email">${s.email}</span>
+      <span class="supp-reason">${s.reason}</span>
+      <button class="btn btn-ghost btn-xs supp-remove" data-email="${s.email}">Remove</button>
+    </div>`).join("");
+  panel.querySelectorAll(".supp-remove").forEach((btn) => {
+    btn.addEventListener("click", () => unsuppressEmail(btn.dataset.email));
+  });
 }
 
 async function saveProspectToMemory(prospect, update) {
@@ -1046,16 +1113,19 @@ function renderMemoryList() {
     const due = getEmailDueStatus(p);
     return due && (due.status === 'due' || due.status === 'overdue');
   };
+  const isSuppressedProspect = (p) => isSuppressed(p.email);
 
-  const filtered = _crmFilter === 'all' ? _crmProspects
-    : _crmFilter === 'due' ? _crmProspects.filter(isDueProspect)
+  const filtered = _crmFilter === 'all'        ? _crmProspects
+    : _crmFilter === 'due'                      ? _crmProspects.filter(isDueProspect)
+    : _crmFilter === 'suppressed'               ? _crmProspects.filter(isSuppressedProspect)
     : _crmProspects.filter((p) => p.status === _crmFilter);
 
   // Update filter pill counts
   document.querySelectorAll(".crm-filter").forEach((pill) => {
     const f = pill.dataset.filter;
-    const count = f === 'all' ? _crmProspects.length
-      : f === 'due' ? _crmProspects.filter(isDueProspect).length
+    const count = f === 'all'        ? _crmProspects.length
+      : f === 'due'                  ? _crmProspects.filter(isDueProspect).length
+      : f === 'suppressed'           ? _crmProspects.filter(isSuppressedProspect).length
       : _crmProspects.filter((p) => p.status === f).length;
     const badge = pill.querySelector(".filter-count");
     if (badge) badge.textContent = count > 0 ? count : "";
@@ -1072,10 +1142,11 @@ function renderMemoryList() {
     const date = new Date(p.updated_at || p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
     const touchBadge = p.current_touch > 0 ? `<span class="touch-badge">T${p.current_touch}</span>` : "";
     const seqBadge   = getSequenceBadge(p);
+    const suppBadge  = isSuppressed(p.email) ? `<span class="seq-badge seq-supp" title="Suppressed — no outreach">⊘</span>` : "";
     const nextLine   = p.next_action ? `<div class="mr-next-action">→ ${p.next_action}${p.next_action_date ? " · " + p.next_action_date : ""}</div>` : "";
-    return `<div class="memory-row" data-id="${p.id}">
+    return `<div class="memory-row${isSuppressed(p.email) ? ' row-suppressed' : ''}" data-id="${p.id}">
       <div class="mr-main">
-        <div class="mr-name">${p.name || "Unknown"} ${touchBadge}${seqBadge}</div>
+        <div class="mr-name">${p.name || "Unknown"} ${touchBadge}${seqBadge}${suppBadge}</div>
         <div class="mr-meta">${[p.title, p.company].filter(Boolean).join(" · ")}</div>
         ${nextLine}
       </div>
@@ -1112,8 +1183,18 @@ function openMemoryDrawer(id) {
   if ($("drawerNextDate"))   $("drawerNextDate").value   = entry.next_action_date || "";
 
   renderDrawerTab("dossier", entry);
+  updateDrawerSuppressBtn(entry);
   $("memoryDrawer").classList.remove("hidden");
   $("memoryDrawer").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function updateDrawerSuppressBtn(p) {
+  const btn = $("drawerSuppressBtn");
+  if (!btn || !p) return;
+  const suppressed = isSuppressed(p.email);
+  btn.textContent = suppressed ? "⊘ Unsuppress" : "⊘ Suppress Email";
+  btn.classList.toggle("btn-suppress-active", suppressed);
+  btn.disabled = false;
 }
 
 async function markEmailSent(prospectId) {
@@ -1342,6 +1423,11 @@ function wireMemory() {
                                : newStatus === 'closed'  ? 'opt_out'
                                : 'positive_interest';
           await logReplyToMemory(_currentDrawerId, fields.notes || '', classification);
+          // Auto-suppress on opt-out / closed
+          if (newStatus === 'closed') {
+            const p = _crmProspects.find((x) => x.id === _currentDrawerId);
+            if (p?.email) await suppressEmail(p.email, 'opt_out', p.id);
+          }
         }
         saveCrm.textContent = "Saved ✓";
         setTimeout(() => { saveCrm.textContent = orig; saveCrm.disabled = false; }, 1500);
@@ -1362,6 +1448,52 @@ function wireMemory() {
       if (!btn || !_currentDrawerId) return;
       btn.textContent = "Saving…"; btn.disabled = true;
       await markEmailSent(_currentDrawerId);
+    });
+  }
+
+  // Suppress / Unsuppress button in drawer footer
+  const drawerFooter = $("drawerFooterArea");
+  if (drawerFooter) {
+    drawerFooter.addEventListener("click", async (e) => {
+      const btn = e.target.closest("#drawerSuppressBtn");
+      if (!btn || !_currentDrawerId) return;
+      const p = _crmProspects.find((x) => x.id === _currentDrawerId);
+      if (!p?.email) return;
+      const already = isSuppressed(p.email);
+      btn.textContent = "…"; btn.disabled = true;
+      if (already) {
+        await unsuppressEmail(p.email);
+      } else {
+        await suppressEmail(p.email, 'manual', p.id);
+      }
+      updateDrawerSuppressBtn(p);
+    });
+  }
+
+  // Suppression panel — manual add
+  const suppAddBtn = $("suppAddBtn");
+  if (suppAddBtn) {
+    suppAddBtn.addEventListener("click", async () => {
+      const inp = $("suppAddEmail");
+      const email = (inp?.value || "").trim().toLowerCase();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert("Enter a valid email address"); return;
+      }
+      suppAddBtn.textContent = "…"; suppAddBtn.disabled = true;
+      await suppressEmail(email, 'manual');
+      if (inp) inp.value = "";
+      suppAddBtn.textContent = "Add"; suppAddBtn.disabled = false;
+    });
+  }
+
+  // Toggle suppression panel
+  const suppToggle = $("suppPanelToggle");
+  const suppBody   = $("suppPanelBody");
+  if (suppToggle && suppBody) {
+    suppToggle.addEventListener("click", () => {
+      const open = suppBody.style.display !== "none";
+      suppBody.style.display = open ? "none" : "block";
+      suppToggle.querySelector(".supp-toggle-arrow").textContent = open ? "▼" : "▲";
     });
   }
 

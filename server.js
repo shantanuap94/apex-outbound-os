@@ -1122,6 +1122,101 @@ async function handleHealth(req, res) {
   }
 }
 
+// ─── Webhook: Email Events ────────────────────────────────────────────────────
+// Normalise bounce / unsubscribe / spam events from SendGrid, Mailgun, Postmark.
+// Requires SUPABASE_URL + SUPABASE_SERVICE_KEY env vars (service role key).
+function normalizeEmailEvents(body) {
+  const events = [];
+  // SendGrid: array of event objects
+  if (Array.isArray(body)) {
+    for (const ev of body) {
+      const type = { bounce: "bounce", unsubscribe: "unsubscribe",
+                     spamreport: "spam", deferred: null, delivered: null }[ev.event];
+      if (type && ev.email) events.push({ email: ev.email.toLowerCase(), type });
+    }
+    return events;
+  }
+  // Mailgun: single object with event field
+  if (body.event && body.recipient) {
+    const type = { bounced: "bounce", unsubscribed: "unsubscribe",
+                   complained: "spam" }[body.event];
+    if (type) events.push({ email: body.recipient.toLowerCase(), type });
+    return events;
+  }
+  // Postmark: single object with RecordType
+  if (body.RecordType && body.Email) {
+    const type = { Bounce: "bounce", SpamComplaint: "spam",
+                   SubscriptionChange: "unsubscribe" }[body.RecordType];
+    if (type) events.push({ email: body.Email.toLowerCase(), type });
+    return events;
+  }
+  return events;
+}
+
+async function sbServiceFetch(path, opts = {}) {
+  const base = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
+  const key  = process.env.SUPABASE_SERVICE_KEY;
+  if (!base || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_KEY not set");
+  const res = await fetch(`${base}/rest/v1${path}`, {
+    ...opts,
+    headers: {
+      "apikey": key,
+      "Authorization": `Bearer ${key}`,
+      "Content-Type": "application/json",
+      ...(opts.headers || {}),
+    },
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+  return res.status === 204 ? null : res.json();
+}
+
+async function handleWebhookEmailEvent(req, res) {
+  try {
+    const body   = await readBody(req);
+    const events = normalizeEmailEvents(body);
+    if (!events.length) return json(res, { processed: 0, skipped: "no actionable events" });
+
+    let processed = 0;
+    for (const ev of events) {
+      // Find prospect(s) by email
+      const prospects = await sbServiceFetch(
+        `/prospects?email=eq.${encodeURIComponent(ev.email)}&select=id,user_id`
+      );
+      if (!prospects?.length) continue;
+
+      for (const p of prospects) {
+        // Upsert into suppression_list (ignore duplicate)
+        await sbServiceFetch("/suppression_list", {
+          method: "POST",
+          headers: { "Prefer": "resolution=ignore-duplicates,return=minimal" },
+          body: JSON.stringify({
+            user_id: p.user_id,
+            email: ev.email,
+            reason: ev.type,
+            prospect_id: p.id,
+          }),
+        });
+
+        // Update prospect: pause sequence, mark cold
+        await sbServiceFetch(`/prospects?id=eq.${p.id}`, {
+          method: "PATCH",
+          headers: { "Prefer": "return=minimal" },
+          body: JSON.stringify({
+            status: "cold",
+            active_email_idx: 0,
+            updated_at: new Date().toISOString(),
+          }),
+        });
+        processed++;
+      }
+    }
+    return json(res, { processed });
+  } catch (e) {
+    console.error("Webhook error:", e.message);
+    json(res, { error: e.message }, 500);
+  }
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 const POST_ROUTES = {
   "/api/icp/fill": handleIcpFill,
@@ -1132,6 +1227,7 @@ const POST_ROUTES = {
   "/api/perplexity/search": handlePerplexitySearch,
   "/api/leads/generate": handleLeadsGenerate,
   "/api/profile/extract": handleProfileExtract,
+  "/api/webhook/email-event": handleWebhookEmailEvent,
 };
 
 const server = http.createServer(async (req, res) => {

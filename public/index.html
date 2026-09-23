@@ -600,6 +600,22 @@
           <button class="crm-filter" data-filter="closed">Closed <span class="filter-count"></span></button>
           <button class="crm-filter" data-filter="cold">Cold <span class="filter-count"></span></button>
           <button class="crm-filter" data-filter="due">Due <span class="filter-count"></span></button>
+          <button class="crm-filter" data-filter="suppressed">⊘ Suppressed <span class="filter-count"></span></button>
+        </div>
+
+        <!-- Suppression management panel -->
+        <div class="supp-panel">
+          <div class="supp-panel-header" id="suppPanelToggle">
+            <span>⊘ Suppression List <span class="supp-count-badge" id="suppressionCount">0</span></span>
+            <span class="supp-toggle-arrow">▼</span>
+          </div>
+          <div class="supp-panel-body" id="suppPanelBody" style="display:none">
+            <div class="supp-add-row">
+              <input type="email" id="suppAddEmail" class="supp-add-input" placeholder="email@domain.com" />
+              <button class="btn btn-outline btn-sm" id="suppAddBtn">Add</button>
+            </div>
+            <div id="suppressionList" class="supp-list"></div>
+          </div>
         </div>
 
         <!-- empty state -->
@@ -662,7 +678,12 @@
             </div>
             <div class="dcf-notes">
               <textarea id="drawerNotes" rows="3" placeholder="Notes — what happened on last call? What did they say?"></textarea>
-              <button class="btn btn-dark btn-sm" id="drawerSaveCrm">Save</button>
+              <div class="dcf-notes-actions">
+                <button class="btn btn-dark btn-sm" id="drawerSaveCrm">Save</button>
+                <div id="drawerFooterArea">
+                  <button class="btn btn-ghost btn-sm supp-btn" id="drawerSuppressBtn">⊘ Suppress Email</button>
+                </div>
+              </div>
             </div>
           </div>
           <div id="drawerContent" class="drawer-content"></div>
