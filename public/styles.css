@@ -866,6 +866,44 @@ main { padding: 24px 32px 60px; }
 .ms-closed  { background: rgba(142,142,147,.15); color: #8e8e93; }
 .ms-cold    { background: rgba(94,159,255,.12);  color: #5e9fff; }
 
+/* ─── Prospect Search Panel ─────────────────────────────────────────────── */
+.prospect-search-panel {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.ps-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px;
+  font-size: 13px; font-weight: 600; color: var(--text-2);
+  cursor: pointer; user-select: none;
+  background: var(--bg-2);
+}
+.ps-header:hover { color: var(--text-1); }
+.ps-toggle-arrow { font-size: 10px; opacity: .6; }
+.ps-body { padding: 14px; background: var(--bg-1); border-top: 1px solid var(--border); }
+.ps-row { display: flex; gap: 12px; margin-bottom: 10px; }
+.ps-field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.ps-field label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; }
+.ps-hint { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.ps-field input, .ps-field select {
+  padding: 7px 10px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--bg-2);
+  color: var(--text-1); font-size: 13px;
+}
+.ps-results { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.ps-result-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px; border-radius: 8px;
+  background: var(--bg-2); border: 1px solid var(--border);
+}
+.ps-result-name  { font-size: 13px; font-weight: 600; color: var(--text-1); }
+.ps-result-role  { font-size: 12px; color: var(--text-2); margin-top: 1px; }
+.ps-result-loc   { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.ps-result-email { font-size: 11px; color: var(--accent); margin-top: 2px; }
+@media (max-width: 600px) { .ps-row { flex-direction: column; } }
+
 /* ─── CRM Filters ────────────────────────────────────────────────────────── */
 .crm-filters {
   display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;

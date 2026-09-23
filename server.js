@@ -857,6 +857,39 @@ async function handleApolloMatch(req, res) {
   }
 }
 
+async function handleApolloSearch(req, res) {
+  try {
+    if (!process.env.APOLLO_API_KEY) return json(res, { error: "Apollo API key not configured" }, 400);
+    const body = await readBody(req);
+    const { titles = [], locations = [], sizeRanges = [], keywords = "", page = 1, perPage = 25 } = body;
+
+    const payload = { page, per_page: Math.min(perPage, 50) };
+    if (titles.length)     payload.person_titles = titles;
+    if (locations.length)  payload.person_locations = locations;
+    if (sizeRanges.length) payload.organization_num_employees_ranges = sizeRanges;
+    if (keywords.trim())   payload.q_keywords = keywords.trim();
+
+    const r = await fetch("https://api.apollo.io/v1/mixed_people/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": process.env.APOLLO_API_KEY },
+      body: JSON.stringify(payload),
+    });
+
+    if (r.status === 429) return json(res, { error: "Apollo rate limit — wait a moment and try again" }, 429);
+    if (!r.ok) {
+      const errText = await r.text();
+      console.warn(`Apollo search ${r.status}:`, errText.substring(0, 200));
+      return json(res, { error: `Apollo returned ${r.status}` }, r.status);
+    }
+
+    const data = await r.json();
+    json(res, { people: data.people || [], pagination: data.pagination || {} });
+  } catch (e) {
+    console.error("Apollo search failed:", e.message);
+    json(res, { error: e.message }, 500);
+  }
+}
+
 async function handleLeadsGenerate(req, res) {
   try {
     const body = await readBody(req);
@@ -1054,6 +1087,7 @@ const POST_ROUTES = {
   "/api/icp/fill": handleIcpFill,
   "/api/chain/run": handleChainRun,
   "/api/apollo/match": handleApolloMatch,
+  "/api/apollo/search": handleApolloSearch,
   "/api/perplexity/search": handlePerplexitySearch,
   "/api/leads/generate": handleLeadsGenerate,
   "/api/profile/extract": handleProfileExtract,

@@ -443,6 +443,7 @@ function bootApp(session) {
   wireIcp();
   wireChain();
   wireMemory();
+  wireProspectSearch();
   checkApiStatus();
   setInterval(checkApiStatus, 30000);
   document.querySelectorAll(".nav-item").forEach((btn) => {
@@ -1096,6 +1097,104 @@ function renderDrawerTab(tab, entry) {
   } else if (tab === "objection") {
     content.innerHTML = `<pre class="drawer-pre">${entry.objection_response || "No objection handler yet."}</pre>`;
   }
+}
+
+// ─── Prospect Search ──────────────────────────────────────────────────────────
+function wireProspectSearch() {
+  const header = $("toggleProspectSearch");
+  const body   = $("prospectSearchBody");
+  if (header && body) {
+    header.addEventListener("click", () => {
+      const open = body.style.display !== "none";
+      body.style.display = open ? "none" : "block";
+      const arrow = header.querySelector(".ps-toggle-arrow");
+      if (arrow) arrow.textContent = open ? "▼" : "▲";
+    });
+  }
+  const btn = $("psSearchBtn");
+  if (btn) btn.addEventListener("click", runProspectSearch);
+}
+
+async function runProspectSearch() {
+  const btn      = $("psSearchBtn");
+  const countEl  = $("psResultCount");
+  const resultsEl = $("psResults");
+
+  const titlesRaw  = ($("psTitle")?.value   || "").trim();
+  const locRaw     = ($("psLocation")?.value || "").trim();
+  const size       = $("psSize")?.value   || "";
+  const keywords   = ($("psKeywords")?.value || "").trim();
+
+  if (!titlesRaw && !locRaw && !keywords) {
+    alert("Enter at least a job title, location, or keyword to search.");
+    return;
+  }
+
+  const titles     = titlesRaw ? titlesRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
+  const locations  = locRaw    ? locRaw.split(",").map(l => l.trim()).filter(Boolean)    : [];
+  const sizeRanges = size      ? [size] : [];
+
+  btn.textContent = "Searching…"; btn.disabled = true;
+  countEl.textContent = "";
+  resultsEl.innerHTML = "";
+
+  try {
+    const res = await post("/api/apollo/search", { titles, locations, sizeRanges, keywords });
+    if (res.error) { alert("Search failed: " + res.error); return; }
+
+    const people = res.people || [];
+    const total  = res.pagination?.total_entries;
+    countEl.textContent = people.length
+      ? `Showing ${people.length}${total ? " of " + total.toLocaleString() : ""} results`
+      : "No results found.";
+
+    if (!people.length) return;
+
+    resultsEl.innerHTML = renderProspectResults(people);
+
+    resultsEl.querySelectorAll(".ps-add-btn").forEach((addBtn) => {
+      addBtn.addEventListener("click", async () => {
+        const p = people[parseInt(addBtn.dataset.idx, 10)];
+        addBtn.textContent = "Adding…"; addBtn.disabled = true;
+        await saveProspectToMemory({
+          name:     p.name             || "",
+          title:    p.title            || "",
+          company:  p.organization?.name || p.company || "",
+          email:    p.email            || "",
+          linkedin: p.linkedin_url     || "",
+          location: [p.city, p.state, p.country].filter(Boolean).join(", "),
+          domain:   p.organization?.website_url || "",
+        }, {});
+        addBtn.textContent = "Added ✓"; addBtn.disabled = true;
+        renderMemoryList();
+      });
+    });
+  } catch (e) {
+    alert("Network error: " + e.message);
+  } finally {
+    btn.textContent = "Find Prospects"; btn.disabled = false;
+  }
+}
+
+function renderProspectResults(people) {
+  return people.map((p, i) => {
+    const name     = p.name || "—";
+    const title    = p.title || "";
+    const company  = p.organization?.name || p.company || "—";
+    const loc      = [p.city, p.state, p.country].filter(Boolean).join(", ");
+    const emp      = p.organization?.estimated_num_employees;
+    const email    = p.email || p.work_email || "";
+    return `
+      <div class="ps-result-row">
+        <div class="ps-result-info">
+          <div class="ps-result-name">${name}</div>
+          <div class="ps-result-role">${title}${title && company ? " · " : ""}${company}</div>
+          ${loc || emp ? `<div class="ps-result-loc">${loc}${loc && emp ? " · " : ""}${emp ? emp.toLocaleString() + " employees" : ""}</div>` : ""}
+          ${email ? `<div class="ps-result-email">${email}</div>` : ""}
+        </div>
+        <button class="btn btn-outline btn-sm ps-add-btn" data-idx="${i}">+ CRM</button>
+      </div>`;
+  }).join("");
 }
 
 function wireMemory() {

@@ -542,6 +542,48 @@
           </div>
         </div>
 
+        <!-- Find Prospects panel -->
+        <div class="prospect-search-panel">
+          <div class="ps-header" id="toggleProspectSearch">
+            <span>◎ Find Prospects</span>
+            <span class="ps-toggle-arrow">▼</span>
+          </div>
+          <div id="prospectSearchBody" class="ps-body" style="display:none">
+            <div class="ps-row">
+              <div class="ps-field">
+                <label>Job Titles <span class="ps-hint">comma separated</span></label>
+                <input type="text" id="psTitle" placeholder="CEO, Founder, Procurement Manager">
+              </div>
+              <div class="ps-field">
+                <label>Location <span class="ps-hint">comma separated</span></label>
+                <input type="text" id="psLocation" placeholder="India, Mumbai, UAE">
+              </div>
+            </div>
+            <div class="ps-row">
+              <div class="ps-field">
+                <label>Company Size</label>
+                <select id="psSize">
+                  <option value="">Any size</option>
+                  <option value="1,50">1–50 employees</option>
+                  <option value="51,200">51–200</option>
+                  <option value="201,1000">201–1,000</option>
+                  <option value="1001,5000">1,001–5,000</option>
+                  <option value="5001,10000">5,001–10,000</option>
+                </select>
+              </div>
+              <div class="ps-field">
+                <label>Keywords <span class="ps-hint">optional</span></label>
+                <input type="text" id="psKeywords" placeholder="snack manufacturer, FMCG, corn">
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+              <button class="btn btn-dark btn-sm" id="psSearchBtn">Find Prospects</button>
+              <span id="psResultCount" style="font-size:12px;color:var(--text-3)"></span>
+            </div>
+            <div id="psResults" class="ps-results"></div>
+          </div>
+        </div>
+
         <!-- CRM filter pills -->
         <div class="crm-filters">
           <button class="crm-filter active" data-filter="all">All <span class="filter-count"></span></button>
