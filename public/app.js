@@ -1008,16 +1008,30 @@ function statusLabel(s) {
 function statusClass(s) {
   return { active: "ms-active", replied: "ms-replied", meeting: "ms-meeting", closed: "ms-closed", cold: "ms-cold" }[s] || "ms-active";
 }
+const EMAIL_GAPS_DAYS = { 2: 3, 3: 5, 4: 6 };
+
+function getEmailDueStatus(p) {
+  const idx = p.active_email_idx;
+  if (!idx || idx <= 0 || idx > 4) return null;
+  if (idx === 1 || !p.last_email_sent_at) return { status: 'due', daysUntil: 0 };
+  const gapMs = (EMAIL_GAPS_DAYS[idx] || 3) * 86400000;
+  const dueAt = new Date(new Date(p.last_email_sent_at).getTime() + gapMs);
+  const daysUntil = Math.ceil((dueAt - Date.now()) / 86400000);
+  if (daysUntil <= 0) return { status: daysUntil < -1 ? 'overdue' : 'due', daysUntil };
+  return { status: 'pending', daysUntil };
+}
+
 function getSequenceBadge(p) {
   if (p.meeting_booked) return '';
   if (p.status && p.status !== 'active') return '';
   const idx = p.active_email_idx;
   if (idx === null || idx === undefined) return '';
   if (idx === 0) return '<span class="seq-badge seq-paused">Replied</span>';
-  const map = { 1: 'E1 Due', 2: 'E2 Due', 3: 'E3 Due', 4: 'E4 Due' };
-  return map[idx]
-    ? `<span class="seq-badge seq-${idx}">${map[idx]}</span>`
-    : '<span class="seq-badge seq-done">Seq Done</span>';
+  const due = getEmailDueStatus(p);
+  if (!due) return '<span class="seq-badge seq-done">Seq Done</span>';
+  if (due.status === 'overdue') return `<span class="seq-badge seq-overdue">E${idx} Overdue</span>`;
+  if (due.status === 'due')     return `<span class="seq-badge seq-${idx}">E${idx} Due</span>`;
+  return `<span class="seq-badge seq-pending">E${idx} in ${due.daysUntil}d</span>`;
 }
 
 let _currentDrawerId = null;
@@ -1027,14 +1041,22 @@ function renderMemoryList() {
   const list  = $("memoryList");
   if (!list) return;
 
-  const filtered = _crmFilter === "all"
-    ? _crmProspects
+  const isDueProspect = (p) => {
+    if (p.status !== 'active') return false;
+    const due = getEmailDueStatus(p);
+    return due && (due.status === 'due' || due.status === 'overdue');
+  };
+
+  const filtered = _crmFilter === 'all' ? _crmProspects
+    : _crmFilter === 'due' ? _crmProspects.filter(isDueProspect)
     : _crmProspects.filter((p) => p.status === _crmFilter);
 
   // Update filter pill counts
   document.querySelectorAll(".crm-filter").forEach((pill) => {
     const f = pill.dataset.filter;
-    const count = f === "all" ? _crmProspects.length : _crmProspects.filter((p) => p.status === f).length;
+    const count = f === 'all' ? _crmProspects.length
+      : f === 'due' ? _crmProspects.filter(isDueProspect).length
+      : _crmProspects.filter((p) => p.status === f).length;
     const badge = pill.querySelector(".filter-count");
     if (badge) badge.textContent = count > 0 ? count : "";
   });
@@ -1094,6 +1116,21 @@ function openMemoryDrawer(id) {
   $("memoryDrawer").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+async function markEmailSent(prospectId) {
+  const p = _crmProspects.find((x) => x.id === prospectId);
+  if (!p) return;
+  const currentIdx = p.active_email_idx || 1;
+  const nextIdx = currentIdx >= 4 ? 5 : currentIdx + 1;
+  await crmUpdateFields(prospectId, {
+    last_email_sent_at: new Date().toISOString(),
+    active_email_idx: nextIdx,
+    updated_at: new Date().toISOString(),
+  });
+  renderMemoryList();
+  const updated = _crmProspects.find((x) => x.id === prospectId);
+  if (updated) renderDrawerTab('emails', updated);
+}
+
 function renderDrawerTab(tab, entry) {
   const content = $("drawerContent");
   document.querySelectorAll(".dtab").forEach((t) => t.classList.toggle("active", t.dataset.dtab === tab));
@@ -1104,7 +1141,31 @@ function renderDrawerTab(tab, entry) {
     content.innerHTML = `<pre class="drawer-pre">${entry.dossier || "No dossier yet — run the Agent Chain first."}</pre>`;
   } else if (tab === "emails") {
     const seq = entry.emails?.sequence || entry.emails?.a || "";
-    content.innerHTML = `<pre class="drawer-pre">${seq || "No emails yet — run Generate Outreach."}</pre>`;
+    const idx = entry.active_email_idx;
+    const due = getEmailDueStatus(entry);
+    const EMAIL_NAMES = { 1: 'E1 · Pain-led', 2: 'E2 · Trigger-led', 3: 'E3 · Curiosity', 4: 'E4 · Objection Pre-empt' };
+    let statusBar = '';
+    if (idx && idx > 0 && idx <= 4) {
+      const name = EMAIL_NAMES[idx] || `E${idx}`;
+      let statusText, markLabel;
+      if (!due) {
+        statusText = 'Sequence complete — all 4 emails sent.';
+      } else if (due.status === 'overdue') {
+        statusText = `<span style="color:var(--err,#ff3b30)"><strong>${name}</strong> is overdue by ${Math.abs(due.daysUntil)} day${Math.abs(due.daysUntil) !== 1 ? 's' : ''}</span>`;
+        markLabel = `✓ Mark E${idx} Sent →`;
+      } else if (due.status === 'due') {
+        statusText = `<strong>${name}</strong> — due now`;
+        markLabel = `✓ Mark E${idx} Sent →`;
+      } else {
+        statusText = `<strong>${name}</strong> — due in ${due.daysUntil} day${due.daysUntil !== 1 ? 's' : ''}`;
+        markLabel = `Mark E${idx} Sent`;
+      }
+      statusBar = `<div class="seq-status-bar">
+        <span class="ssb-text">${statusText}</span>
+        ${markLabel ? `<button class="btn btn-dark btn-sm" id="drawerMarkSent">${markLabel}</button>` : ''}
+      </div>`;
+    }
+    content.innerHTML = `${statusBar}<pre class="drawer-pre">${seq || "No emails yet — run Generate Outreach."}</pre>`;
   } else if (tab === "linkedin") {
     content.innerHTML = `<pre class="drawer-pre">${entry.linkedin_messages || "No LinkedIn copy yet."}</pre>`;
   } else if (tab === "cadence") {
@@ -1291,6 +1352,16 @@ function wireMemory() {
         saveCrm.disabled = false;
         alert(e.message || "Save failed — check console for details");
       }
+    });
+  }
+
+  const drawerContent = $("drawerContent");
+  if (drawerContent) {
+    drawerContent.addEventListener("click", async (e) => {
+      const btn = e.target.closest("#drawerMarkSent");
+      if (!btn || !_currentDrawerId) return;
+      btn.textContent = "Saving…"; btn.disabled = true;
+      await markEmailSent(_currentDrawerId);
     });
   }
 
