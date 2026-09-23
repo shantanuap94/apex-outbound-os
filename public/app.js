@@ -1129,16 +1129,16 @@ function wireMemory() {
   const drawerClose = $("drawerClose");
   if (drawerClose) drawerClose.addEventListener("click", () => $("memoryDrawer").classList.add("hidden"));
 
-  const clearBtn = $("drawerClearContent");
-  if (clearBtn) {
-    clearBtn.addEventListener("click", async () => {
+  const drawerClearBtn = $("drawerClearContent");
+  if (drawerClearBtn) {
+    drawerClearBtn.addEventListener("click", async () => {
       if (!_currentDrawerId) return;
       const activeTab = document.querySelector(".dtab.active")?.dataset.dtab;
       if (!confirm(`Clear stored ${activeTab} for this prospect? This cannot be undone.`)) return;
       const field = activeTab === "emails" ? { emails: null } : { linkedin_messages: null };
-      clearBtn.textContent = "Clearing…";
+      drawerClearBtn.textContent = "Clearing…";
       await crmUpdateFields(_currentDrawerId, field);
-      clearBtn.textContent = "Clear";
+      drawerClearBtn.textContent = "Clear";
       const entry = _crmProspects.find((p) => p.id === _currentDrawerId);
       if (entry) renderDrawerTab(activeTab, entry);
     });
