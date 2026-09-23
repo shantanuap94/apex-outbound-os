@@ -1,7 +1,7 @@
 // ─── Constants ────────────────────────────────────────────────────────────────
 const API = "";
 
-const SENDER_FIELDS = ["name","role","offer","valueProp","proof","cta","tone"];
+const SENDER_FIELDS = ["name","role","offer","valueProp","proof","cta","tone","authorityBlock"];
 
 const APEX_SENDER = {
   name: "Shantanu",
@@ -298,6 +298,21 @@ function saveSender() {
 function wireSender() {
   loadSavedSender();
   $("saveSenderBtn").addEventListener("click", saveSender);
+
+  const genAuthBtn = $("genAuthorityBtn");
+  if (genAuthBtn) {
+    genAuthBtn.addEventListener("click", async () => {
+      const textarea = $("sender-authorityBlock");
+      const orig = genAuthBtn.textContent;
+      genAuthBtn.textContent = "…"; genAuthBtn.disabled = true;
+      try {
+        const { authorityBlock, error } = await post("/api/profile/authority", { senderProfile: getSender() });
+        if (error) { alert("Error: " + error); return; }
+        if (textarea) { textarea.value = authorityBlock; saveSender(); }
+      } catch (e) { alert("Network error: " + e.message); }
+      finally { genAuthBtn.textContent = orig; genAuthBtn.disabled = false; }
+    });
+  }
   // File picker label
   $("profileFile").addEventListener("change", () => {
     const file = $("profileFile").files[0];

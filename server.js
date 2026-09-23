@@ -228,9 +228,10 @@ async function handleChainRun(req, res) {
     const senderRole    = sender.role    || "";
     const senderOffer   = sender.offer   || "";
     const senderValueProp = sender.valueProp || "";
-    const senderProof   = sender.proof   || "";
-    const senderCta     = sender.cta     || "a 15-minute conversation";
-    const senderTone    = sender.tone    || "peer-to-peer";
+    const senderProof          = sender.proof          || "";
+    const senderCta            = sender.cta            || "a 15-minute conversation";
+    const senderTone           = sender.tone           || "peer-to-peer";
+    const senderAuthorityBlock = sender.authorityBlock || "";
     const currentYear   = new Date().getFullYear();
 
     const systemPrompt = `You are a B2B outreach strategist writing on behalf of ${senderName}${senderRole ? ", " + senderRole : ""}.
@@ -534,8 +535,9 @@ BAD: "I've been following Gopal Snacks' impressive move to add 26 new products �
 The icebreaker must name something specific — a product, a launch, a number, a fact. If it could be sent to any company in the same industry, it is not specific enough. Rewrite it.
 
 LINE 2 — SENDER INTRO + AUTHORITY BLOCK:
-Not one sentence — 3-5 sentences. The prospect is a stranger. They need to know who is writing and why it's worth reading. Include ALL available from the sender profile: full name and role, company name (BSE/NSE listed status if applicable), exact product categories (not "corn products" — name them), years in operation, plant count, named clients, certifications, capacity. This block earns the right to keep reading. Do not compress.
-Example quality: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified."
+${senderAuthorityBlock
+  ? `Use this pre-approved authority block VERBATIM — do not rewrite, shorten, or paraphrase a single word:\n"${senderAuthorityBlock}"`
+  : `Not one sentence — 3-5 sentences. The prospect is a stranger. They need to know who is writing and why it's worth reading. Include ALL available from the sender profile: full name and role, company name (BSE/NSE listed status if applicable), exact product categories (not "corn products" — name them), years in operation, plant count, named clients, certifications, capacity. This block earns the right to keep reading. Do not compress.\nExample quality: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified."`}
 
 ONLY USE WHAT THE SENDER PROFILE PROVIDES. Do not invent plant names, certifications, clients, or product categories.
 
@@ -857,6 +859,44 @@ async function handleApolloMatch(req, res) {
   }
 }
 
+async function handleProfileAuthority(req, res) {
+  try {
+    if (!process.env.OPENAI_API_KEY) return json(res, { error: "OpenAI key not set" }, 400);
+    const { senderProfile } = await readBody(req);
+    const s = senderProfile || {};
+
+    const userPrompt = `Write a B2B cold email authority intro paragraph for ${s.name || "the sender"}.
+
+This is LINE 2 of a cold email — appears right after a specific icebreaker about the prospect's product or news. It introduces the sender to a complete stranger and earns the right to keep reading.
+
+Rules:
+- One paragraph, 3–5 sentences. No bullet points. No intro line like "Here's your paragraph."
+- Include: full name, role and company, exact product names (never generic), scale (years in operation, plant count, capacity if provided), named clients, certifications
+- End with one sentence connecting the offer to the prospect's buying context
+- Use ONLY the details below — do not invent clients, certifications, plant names, or product categories
+
+SENDER DETAILS:
+Name: ${s.name || ""}
+Role: ${s.role || ""}
+What they offer: ${s.offer || ""}
+Why it matters to their ICP: ${s.valueProp || ""}
+Social proof: ${s.proof || ""}`;
+
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+      body: JSON.stringify({ model: "gpt-4o", messages: [{ role: "user", content: userPrompt }], temperature: 0.4, max_tokens: 350 }),
+    });
+    if (!r.ok) return json(res, { error: `OpenAI returned ${r.status}` }, r.status);
+    const data = await r.json();
+    const block = data.choices?.[0]?.message?.content?.trim() || "";
+    json(res, { authorityBlock: block });
+  } catch (e) {
+    console.error("Authority block generation failed:", e.message);
+    json(res, { error: e.message }, 500);
+  }
+}
+
 async function handleApolloSearch(req, res) {
   try {
     if (!process.env.APOLLO_API_KEY) return json(res, { error: "Apollo API key not configured" }, 400);
@@ -1086,6 +1126,7 @@ async function handleHealth(req, res) {
 const POST_ROUTES = {
   "/api/icp/fill": handleIcpFill,
   "/api/chain/run": handleChainRun,
+  "/api/profile/authority": handleProfileAuthority,
   "/api/apollo/match": handleApolloMatch,
   "/api/apollo/search": handleApolloSearch,
   "/api/perplexity/search": handlePerplexitySearch,
