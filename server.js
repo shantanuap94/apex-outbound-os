@@ -221,7 +221,7 @@ async function handleChainRun(req, res) {
 
   try {
     const body = await readBody(req);
-    const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply, fewShotExamples } = body;
+    const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply, fewShotExamples, emailNumber, previousEmails } = body;
 
     const sender = senderProfile || {};
     const senderName    = sender.name    || "the sender";
@@ -477,156 +477,153 @@ TOUCH 3 — Day 8 · Email (Break-up)
 
 Each touch: different angle, different emotional register. No invented statistics.`,
 
-      outreach: `Write a 4-EMAIL NURTURE SEQUENCE FROM ${senderName} to ${p} (${role}) at ${co}. Goal: get a 20-minute meeting. Emails send every 2 days. Each email takes a different angle. The prospect does not know ${senderName} — Email 1 must introduce the sender fully.${dossierCtx}
+      outreach: (() => {
+        const emailNum = emailNumber || 1;
+        const prevE1 = previousEmails?.e1 || "";
+        const prevE2 = previousEmails?.e2 || "";
+        const prevE3 = previousEmails?.e3 || "";
 
-CRITICAL — READ BEFORE WRITING ANYTHING:
-- The sender's name is ${senderName}. Use this EXACT name in every email. Do not change it, shorten it, replace it with a placeholder, or invent a different name. If you write any name other than "${senderName}", you have failed.
-- The sender's role is ${senderRole}. Use verbatim.
-- SIGNATURE FORMAT — exact, nothing else: ${senderName} · ${senderRole}. Do NOT add a company tagline, slogan, "Leader in X Industry", or any text you invented. The signature is only name and role.
-- PRODUCT CATEGORIES — only use what is in the offer field below. Do not add, infer, or invent any other product: no "Indian yellow maize", no "corn starch", no "modified starch", no wet-milled products, no grain categories not explicitly named.
-- YEARS/NUMBERS — do not calculate or estimate years of experience. Use the exact phrasing from the offer field verbatim (e.g. "milling since 1999"). Do not convert this to "23+ years" or any other number you calculated.
+        const sharedRules = `
+CRITICAL RULES — READ BEFORE WRITING ANYTHING:
+- The sender's name is ${senderName}. Use EXACTLY this name. Never substitute, shorten, or replace.
+- SIGNATURE FORMAT — exact, nothing else: ${senderName} · ${senderRole}. No taglines. No invented text.
+- PRODUCT CATEGORIES — only what is in the offer field. Never add, infer, or invent categories.
+- YEARS/NUMBERS — use exact phrasing from offer field verbatim. Never calculate or convert.
 
 THE SENDER:
-- Name: ${senderName} (use exactly — no substitutions)
+- Name: ${senderName}
 - Role: ${senderRole}
-- Company offer: ${senderOffer}
-- Why it matters to buyers like ${p}: ${senderValueProp}
-- Proof (use verbatim, never invent): ${senderProof ? senderProof : "Use company credentials factually — years operating, listed status, plant count."}
+- Offer: ${senderOffer}
+- Why it matters to ${p}: ${senderValueProp}
+- Proof (verbatim only): ${senderProof || "Use company credentials factually — years operating, listed status, plant count."}
 
-ICP emotional profile:
+ICP EMOTIONAL PROFILE of ${p} (${role}) at ${co}:
 - Pains: ${icpPains}
 - Fears: ${icpFears}
 - Frustrations: ${icpFrustrations}
 - Dream outcomes: ${icpDesires}
-- What they say out loud: ${icpSayLoud}
-- Privately think: ${icpThinkPriv}
+- Says out loud: ${icpSayLoud}
+- Privately thinks: ${icpThinkPriv}
 
-POSITIONING RULE — applies to all 4 emails:
-Do NOT position as a replacement for their existing supplier. Position as a SECOND SOURCE that improves supply chain reliability. Most procurement managers already have a primary supplier and won't switch. But they will add a second qualified source to de-risk their line. Every email should feel like a supply chain upgrade, not a disruption.
-
----
-
-${fewShotExamples && fewShotExamples.length > 0 ? `REAL EXAMPLES THAT GOT REPLIES — study these for tone, length, and specificity. Do not copy them. Use them to calibrate how direct and detailed your emails should be:
-
-${fewShotExamples.map((ex, i) => `--- Example ${i + 1} ---\nSubject: ${ex.subject || "(no subject)"}\n${ex.body}`).join("\n\n")}
-
----
-
-` : ""}EMAIL 1 — Day 1 · Pain-led
-
-STRUCTURE (mandatory — do not deviate):
-
-LINE 1 — ICEBREAKER:
-One specific, researched observation about ${p} or ${co}. Must name an ACTUAL PRODUCT, BRAND, LAUNCH, or SPECIFIC FACT from the dossier's raw signals — not a generic compliment.
-
-IGNORE the pre-written "Ice Breaker Bank" examples in the dossier if they are generic. Go back to the raw signals in Section 0 and Section 1 of the dossier — the actual product names, expansion details, launch dates, company facts — and build a sharper icebreaker from those.
-
-BANNED icebreaker patterns — never write these:
-- "I've been following [company]'s impressive move to..."
-- "A testament to your growth / market leadership / impressive expansion"
-- "Congrats on [generic achievement]"
-- "Your [adjective] journey / rapid ascension / incredible story"
-- Any generic compliment that could apply to any company
-
-GOOD: "Gopal Snacks is rolling out 26 new products by November — that kind of push across Gathiya, Bhujia, and extruded lines puts real pressure on corn grit consistency run to run."
-GOOD: "Saw that Cremica just expanded its extruded snacks line — 6 new SKUs added to the Cremica Crunch range."
-BAD: "I've been following Gopal Snacks' impressive move to add 26 new products — a testament to your market growth."
-
-The icebreaker must name something specific — a product, a launch, a number, a fact. If it could be sent to any company in the same industry, it is not specific enough. Rewrite it.
-
-LINE 2 — SENDER INTRO + AUTHORITY BLOCK:
-${senderAuthorityBlock
-  ? `Use this pre-approved authority block VERBATIM — do not rewrite, shorten, or paraphrase a single word:\n"${senderAuthorityBlock}"`
-  : `Not one sentence — 3-5 sentences. The prospect is a stranger. They need to know who is writing and why it's worth reading. Include ALL available from the sender profile: full name and role, company name (BSE/NSE listed status if applicable), exact product categories (not "corn products" — name them), years in operation, plant count, named clients, certifications, capacity. This block earns the right to keep reading. Do not compress.\nExample quality: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified."`}
-
-ONLY USE WHAT THE SENDER PROFILE PROVIDES. Do not invent plant names, certifications, clients, or product categories.
-
-LINES 3-4 — BRIDGE (pain angle):
-Name the exact operational pain from the ICP. Not "supply chain challenges" — the actual mechanism: inconsistent particle size, batch deviations, QA escalations, OTIF pressure. Make ${p} feel understood. Reference their specific products, their company's current situation, their role pressure. Draw from: ${icpFrustrations} and ${icpFears}.
-
-LINE 5 — PROOF:
-One specific detail that deepens credibility beyond Line 2. Do NOT repeat the same client names. Add a new layer: a volume reference, a process detail, a geography note, or a specific outcome. If nothing to add, skip this line.
-
-LINE 6 — CTA:
-Ask them to share their current spec so you can send a matched sample. "If you could share your current spec, I'd be happy to send a matched sample — no commitment at all." Low friction. No meeting ask yet.
-
-END: One genuine, curious question about their work. Not a CTA to buy. This is what gets a reply.
-GOOD: "Quick question — how often does your team benchmark your current corn supplier's COA against the spec you signed off on?"
-SIGN OFF: ${senderName} · ${senderRole}
-
----
-
-EMAIL 2 — Day 3 · Trigger-led
-
-Different emotional register from Email 1. Lead with a SPECIFIC TRIGGER from the dossier — a company launch, expansion, investment, new product line, market move. Frame it as an opportunity, not a problem. The bridge connects this trigger to why having a second qualified source matters right now — not someday, but specifically because of this trigger.
-
-No full authority block needed — they've seen it. One short credibility reminder is enough: "[Company name], [one credential]."
-
-CTA: Reoffer the sample/spec exchange. OR offer something specific for their file — a COA, a grade comparison, a market note. Name it precisely. "No strings attached."
-
-End with a soft question tied to the trigger: something that makes them answer yes or no, not ignore.
-
----
-
-EMAIL 3 — Day 5 · Curiosity/Insight-led
-
-Lead with a sharp market insight or operational truth that is useful to ${p} regardless of whether they buy from ${senderName}. Give them something they can use in their job — a benchmark, a trend, a data point about ingredient quality standards, a procurement practice observation. Make them think "this person actually knows this space."
-
-This email does NOT ask for the spec or the sample. It earns credibility through genuine usefulness.
-
-Soft meeting mention at the end — not a hard ask. Something like: "Happy to walk through how we've approached this with [named client type] if 20 minutes ever makes sense — no deck, just a conversation."
-
-End with a question that opens a door: curious about their current process or how they handle a specific challenge.
-
----
-
-EMAIL 4 — Day 7 · Objection pre-empt + direct meeting ask
-
-This is the highest-converting email in a B2B procurement sequence. Open by naming the elephant in the room directly: "You almost certainly already have a corn supplier. Most procurement leads I talk to do."
-
-Then flip it: that's exactly why 20 minutes is worth it. Not to replace anyone — but to have a qualified second source ready before they need one. A batch deviation, a capacity shortfall, a supplier quality issue — these don't announce themselves. The procurement managers who handle them best are the ones who already have a second source qualified and on file.
-
-Name a specific, realistic scenario where a second source would have saved them: a batch rejection during a peak production run, a supplier missing spec on a large order. Keep it real — no invented statistics.
-
-Direct ask for a 20-minute call. Suggest 2 specific time windows (e.g. "Tuesday or Thursday morning — happy to work around your calendar"). Frame it as: "Enough time to share our spec and COA, you tell me if it's even worth running a sample trial. That's it."
-
-If they're not ready: "If timing isn't right, just say park it for Q2 — no hard feelings. I'll keep the door open."
-
----
-
-GLOBAL RULES FOR ALL 4 EMAILS:
+POSITIONING RULE:
+Do NOT position as a replacement. Position as a SECOND SOURCE. Most procurement managers have a primary supplier and won't switch. But they will add a second qualified source to de-risk their line. Every email should feel like a supply chain upgrade, not a disruption.
 
 WORD COUNT:
 - India/MENA/West Africa: 180–250 words. Relationship markets. They read.
 - UK/US/Europe: 100–140 words. They skim.
-Do not pad. Long and credible beats short and vague. Long and fluffy loses immediately.
+Long and credible beats short and vague. Long and fluffy loses.
 
-SENTENCE STRUCTURE — SHORT AND PUNCHY:
+SENTENCE STRUCTURE:
 Max 15 words per sentence. One idea per sentence. Full stop instead of comma when in doubt.
-BAD: "The ingredients you source for your biscuit manufacturing lines, particularly when you're running multiple SKUs at national scale, require a level of consistency that goes beyond what the spec sheet alone can guarantee."
+BAD: "The ingredients you source, particularly when running multiple SKUs at scale, require consistency beyond what the spec sheet alone can guarantee."
 GOOD: "The spec sheet looks fine. The COA matches. But batch 47 behaves differently from batch 3. At this volume, that's not a line note — that's a stoppage."
 
 USE CONTRACTIONS — always: you're / we've / it's / don't / that's / I'm / we're / they've / you'll
 
 BANNED PHRASES:
-- "Hope this finds you well" / "Just following up" / "Circling back" / "As per my last email"
-- "We help companies like yours" / "Would love to connect and exchange notes"
-- "Leverage synergies" / "seamless efficiency" / "value proposition" / "end-to-end solution"
-- "A testament to your growth / market leadership / impressive move"
-- "Congrats on [achievement]" as an opener
-- "innovative snack manufacturers" / "premium corn products" / "industry-leading expertise"
-- "Leader in [X] Industry" — never add this to a signature or anywhere
-- Any fabricated percentage, statistic, or trend not directly from the dossier
-- Any company tagline or slogan you invented for the sender
+"Hope this finds you well" / "Just following up" / "Circling back" / "As per my last email"
+"We help companies like yours" / "Leverage synergies" / "seamless efficiency" / "value proposition"
+"A testament to your growth / market leadership" / "innovative" / "premium" / "industry-leading"
+"Leader in [X] Industry" — never in signature or anywhere else
+Any fabricated statistic or trend not directly from the dossier
+Any company tagline you invented for the sender
 
-TONE: ${senderTone} — warm, peer-to-peer, expert but not arrogant. Write like you met this person at an industry event and you're following up the next morning.
+TONE: ${senderTone} — warm, peer-to-peer, expert but not arrogant.
+Subject line: specific, under 8 words, references a real thing from the dossier.${dossierCtx}${fewShotExamples && fewShotExamples.length > 0 ? `
 
-Subject lines: specific, not clickbait, under 8 words. Reference a real thing from the dossier.
+REAL EXAMPLES THAT GOT REPLIES — study tone, length, specificity. Do not copy:
+${fewShotExamples.map((ex, i) => `--- Example ${i+1} ---\nSubject: ${ex.subject || "(no subject)"}\n${ex.body}`).join("\n\n")}` : ""}`;
 
-Do not invent locations, plant names, certifications, or product categories not in the sender profile.
-Use only named proof from the sender's social proof field. Never invent.
+        if (emailNum === 1) return `Write EMAIL 1 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. This is the FIRST email. ${p} does not know ${senderName} at all. Goal: intrigue, build credibility, and earn a reply — not book a meeting yet.
+${sharedRules}
 
-Label each clearly: EMAIL 1, EMAIL 2, EMAIL 3, EMAIL 4 with the day and angle.`,
+EMAIL 1 STRUCTURE (mandatory — do not deviate):
+
+LINE 1 — ICEBREAKER:
+One specific, researched observation about ${p} or ${co}. Must name an ACTUAL PRODUCT, BRAND, LAUNCH, or SPECIFIC FACT from the dossier. Not a generic compliment.
+BANNED: "I've been following [company]'s impressive move to..." / "A testament to your growth" / "Congrats on [generic achievement]"
+GOOD: "Gopal Snacks is rolling out 26 new products by November — that kind of push across Gathiya, Bhujia, and extruded lines puts real pressure on corn grit consistency run to run."
+BAD: "I've been following Gopal Snacks' impressive move to add 26 new products — a testament to your market growth."
+The icebreaker must name something specific. If it could apply to any company in the industry, rewrite it.
+
+LINE 2 — FULL AUTHORITY BLOCK:
+${senderAuthorityBlock
+  ? `Use this pre-approved authority block VERBATIM — do not rewrite, shorten, or paraphrase a single word:\n"${senderAuthorityBlock}"`
+  : `3-5 sentences. ${p} is a stranger. Include ALL available: full name and role, company name (BSE/NSE status if applicable), exact product categories (named, not generic), years in operation, plant count, named clients, certifications. This block earns the right to keep reading. Do not compress.\nExample: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified."`}
+ONLY USE WHAT THE SENDER PROFILE PROVIDES. Never invent plant names, certifications, clients, or categories.
+
+LINES 3-4 — BRIDGE (pain angle):
+Name the exact operational pain. Not "supply chain challenges" — the actual mechanism: inconsistent particle size, batch deviations, QA escalations, OTIF pressure. Make ${p} feel understood. Reference their specific products, current situation, role pressure.
+
+LINE 5 — PROOF:
+One specific credibility detail beyond Line 2. Different layer: a volume reference, process detail, geography note, or specific outcome. If nothing to add, skip.
+
+LINE 6 — SOFT CTA:
+Ask them to share their current spec so you can send a matched sample. "If you could share your current spec, I'd be happy to send a matched sample — no commitment at all." Low friction. No meeting ask yet.
+
+END: One genuine, curious question about their work. This is what gets a reply.
+GOOD: "Quick question — how often does your team benchmark your current corn supplier's COA against the spec you signed off on?"
+SIGN OFF: ${senderName} · ${senderRole}
+
+Output only the final email, ready to send. Include the subject line at the top.`;
+
+        if (emailNum === 2) return `Write EMAIL 2 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. ${p} received Email 1 but has not replied.
+${sharedRules}
+
+CONTEXT — Email 1 that was already sent (do not repeat its content or approach):
+${prevE1 ? prevE1 : "[Email 1 was the pain-led intro with full authority block]"}
+
+EMAIL 2 RULES:
+- Different emotional register from Email 1. Do NOT reference Email 1 or say "following up."
+- Lead with a SPECIFIC TRIGGER from the dossier — a company launch, expansion, investment, new product line, market move. Frame it as an opportunity, not a problem.
+- Bridge: connect this trigger to why having a second qualified source matters RIGHT NOW because of this trigger — not someday.
+- No full authority block — they've seen it. One short credibility reminder only: "[Company name], [one credential]."
+- CTA: Reoffer the sample/spec exchange OR offer something specific for their file — a COA, a grade comparison, a market note. Name it precisely. "No strings attached."
+- End: a soft question tied to the trigger that makes them answer yes or no, not ignore.
+SIGN OFF: ${senderName} · ${senderRole}
+
+Output only the final email, ready to send. Include the subject line at the top.`;
+
+        if (emailNum === 3) return `Write EMAIL 3 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. ${p} has not replied to Emails 1 or 2.
+${sharedRules}
+
+CONTEXT — Emails already sent (do not repeat or reference them):
+Email 1: ${prevE1 ? "[Pain-led intro with authority block and spec/sample offer]" : "[Pain-led intro]"}
+Email 2: ${prevE2 ? "[Trigger-led with specific company trigger]" : "[Trigger-led]"}
+
+EMAIL 3 RULES:
+- Lead with a sharp MARKET INSIGHT or OPERATIONAL TRUTH that is useful to ${p} regardless of whether they buy. Give something they can use in their job: a benchmark, a trend, a data point about ingredient quality standards, a procurement practice observation.
+- Make them think: "this person actually knows this space."
+- Do NOT ask for the spec or the sample in this email. Earn credibility through genuine usefulness.
+- No reference to previous emails. This should feel like a new, standalone value add.
+- Soft meeting mention at end — not a hard ask. "Happy to walk through how we've approached this with [client type] if 20 minutes ever makes sense — no deck, just a conversation."
+- End: a question that opens a door — curious about their current process or a specific challenge they face.
+SIGN OFF: ${senderName} · ${senderRole}
+
+Output only the final email, ready to send. Include the subject line at the top.`;
+
+        if (emailNum === 4) return `Write EMAIL 4 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. This is the FINAL email. ${p} has not replied to any of the previous three emails.
+${sharedRules}
+
+CONTEXT — Emails already sent (do not repeat or reference them):
+Email 1: Pain-led intro with full authority block
+Email 2: Trigger-led — specific company trigger + second source opportunity
+Email 3: Insight-led — market truth + soft meeting mention
+${prevE3 ? `Summary of Email 3 tone/angle: [insight-led, no hard ask]` : ""}
+
+EMAIL 4 RULES — THE HIGHEST-CONVERTING EMAIL IN A B2B PROCUREMENT SEQUENCE:
+- Open by naming the elephant in the room DIRECTLY: "You almost certainly already have a corn supplier. Most procurement leads I talk to do."
+- Flip it immediately: that's exactly why 20 minutes is worth it. Not to replace anyone — but to have a qualified second source ready BEFORE they need one. A batch deviation, a capacity shortfall, a supplier quality issue — these don't announce themselves. The procurement managers who handle them best are the ones who already have a second source qualified and on file.
+- Name one specific, realistic scenario where a second source would have saved them: a batch rejection during a peak production run, a supplier missing spec on a large order. Real scenario, no invented statistics.
+- DIRECT ASK for a 20-minute call. Suggest 2 specific time windows. Frame it as: "Enough time to share our spec and COA, you tell me if it's even worth running a sample trial. That's it."
+- Easy out: "If timing isn't right, just say park it for Q2 — no hard feelings. I'll keep the door open."
+- This email earns permission to be direct because 3 previous value-adds have been made.
+SIGN OFF: ${senderName} · ${senderRole}
+
+Output only the final email, ready to send. Include the subject line at the top.`;
+
+        return `Write a cold outreach email FROM ${senderName} TO ${p} at ${co}.${sharedRules}`;
+      })(),
 
       followup: `Using the full intelligence dossier for ${p} at ${co}, build a complete 8-TOUCH RELATIONSHIP CADENCE from ${senderName}.${dossierCtx}
 

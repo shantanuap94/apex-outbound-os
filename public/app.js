@@ -1212,6 +1212,71 @@ async function markEmailSent(prospectId) {
   if (updated) renderDrawerTab('emails', updated);
 }
 
+// Returns the text for a single email (supports old sequence format + new e1-e4 format)
+function getEmailText(emails, idx) {
+  if (!emails) return "";
+  // New per-email format
+  if (emails[`e${idx}`]) return emails[`e${idx}`];
+  // Old all-in-one format — return full sequence for E1 only
+  if (idx === 1) return emails.sequence || emails.a || "";
+  return "";
+}
+
+// Returns true if the prospect has any emails in new per-email format
+function isNewEmailFormat(emails) {
+  return !!(emails?.e1 || emails?.e2 || emails?.e3 || emails?.e4);
+}
+
+async function generateNextEmail(prospectId, emailNum) {
+  const entry = _crmProspects.find((x) => x.id === prospectId);
+  if (!entry) return;
+
+  const content = $("drawerContent");
+  const btn = $(`#genEmail${emailNum}Btn`);
+  if (btn) { btn.textContent = `Generating E${emailNum}…`; btn.disabled = true; }
+
+  const streamBox = $("drawerEmailStream");
+  if (streamBox) { streamBox.textContent = ""; streamBox.style.display = "block"; }
+
+  const icp  = getIcp();
+  const sender = getSender();
+  const previousEmails = {
+    e1: entry.emails?.e1 || "",
+    e2: entry.emails?.e2 || "",
+    e3: entry.emails?.e3 || "",
+  };
+
+  try {
+    const text = await postStream(
+      "/api/chain/run",
+      {
+        prospect: { name: entry.name, title: entry.title, company: entry.company,
+                    domain: entry.domain, email: entry.email },
+        icp,
+        senderProfile: sender,
+        step: "outreach",
+        emailNumber: emailNum,
+        dossier: entry.dossier || "",
+        previousEmails,
+      },
+      (_, full) => { if (streamBox) streamBox.textContent = full; }
+    );
+
+    const emailContent = (typeof text === "string" ? text : text?.content) || "";
+    if (!emailContent) { if (btn) { btn.textContent = `Generate E${emailNum}`; btn.disabled = false; } return; }
+
+    // Merge new email into existing emails object
+    const updatedEmails = { ...(entry.emails || {}), [`e${emailNum}`]: emailContent };
+    await crmUpdateFields(prospectId, { emails: updatedEmails, updated_at: new Date().toISOString() });
+    if (streamBox) streamBox.style.display = "none";
+    const updated = _crmProspects.find((x) => x.id === prospectId);
+    if (updated) renderDrawerTab("emails", updated);
+  } catch (e) {
+    if (streamBox) streamBox.textContent = "Error: " + e.message;
+    if (btn) { btn.textContent = `Generate E${emailNum}`; btn.disabled = false; }
+  }
+}
+
 function renderDrawerTab(tab, entry) {
   const content = $("drawerContent");
   document.querySelectorAll(".dtab").forEach((t) => t.classList.toggle("active", t.dataset.dtab === tab));
@@ -1221,24 +1286,26 @@ function renderDrawerTab(tab, entry) {
   if (tab === "dossier") {
     content.innerHTML = `<pre class="drawer-pre">${entry.dossier || "No dossier yet — run the Agent Chain first."}</pre>`;
   } else if (tab === "emails") {
-    const seq = entry.emails?.sequence || entry.emails?.a || "";
-    const idx = entry.active_email_idx;
-    const due = getEmailDueStatus(entry);
+    const idx  = entry.active_email_idx || 1;
+    const due  = getEmailDueStatus(entry);
+    const newFmt = isNewEmailFormat(entry.emails);
     const EMAIL_NAMES = { 1: 'E1 · Pain-led', 2: 'E2 · Trigger-led', 3: 'E3 · Curiosity', 4: 'E4 · Objection Pre-empt' };
+
+    // Status bar (same logic as before)
     let statusBar = '';
-    if (idx && idx > 0 && idx <= 4) {
+    if (idx > 0 && idx <= 4) {
       const name = EMAIL_NAMES[idx] || `E${idx}`;
       let statusText, markLabel;
       if (!due) {
         statusText = 'Sequence complete — all 4 emails sent.';
       } else if (due.status === 'overdue') {
-        statusText = `<span style="color:var(--err,#ff3b30)"><strong>${name}</strong> is overdue by ${Math.abs(due.daysUntil)} day${Math.abs(due.daysUntil) !== 1 ? 's' : ''}</span>`;
+        statusText = `<span style="color:var(--err,#ff3b30)"><strong>${name}</strong> overdue by ${Math.abs(due.daysUntil)}d</span>`;
         markLabel = `✓ Mark E${idx} Sent →`;
       } else if (due.status === 'due') {
         statusText = `<strong>${name}</strong> — due now`;
         markLabel = `✓ Mark E${idx} Sent →`;
       } else {
-        statusText = `<strong>${name}</strong> — due in ${due.daysUntil} day${due.daysUntil !== 1 ? 's' : ''}`;
+        statusText = `<strong>${name}</strong> — due in ${due.daysUntil}d`;
         markLabel = `Mark E${idx} Sent`;
       }
       statusBar = `<div class="seq-status-bar">
@@ -1246,7 +1313,34 @@ function renderDrawerTab(tab, entry) {
         ${markLabel ? `<button class="btn btn-dark btn-sm" id="drawerMarkSent">${markLabel}</button>` : ''}
       </div>`;
     }
-    content.innerHTML = `${statusBar}<pre class="drawer-pre">${seq || "No emails yet — run Generate Outreach."}</pre>`;
+
+    if (newFmt) {
+      // Per-email view with progress + generate buttons
+      const progressPills = [1,2,3,4].map((n) => {
+        const exists = !!getEmailText(entry.emails, n);
+        const active = n === idx;
+        return `<span class="email-prog-pill${exists ? ' prog-done' : ''}${active ? ' prog-active' : ''}">${EMAIL_NAMES[n] || `E${n}`}</span>`;
+      }).join("");
+
+      const currentEmailText = getEmailText(entry.emails, idx) || "";
+
+      // Generate button for the NEXT email (only if current email exists and next doesn't)
+      let genBtn = '';
+      const nextIdx = idx <= 4 ? idx : null;
+      if (nextIdx && nextIdx <= 4 && !getEmailText(entry.emails, nextIdx) && (nextIdx === 1 || getEmailText(entry.emails, nextIdx - 1))) {
+        genBtn = `<button class="btn btn-dark btn-sm" id="genEmail${nextIdx}Btn">✦ Generate E${nextIdx}</button>`;
+      }
+
+      content.innerHTML = `
+        ${statusBar}
+        <div class="email-progress-bar">${progressPills}${genBtn ? `<div style="margin-left:auto">${genBtn}</div>` : ''}</div>
+        <div id="drawerEmailStream" class="drawer-pre stream-box" style="display:none"></div>
+        <pre class="drawer-pre">${currentEmailText || `E${idx} not yet generated — click "Generate E${idx}" above.`}</pre>`;
+    } else {
+      // Old format — show full sequence text
+      const seq = entry.emails?.sequence || entry.emails?.a || "";
+      content.innerHTML = `${statusBar}<pre class="drawer-pre">${seq || "No emails yet — run Generate Outreach."}</pre>`;
+    }
   } else if (tab === "linkedin") {
     content.innerHTML = `<pre class="drawer-pre">${entry.linkedin_messages || "No LinkedIn copy yet."}</pre>`;
   } else if (tab === "cadence") {
@@ -1444,10 +1538,14 @@ function wireMemory() {
   const drawerContent = $("drawerContent");
   if (drawerContent) {
     drawerContent.addEventListener("click", async (e) => {
-      const btn = e.target.closest("#drawerMarkSent");
-      if (!btn || !_currentDrawerId) return;
-      btn.textContent = "Saving…"; btn.disabled = true;
-      await markEmailSent(_currentDrawerId);
+      if (!_currentDrawerId) return;
+      const markBtn = e.target.closest("#drawerMarkSent");
+      if (markBtn) { markBtn.textContent = "Saving…"; markBtn.disabled = true; await markEmailSent(_currentDrawerId); return; }
+      const genBtn = e.target.closest("[id^='genEmail'][id$='Btn']");
+      if (genBtn) {
+        const num = parseInt(genBtn.id.replace("genEmail", "").replace("Btn", ""), 10);
+        if (num >= 1 && num <= 4) await generateNextEmail(_currentDrawerId, num);
+      }
     });
   }
 
@@ -1710,7 +1808,7 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       const emailOutEl = $("emailOut-a");
       const liOutEl = $("liOut");
       const [emailRes, liRes] = await Promise.all([
-        postStream("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "outreach", dossier, fewShotExamples },
+        postStream("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "outreach", emailNumber: 1, dossier, fewShotExamples },
           (_, full) => { if (emailOutEl) emailOutEl.textContent = full; }),
         postStream("/api/chain/run", { prospect: p, icp: getIcp(), senderProfile: sender, step: "linkedin", dossier, linkedinPosts: $("linkedinPosts").value },
           (_, full) => { if (liOutEl) liOutEl.textContent = full; }),
@@ -1727,9 +1825,9 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       }
       if (liContent) $("liOut").textContent = liContent;
 
-      // Save full sequence + LinkedIn to prospect memory
+      // Save E1 + LinkedIn to prospect memory
       await saveProspectToMemory(p, {
-        emails: { sequence: emailContent },
+        emails: { e1: emailContent },
         linkedin: liContent,
       });
       if (document.getElementById("tab-campaigns")?.classList.contains("active")) renderMemoryList();
