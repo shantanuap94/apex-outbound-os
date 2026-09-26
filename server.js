@@ -582,48 +582,63 @@ ${fewShotExamples.map((ex, i) => `--- Example ${i+1} ---\nSubject: ${ex.subject 
 
         if (isReferral) return `Write a REFERRAL REQUEST EMAIL FROM ${senderName} TO ${p} (${role}) at ${co}.
 
-SITUATION: ${p} is at ${co}, which is related to — but is NOT — the actual company that buys TBI Corn's products. The goal of this email is NOT to pitch ${co} on purchasing corn ingredients. The goal is to respectfully ask ${p} to refer you to the correct procurement contact at the actual buying entity (a subsidiary, JV, or sister company).
+GOAL: Ask ${p} to refer you to the correct procurement contact. Do NOT pitch ${p} on buying corn ingredients — they are either at the wrong company or in the wrong category.
 ${sharedRules}
 
 CRITICAL OUTPUT RULE: Write the email exactly as it would be sent — no structural labels, no markers. Clean email only.
 
-Read the dossier carefully to identify:
-1. What ${co} actually does (noodles? parent holding? distribution? packaging?)
-2. What the ACTUAL buying company is — the subsidiary, JV, or sister brand that makes the corn-based product (e.g., "Calbee Wings JV")
-3. What product that buying company makes using TBI Corn's ingredients (e.g., "Krisbee Krunchy — corn-based extruded stick snack")
-4. The relationship / connection (e.g., "Wings' snack joint venture with Calbee")
+STEP 1 — DETECT THE REFERRAL SUB-TYPE from the dossier:
+
+TYPE A — WRONG COMPANY (contact is at parent / sister / noodle / packaging / distribution company):
+The actual buyer is a subsidiary, JV, or sister brand. e.g., Brata at Wings/Prakarsa → refer to Calbee Wings JV for Krisbee Krunchy.
+Identify: (1) what ${co} does, (2) which JV/subsidiary makes the corn-based product, (3) that product and its ingredient need, (4) the structural connection.
+
+TYPE B — RIGHT COMPANY, WRONG CATEGORY (contact is at the right company but in a different procurement category):
+e.g., Saipan at Nestlé Packaging/AOA → refer to Nestlé Direct Materials / Food Ingredients procurement.
+Identify: (1) their actual category (packaging, logistics, capex, etc.), (2) the right internal category/team for corn ingredients, (3) their region.
+For TYPE B: you have MORE LinkedIn data — use it. Name their actual work (sustainability, GHG, Design for recycling, region coverage), their career background, education, shared group if any. This personalisation shows you actually researched them before asking for a favour.
 
 ${dossierCtx}
 
-SUBJECT LINE — one of these formats:
-- "Hi [Name] — quick referral ask for [actual buying company] — [product name]"
-- "[Name] — [parent] + [buying JV] — corn [ingredient] for [product]"
-- "Came across your name with [parent company] — need your help for [buying JV]"
+SUBJECT LINE:
+TYPE A: "Hi [Name] — quick referral ask for [JV/subsidiary] — [product name]" / "[Name] — [parent] + [JV] — corn [ingredient] for [product]"
+TYPE B: "Hi [Name] — came across your name with [Company] [category], [region]" / "[Name] — [category] + [Company] — quick referral ask"
 
 EMAIL BODY — write in this exact order, no labels in output:
 
 1. Brief warm opener: "Hope you are doing well."
 
-2. RESEARCH OPENER: "I was doing some research on top corn-based [product category] buyers in Indonesia and your name came up with [parent company] — I know you are with [group] on the [their side — noodles/packaging/etc.] side, but I also saw [group]'s [relationship — e.g. snack JV], [actual buying company], makes [product] — [one-line product description]. That's actually why I'm writing to you."
+2. RESEARCH OPENER — tailored by type:
+TYPE A: "I was doing research on top corn-based [product] buyers in [country] and your name came up with [company] — I know you are with [group] on the [their side] side, but I also saw [group]'s [relationship], [JV name], makes [product] — [description]. That's actually why I'm writing to you."
+TYPE B: "I was doing research on top procurement leaders in [region] driving [their focus — sustainability / value-based SCM / category management] and your name came up with [Company] — [role] for [category], [region]. [One specific thing from their LinkedIn: GHG project / Design for recycling / IIM background / years across regions]. That's actually why I'm writing to you."
 
-3. SENDER INTRO (2-3 sentences): Company, listed status, years milling, plants, named clients — bridge into the actual buying product: "same world where grit size decides whether stick expands at 4x or 3.5x lot to lot."
+3. ACKNOWLEDGE THEIR ACTUAL WORK (TYPE B only — skip for TYPE A): 1-2 sentences genuinely noting what they do — not generic praise, specific to their projects/scope/background. e.g. "Also saw your IIM Calcutta background and 14 years across consulting + industry — Asia, Africa, Oceania, EMENA — really impressive journey."
+
+4. META-ACKNOWLEDGE: "I know you probably get a lot of supplier emails, so I'll keep this short and human."
+
+5. SENDER INTRO (2-3 sentences): Company, credentials, named clients.
 ${senderAuthorityBlock
   ? `Use this pre-approved authority block VERBATIM:\n"${senderAuthorityBlock}"`
   : `Natural peer-to-peer tone. Only use what the sender profile provides.`}
+For TYPE B: bridge into the category mismatch naturally: "Not [their category], so I know this is not directly your category."
 
-4. SPECS FOR THE ACTUAL PRODUCT (not ${co}'s product): Give relevant specs for what the JV/subsidiary product needs. Phrase as "what we typically see work is...":
-- Extruded sticks: "grits around 0.8–1.2mm, moisture <13%, low specks — for predictable expansion and less oil uptake"
-- Corn tortilla: "fine flour around 80–100 mesh, moisture <13% — for even sheeting"
+6. SPECS — TYPE A only (for the JV's product, not the parent's):
+- Extruded sticks: "grits around 0.8–1.2mm, moisture <13%, low specks — predictable expansion, less oil uptake"
+- Corn tortilla: "fine flour around 80–100 mesh, moisture <13%"
 - Extruded puffs: "0.8–1.2mm grits, same moisture band"
-Then add: "but I know [actual buying company] will have its own exact spec."
+TYPE B: Skip product specs — the wrong-category contact doesn't need them and will feel confused.
 
-5. EXPLICIT REFERRAL ASK: "I understand you are in [role] at [parent company] and not directly handling [actual buying company] procurement — would you be open to referring me to the right person in [actual buying company] procurement team who looks after corn [ingredient] for [product]?"
+7. REASON FOR WRITING + REFERRAL ASK:
+TYPE A: "I understand you are in [role] at [parent company] and not directly handling [JV] procurement — would you be open to referring me to the right person in [JV] procurement who looks after corn [ingredient] for [product]?"
+TYPE B: "The reason I'm writing to you — I'm trying to reach the right person in [Company]'s [Direct Materials / Food Ingredients / Raw Materials] procurement who looks after corn-based ingredients for the [AOA / SEA / EMENA] region. Would you be open to referring me to the right colleague in [Company] who handles corn flour / grits / meal for food?"
 
-6. ATTACHMENT: "Attaching our sales profile for your reference — range, certifications [ISO 22000:2018, Halal, Kosher, APEDA] and export docs for Indonesia — just for your file, in case helpful to forward."
+8. ATTACHMENT: "Attaching our sales profile for your reference — range, certifications [ISO 22000:2018, Halal, Kosher, APEDA] and export docs — just for your file, in case helpful to forward."
 
-7. LOW-BURDEN CLOSE: "No hard pitch — just trying to reach the right team. If you can point me to the right person, I'll take it from there and not trouble you further."
+9. LOW-BURDEN CLOSE: "No hard pitch to you on [their category] — just trying to reach the right team for corn ingredients. If you can point me, I'll take it from there and not trouble you further."
 
-8. WARM CLOSE (1 line): Genuine appreciation for what they've built. Reference a real detail from the dossier — the group's brands, scale, years, markets. e.g. "Thanks for your time, Brata — and really appreciate the work you and Wings have done building the group."
+10. WARM CLOSE (1 line): Reference their specific work — not generic appreciation.
+TYPE A: Their group's scale, brands, or history.
+TYPE B: Their specific initiative or expertise — "really appreciate the sustainability work you and [Company] are driving on recycling and GHG" / "really appreciate the end-to-end value work you are leading across the AOA region."
 
 SIGN OFF: Warm regards, ${senderName} · ${senderRole}
 
