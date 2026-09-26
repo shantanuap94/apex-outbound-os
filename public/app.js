@@ -601,19 +601,23 @@ function wireImport() {
     fileInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      const ext = file.name.split(".").pop().toLowerCase();
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
       try {
-        if (ext === "csv") {
+        if (ext === "csv" || file.type === "text/csv") {
+          if (typeof Papa === "undefined") { alert("CSV parser not loaded — please refresh the page and try again."); return; }
           const text = await file.text();
           const result = Papa.parse(text, { skipEmptyLines: true });
           _processImport(result.data);
-        } else if (ext === "xlsx" || ext === "xls") {
+        } else {
+          // Treat anything else as Excel (xlsx/xls/ods or no extension shown by Windows)
+          if (typeof XLSX === "undefined") { alert("Excel parser not loaded — please refresh the page and try again."); return; }
           const buf = await file.arrayBuffer();
           const wb = XLSX.read(buf);
+          if (!wb.SheetNames.length) { alert("Could not find any sheets in this file."); return; }
           const ws = wb.Sheets[wb.SheetNames[0]];
           _processImport(XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" }));
         }
-      } catch (err) { alert("Could not parse file: " + err.message); }
+      } catch (err) { alert("Could not read file: " + err.message); }
       fileInput.value = "";
     });
   }
