@@ -118,6 +118,12 @@ function aiHeaders(endpoint) {
   };
 }
 
+// Strip markdown code fences that some models (Claude) wrap around JSON
+function parseAIJson(content) {
+  const s = (content || "{}").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  return JSON.parse(s);
+}
+
 // ─── Handlers ────────────────────────────────────────────────────────────────
 async function handleStatus(req, res) {
   json(res, {
@@ -197,13 +203,13 @@ Be specific, concrete, and insight-driven. Avoid buzzwords. Return only valid JS
           },
           { role: "user", content: description || "" },
         ],
-        response_format: { type: "json_object" },
+        ...(ep2.url.includes("openai") ? { response_format: { type: "json_object" } } : {}),
         max_tokens: 1500,
       }),
     });
     const data = await r.json();
     const content = data.choices?.[0]?.message?.content;
-    json(res, { icp: JSON.parse(content) });
+    json(res, { icp: parseAIJson(content) });
   } catch (e) {
     json(res, { error: e.message }, 500);
   }
@@ -1179,12 +1185,12 @@ authorityOpinion
             content: `Build the outreach profile from this source material:\n\n${sourceText}`,
           },
         ],
-        response_format: { type: "json_object" },
+        ...(epExtract.url.includes("openai") ? { response_format: { type: "json_object" } } : {}),
         max_tokens: 2500,
       }),
     });
     const data = await r.json();
-    const profile = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+    const profile = parseAIJson(data.choices?.[0]?.message?.content);
     json(res, { profile });
   } catch (e) {
     json(res, { error: e.message }, 500);
