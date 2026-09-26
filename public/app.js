@@ -420,6 +420,16 @@ function wireSender() {
         if (el && profile[f] && profile[f].trim()) { el.value = profile[f].trim(); filled++; }
       });
 
+      // Auto-expand Advanced Profile if any advanced fields were filled
+      const advFields = ["offerMechanism","outcomeTimeframe","lowRiskOffer","differentiation","proofCards","authorityOpinion"];
+      const advFilled = advFields.some(f => profile[f]?.trim());
+      if (advFilled) {
+        const body = $("senderAdvBody");
+        const toggle = $("senderAdvToggle");
+        if (body) body.style.display = "block";
+        if (toggle) { const arrow = toggle.querySelector(".adv-arrow"); if (arrow) arrow.textContent = "▲"; }
+      }
+
       status.textContent = filled > 0
         ? `Profile extracted — ${filled} field${filled > 1 ? "s" : ""} filled. Review and save.`
         : "Extracted but no clear profile data found. Try a different URL or file.";

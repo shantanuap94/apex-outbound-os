@@ -1026,47 +1026,56 @@ async function handleProfileExtract(req, res) {
     const body = await readBody(req);
     const { url: targetUrl, fileContent, fileName } = body;
 
-    let sourceText = "";
+    const sources = [];
 
+    // Collect file content
     if (fileContent) {
-      sourceText = fileContent.substring(0, 12000);
-    } else if (targetUrl) {
-      const normalizedUrl = normalizeExtractUrl(targetUrl);
-      const r = await fetch(normalizedUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; ApexOutboundOS/1.0)",
-          "Accept": "text/html,application/xhtml+xml,application/pdf,text/plain,*/*",
-        },
-        redirect: "follow",
-      });
-      const contentType = r.headers.get("content-type") || "";
-      if (contentType.includes("application/pdf")) {
-        const buffer = Buffer.from(await r.arrayBuffer());
-        const pdfData = await pdfParse(buffer);
-        sourceText = pdfData.text.substring(0, 10000);
-      } else {
-        const raw = await r.text();
-        // Check for binary PDF that came without the right content-type header
-        if (raw.startsWith("%PDF")) {
-          const buffer = Buffer.from(raw, "binary");
-          const pdfData = await pdfParse(buffer);
-          sourceText = pdfData.text.substring(0, 10000);
-        } else {
-          sourceText = raw
-            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-            .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "")
-            .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, "")
-            .replace(/<[^>]+>/g, " ")
-            .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-            .replace(/\s+/g, " ")
-            .trim()
-            .substring(0, 10000);
-        }
-      }
+      sources.push(`--- FILE: ${fileName || "uploaded document"} ---\n${fileContent.substring(0, 14000)}`);
     }
 
-    if (!sourceText) return json(res, { error: "No content found at that URL." }, 400);
+    // Collect URL content (always fetch if provided, even if file is also present)
+    if (targetUrl) {
+      try {
+        const normalizedUrl = normalizeExtractUrl(targetUrl);
+        const r = await fetch(normalizedUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; ApexOutboundOS/1.0)",
+            "Accept": "text/html,application/xhtml+xml,application/pdf,text/plain,*/*",
+          },
+          redirect: "follow",
+        });
+        const contentType = r.headers.get("content-type") || "";
+        let urlText = "";
+        if (contentType.includes("application/pdf")) {
+          const buffer = Buffer.from(await r.arrayBuffer());
+          const pdfData = await pdfParse(buffer);
+          urlText = pdfData.text.substring(0, 8000);
+        } else {
+          const raw = await r.text();
+          if (raw.startsWith("%PDF")) {
+            const buffer = Buffer.from(raw, "binary");
+            const pdfData = await pdfParse(buffer);
+            urlText = pdfData.text.substring(0, 8000);
+          } else {
+            urlText = raw
+              .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+              .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+              .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "")
+              .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, "")
+              .replace(/<[^>]+>/g, " ")
+              .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+              .replace(/\s+/g, " ")
+              .trim()
+              .substring(0, 8000);
+          }
+        }
+        if (urlText) sources.push(`--- URL: ${targetUrl} ---\n${urlText}`);
+      } catch (_) {} // don't fail if URL fetch errors — file content is still usable
+    }
+
+    if (!sources.length) return json(res, { error: "No content found. Try a different URL or file." }, 400);
+
+    const sourceText = sources.join("\n\n");
 
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -1079,23 +1088,37 @@ async function handleProfileExtract(req, res) {
         messages: [
           {
             role: "system",
-            content: `You are extracting a sender profile from a company website, LinkedIn profile, or sales document. Extract exactly these fields as a JSON object. If a field isn't clearly stated, infer the most accurate version from the content. Never fabricate — if something truly can't be inferred, leave it as an empty string.
+            content: `You are extracting a detailed sender profile for a B2B outreach system. The sender will use this to write cold emails and LinkedIn messages. Extract every field as specifically as possible — use EXACT names, numbers, certifications, client names, and product names from the source material. Never use generic filler like "premium quality" or "industry-leading" — if you can't find something specific, leave the field empty.
 
-Fields:
-- name: The sender's personal name (if a personal profile) OR company name (if a company page)
-- role: Their job title and company, e.g. "Founder, Apex Growth Partners"
-- offer: What they offer — one concise sentence describing their product or service
-- valueProp: The specific outcome their buyers get — why it matters to the customer
-- proof: A specific proof point — client name, years in business, result, award, or credential
-- cta: What they want the prospect to do next — their preferred call to action
-- tone: How they communicate — infer from the writing style (e.g. "Warm and consultative", "Direct and data-driven", "Peer-to-peer, no jargon")
+Extract these fields as a JSON object:
 
-Return only valid JSON with these exact field names.`,
+BASIC PROFILE:
+- name: The sender's full personal name (not company name)
+- role: Their exact job title and company name, e.g. "VP Growth, TBI Corn Limited"
+- offer: What they specifically offer — name the actual products/services with precise language (e.g. "corn flour, corn grits, broken corn, and corn starch" not "corn products")
+- valueProp: The specific business outcome buyers get — be concrete (e.g. "consistent batch quality and reliable supply that keeps snack lines running without stoppages")
+- proof: The strongest credibility — exact client names, exact years in business, specific certifications (BRC/ISO/FSSAI/etc.), named results with numbers
+- cta: Their preferred first step for a prospect — specific and actionable
+- tone: Communication style inferred from the content (e.g. "Warm, credible, peer-to-peer")
+- authorityBlock: A 2-sentence intro the sender would use in cold outreach — their name, company, years in business, named clients, key credential. Must be specific and ready to paste into an email.
+
+ADVANCED PROFILE (extract if inferable from the content):
+- offerMechanism: How they work — their specific process, technology, or method (e.g. "BSE-listed mill with advanced dry milling technology, ISO 22000 certified plant in Akola")
+- outcomeTimeframe: A specific outcome promise with a timeframe if one exists (e.g. "matched sample within 7 days of receiving your spec")
+- lowRiskOffer: Their easiest first step — samples, trials, audits, demos (e.g. "free matched corn sample against your current spec")
+- differentiation: What makes them different — vs competitors, vs doing nothing, vs in-house sourcing (use specifics from the content)
+- proofCards: Up to 5 proof cards, one per line, format: [Customer type] | [Industry] | [Result] | [Specific detail]. Only use real information from the source.
+- authorityOpinion: One strong, slightly contrarian opinion the company holds about their industry (infer from their messaging if possible)
+
+Return only valid JSON with these exact field names. Leave a field as empty string "" if the source material genuinely doesn't contain enough to fill it specifically.`,
           },
-          { role: "user", content: `Extract the sender profile from this content${fileName ? ` (file: ${fileName})` : ""}:\n\n${sourceText}` },
+          {
+            role: "user",
+            content: `Extract the sender profile from this source material:\n\n${sourceText}`,
+          },
         ],
         response_format: { type: "json_object" },
-        max_tokens: 800,
+        max_tokens: 2000,
       }),
     });
     const data = await r.json();
