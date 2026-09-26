@@ -452,40 +452,28 @@ Rules:
 
 ---
 
-## FOLLOW-UP DM — send 3-4 days after connecting (write as long as needed — DO NOT compress into 400 characters):
+## FOLLOW-UP DM — send 3-4 days after connecting (write as long as needed — DO NOT compress):
 
-This DM has 6 mandatory parts. Write them in order. Do not skip or merge parts.
+CRITICAL OUTPUT RULE: Write a single flowing message with NO section labels, NO "Part 1 / Part 2 / Part 3" markers, NO structural headers of any kind. The message should read exactly as if a real person typed it on their phone. Do not output any meta-commentary about the structure.
 
-PART 1 — WARM GREETING (2 sentences max):
-The ONLY contact before this DM was the connection request. There has been no exchange, no prior conversation, no calls. Do NOT say "during our initial exchange" or "from our earlier chat" — nothing like that happened.
+Write the DM working through these points in order — invisibly, without labelling them:
 
-Open with genuine warmth: "Hi [Name], appreciate the connection — really glad to have you in my network." Then one simple human sentence that acknowledges their role or company genuinely (not flatteringly — specifically).
+Open with genuine warmth — 2 sentences max. The ONLY prior contact was the connection request. There was no prior exchange, no call, no earlier conversation. Do NOT write "during our initial exchange" or "from our earlier chat." Start: "Hi [Name], appreciate the connection — really glad to have you in my network." Follow with one specific, human sentence acknowledging their role or company (specific, not flattering). Example: "I have followed Britannia's expansion for a while and your role sits right at the centre of where product innovation meets procurement reality."
 
-Example: "Hi Shailesh, appreciate the connection — really glad to have you in my network. I have followed Britannia's expansion for a while and your role sits right at the centre of where product innovation meets procurement reality."
+Continue with "I was thinking about your world..." — then describe ${p}'s specific situation using named facts from the dossier. Name their actual products, their company's position, a recent expansion, their role pressure. Make them feel you actually looked. Not "the food industry" — name the company, name specific products, name the move. Use only what the dossier gives you.
 
-PART 2 — THEIR WORLD (2-3 sentences):
-"I was thinking about your world..." — then describe ${p}'s specific situation using named facts from the dossier: their products, their company's market position, their recent expansion, their role. Make ${p} feel you actually looked. Not "the food industry" — name Cremica, name the fruit crush range, name the specific expansion. Use what the dossier gives you.
+Name the specific operational headache — not the category. The actual mechanism: inconsistent particle size affecting yield on the extruder, OTIF pressure from a large retail account, supplier consolidation risk, seasonal volume spikes with long lead times. Draw from: ${icpFrustrations}${icpExactWords ? `\nMirror their language where possible — these are phrases real buyers use: ${icpExactWords}` : ""}
 
-PART 3 — EXACT PAIN MECHANISM (1-2 sentences):
-Name the specific operational problem, not the category. Not "supply chain challenges" but the actual headache: inconsistent particle size affecting yield on the extruder, OTIF pressure from a large retail account, supplier consolidation risk, seasonal volume spikes with long lead times. Draw from: ${icpFrustrations}${icpExactWords ? `\nMirror their language — these are phrases real buyers use: ${icpExactWords}` : ""}
+Add one sentence of company context — positioned as background, not a pitch. "For context, I'm ${senderName} from [company] — [one specific, factual line on credentials and why it's relevant to their situation]." Use only what's in the sender profile.
 
-PART 4 — COMPANY CONTEXT (2 sentences max):
-"${senderName} here is from [company] — [one factual, specific line on what the company does, its credentials, why it's relevant]. This context: [why this matters to ${p}'s specific situation]." Positioned as context, not pitch. Use only what's in the sender profile.
+Offer something specific for their file — a COA, spec sheet, market note, or landed cost comparison. Use the phrase "no strings attached, even if you're not looking to switch." This is value delivery, not a pitch.${senderLowRiskOffer ? `\nPreferred offer: ${senderLowRiskOffer}` : ""}
 
-PART 5 — OFFER FOR THEIR FILE (1-2 sentences):
-Offer something specific and useful — a COA, a spec sheet, a market note, a landed cost comparison. Use the phrase: "no strings attached, even if you're not looking to switch." This is value delivery, not a pitch.${senderLowRiskOffer ? `\nPreferred low-risk offer from the sender: ${senderLowRiskOffer}` : ""}
+Close warmly — no meeting ask in this message. The goal is to build the human connection first. Something like: "Would love to get to know you properly. If it ever makes sense, I'd be glad to share a sample or find some way I can genuinely add value to this connection. No rush at all — just good to be connected." Then sign off: Best, ${senderName}
 
-PART 6 — SOFT CLOSE (rapport-first, no meeting ask yet):
-The goal of this DM is to build trust and start a human connection. Do NOT ask for a meeting or call in this message — that comes later in the sequence after more rapport is built.
-
-End with something like: "Would love to get to know you properly. If it ever makes sense, I'd be glad to share a sample or find some way I can genuinely add value to this connection. No rush at all — just good to be connected."
-
-Then sign off warmly: Best, [Name]
-
-IMPORTANT RULES FOR THIS DM:
+Rules:
 - Simple, human language — short sentences, no corporate phrases
 - Warm and personal, not transactional
-- No meeting request in this message — only a soft offer of value and a genuine human close
+- No meeting request — only a soft offer of value and a genuine human close
 - No "I hope this message finds you well", no "I wanted to reach out"
 - Write like a real person sent it from their phone
 
@@ -590,38 +578,35 @@ Subject line: specific, under 8 words, references a real thing from the dossier.
 REAL EXAMPLES THAT GOT REPLIES — study tone, length, specificity. Do not copy:
 ${fewShotExamples.map((ex, i) => `--- Example ${i+1} ---\nSubject: ${ex.subject || "(no subject)"}\n${ex.body}`).join("\n\n")}` : ""}`;
 
-        if (emailNum === 1) return `Write EMAIL 1 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. This is the FIRST email. ${p} does not know ${senderName} at all. Goal: intrigue, build credibility, and earn a reply — not book a meeting yet.
+        if (emailNum === 1) return `Write EMAIL 1 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. This is the FIRST email. ${p} does not know ${senderName} at all. Goal: intrigue, build credibility, and earn a reply.
 ${sharedRules}
 
-EMAIL 1 STRUCTURE (mandatory — do not deviate):
+CRITICAL OUTPUT RULE: Write the email exactly as it would be sent — no structural labels, no LINE markers, no section annotations in the output. Clean email only.
 
-LINE 1 — ICEBREAKER:
-One specific, researched observation about ${p} or ${co}. Must name an ACTUAL PRODUCT, BRAND, LAUNCH, or SPECIFIC FACT from the dossier. Not a generic compliment.
+Use this exact subject line (do not change it): Subject: Corn ingredients for ${co} | TBI Corn
+
+EMAIL BODY — write in this order, no labels or markers in your output:
+
+1. ICEBREAKER (opening line): One specific, researched observation about ${p} or ${co}. Must name an ACTUAL PRODUCT, BRAND, LAUNCH, or SPECIFIC FACT from the dossier. Not a generic compliment. This line must make ${p} feel you did your homework on them specifically.
 BANNED: "I've been following [company]'s impressive move to..." / "A testament to your growth" / "Congrats on [generic achievement]"
 GOOD: "Gopal Snacks is rolling out 26 new products by November — that kind of push across Gathiya, Bhujia, and extruded lines puts real pressure on corn grit consistency run to run."
 BAD: "I've been following Gopal Snacks' impressive move to add 26 new products — a testament to your market growth."
-The icebreaker must name something specific. If it could apply to any company in the industry, rewrite it.
 
-LINE 2 — FULL AUTHORITY BLOCK:
+2. SENDER INTRO: Who the sender is — natural, not salesy. 1-2 sentences. ${p} is a stranger who needs enough context to keep reading.
 ${senderAuthorityBlock
-  ? `Use this pre-approved authority block VERBATIM — do not rewrite, shorten, or paraphrase a single word:\n"${senderAuthorityBlock}"`
-  : `3-5 sentences. ${p} is a stranger. Include ALL available: full name and role, company name (BSE/NSE status if applicable), exact product categories (named, not generic), years in operation, plant count, named clients, certifications. This block earns the right to keep reading. Do not compress.\nExample: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified."`}
+  ? `Use this pre-approved authority block VERBATIM — do not rewrite, shorten, or paraphrase:\n"${senderAuthorityBlock}"`
+  : `Include: full name and role, company name (BSE/NSE status if applicable), exact product categories (named), years in operation, plant count, named clients, certifications. Earn the right to keep reading.\nExample: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified."`}
 ONLY USE WHAT THE SENDER PROFILE PROVIDES. Never invent plant names, certifications, clients, or categories.
 
-LINES 3-4 — BRIDGE (pain angle):
-Name the exact operational pain. Not "supply chain challenges" — the actual mechanism: inconsistent particle size, batch deviations, QA escalations, OTIF pressure. Make ${p} feel understood. Reference their specific products, current situation, role pressure.
+3. TECHNICAL BRIDGE: Connect their specific product category to the exact corn ingredient and the operational mechanism. Not "supply chain challenges" — the actual headache: inconsistent particle size, batch deviations, QA escalations, OTIF pressure. Name their specific products. Make ${p} feel understood.
 
-LINE 5 — PROOF:
-One specific credibility detail beyond Line 2. Different layer: a volume reference, process detail, geography note, or specific outcome. If nothing to add, skip.
+4. SOFT CTA: "Would love to understand ${co}'s current sourcing setup and share our spec sheets / COA for your review — no commitment at all. Happy to arrange a sample for your NPD / QC team if there's a potential fit. If the dossier mentions a specific destination port or city, add: ', and we can work on a competitive landed cost to [city].'"
 
-LINE 6 — SOFT CTA:
-Ask them to share their current spec so you can send a matched sample. "If you could share your current spec, I'd be happy to send a matched sample — no commitment at all." Low friction. No meeting ask yet.
+Then add: "Would a quick 20-min call next week be useful?"
 
-END: One genuine, curious question about their work. This is what gets a reply.
-GOOD: "Quick question — how often does your team benchmark your current corn supplier's COA against the spec you signed off on?"
-SIGN OFF: ${senderName} · ${senderRole}
+SIGN OFF: Warm regards, ${senderName} · ${senderRole}
 
-Output only the final email, ready to send. Include the subject line at the top.`;
+Output only the final email, ready to send. Subject line at the top, then the body, then sign-off.`;
 
         if (emailNum === 2) return `Write EMAIL 2 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. ${p} received Email 1 but has not replied.
 ${sharedRules}
