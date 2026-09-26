@@ -90,10 +90,38 @@ function quickScoreLead(lead) {
   return Math.min(score, 100);
 }
 
+// ─── AI Endpoint Router ───────────────────────────────────────────────────────
+const OPENAI_MODELS = new Set(["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"]);
+
+function getAIEndpoint(model) {
+  const m = model || "gpt-4o";
+  // Native OpenAI model + key available → use OpenAI directly
+  if (OPENAI_MODELS.has(m) && process.env.OPENAI_API_KEY) {
+    return { url: "https://api.openai.com/v1/chat/completions", key: process.env.OPENAI_API_KEY, model: m };
+  }
+  // Everything else → OpenRouter
+  if (process.env.OPENROUTER_API_KEY) {
+    return { url: "https://openrouter.ai/api/v1/chat/completions", key: process.env.OPENROUTER_API_KEY, model: m };
+  }
+  // Fallback to OpenAI with whatever model was requested
+  return { url: "https://api.openai.com/v1/chat/completions", key: process.env.OPENAI_API_KEY || "", model: m };
+}
+
+function aiHeaders(endpoint) {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${endpoint.key}`,
+    ...(endpoint.url.includes("openrouter") ? {
+      "HTTP-Referer": "https://intelligentoutbound.com",
+      "X-Title": "Intelligent Outbound OS",
+    } : {}),
+  };
+}
+
 // ─── Handlers ────────────────────────────────────────────────────────────────
 async function handleStatus(req, res) {
   json(res, {
-    openai: !!process.env.OPENAI_API_KEY,
+    openai: !!(process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY),
     apollo: !!process.env.APOLLO_API_KEY,
     perplexity: !!process.env.PERPLEXITY_API_KEY,
     apify: !!process.env.APIFY_API_KEY,
@@ -121,14 +149,12 @@ async function handleIcpFill(req, res) {
         dreamOutcomes: "What success looks like — the outcomes they dream about for their business and career.",
       };
       const fieldPrompt = fieldDescriptions[field] || `Generate a value for the ICP field: ${field}`;
-      const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      const ep1 = getAIEndpoint(body.model || "gpt-4o");
+      const r = await fetch(ep1.url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
+        headers: aiHeaders(ep1),
         body: JSON.stringify({
-          model: "gpt-4.1-mini",
+          model: ep1.model,
           messages: [
             {
               role: "system",
@@ -145,14 +171,12 @@ async function handleIcpFill(req, res) {
     }
 
     // Full ICP fill: return {icp: {...}}
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    const ep2 = getAIEndpoint(body.model || "gpt-4o");
+    const r = await fetch(ep2.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
+      headers: aiHeaders(ep2),
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
+        model: ep2.model,
         messages: [
           {
             role: "system",
@@ -733,18 +757,16 @@ Be honest: if this is a polite no, say so and recommend a graceful break-up mess
 
     sendEvent({ step, status: 'processing' });
 
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    const epChain = getAIEndpoint(body.model || "gpt-4o");
+    const r = await fetch(epChain.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: maxTokens, stream: true }),
+      headers: aiHeaders(epChain),
+      body: JSON.stringify({ model: epChain.model, messages, max_tokens: maxTokens, stream: true }),
     });
 
     if (!r.ok) {
       const errText = await r.text();
-      sendEvent({ step, status: 'error', error: `OpenAI ${r.status}: ${errText.substring(0, 200)}` });
+      sendEvent({ step, status: 'error', error: `AI ${r.status}: ${errText.substring(0, 200)}` });
       res.end();
       return;
     }
@@ -877,8 +899,8 @@ async function handleApolloMatch(req, res) {
 
 async function handleProfileAuthority(req, res) {
   try {
-    if (!process.env.OPENAI_API_KEY) return json(res, { error: "OpenAI key not set" }, 400);
-    const { senderProfile } = await readBody(req);
+    const body = await readBody(req);
+    const { senderProfile } = body;
     const s = senderProfile || {};
 
     const userPrompt = `Write a B2B cold email authority intro paragraph for ${s.name || "the sender"}.
@@ -898,12 +920,13 @@ What they offer: ${s.offer || ""}
 Why it matters to their ICP: ${s.valueProp || ""}
 Social proof: ${s.proof || ""}`;
 
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    const epAuth = getAIEndpoint(body.model || "gpt-4o");
+    const r = await fetch(epAuth.url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
-      body: JSON.stringify({ model: "gpt-4o", messages: [{ role: "user", content: userPrompt }], temperature: 0.4, max_tokens: 350 }),
+      headers: aiHeaders(epAuth),
+      body: JSON.stringify({ model: epAuth.model, messages: [{ role: "user", content: userPrompt }], temperature: 0.4, max_tokens: 350 }),
     });
-    if (!r.ok) return json(res, { error: `OpenAI returned ${r.status}` }, r.status);
+    if (!r.ok) return json(res, { error: `AI returned ${r.status}` }, r.status);
     const data = await r.json();
     const block = data.choices?.[0]?.message?.content?.trim() || "";
     json(res, { authorityBlock: block });
@@ -1077,14 +1100,12 @@ async function handleProfileExtract(req, res) {
 
     const sourceText = sources.join("\n\n");
 
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    const epExtract = getAIEndpoint(body.model || "gpt-4o");
+    const r = await fetch(epExtract.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
+      headers: aiHeaders(epExtract),
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: epExtract.model,
         messages: [
           {
             role: "system",
@@ -1182,11 +1203,12 @@ async function handleConfig(req, res) {
 async function handleHealth(req, res) {
   const start = Date.now();
   try {
-    // Lightweight smoke test — one token from OpenAI confirms the key and network are live
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    // Lightweight smoke test — one token confirms the AI key and network are live
+    const epHealth = getAIEndpoint("gpt-4o-mini");
+    const r = await fetch(epHealth.url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
-      body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
+      headers: aiHeaders(epHealth),
+      body: JSON.stringify({ model: epHealth.model, messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
     });
     const ok = r.ok;
     json(res, {

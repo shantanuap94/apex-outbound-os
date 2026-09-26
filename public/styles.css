@@ -88,6 +88,18 @@ a { color: var(--accent); }
 .spill.on { background: rgba(40,190,90,.2); color: #3dca70; }
 .sb-missing { font-size: 10px; color: rgba(255,255,255,.28); margin-top: 6px; line-height: 1.5; }
 
+.sb-model {
+  padding: 10px 14px 12px; border-top: 1px solid rgba(255,255,255,.06);
+}
+.model-select {
+  width: 100%; margin-top: 6px;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.75); font-size: 11px; padding: 5px 8px;
+  border-radius: 6px; cursor: pointer; outline: none;
+}
+.model-select:focus { border-color: rgba(255,255,255,.3); }
+.model-select option, .model-select optgroup { background: #1a1a2e; color: #ddd; }
+
 .sb-user {
   padding: 10px 14px 14px; border-top: 1px solid rgba(255,255,255,.06);
   display: flex; flex-direction: column; gap: 5px;

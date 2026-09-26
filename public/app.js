@@ -18,20 +18,6 @@ const ICP_FIELDS = [
   "disqualifiers","buyingCommittee","seniorityFraming",
 ];
 
-const APEX_ICP = {
-  seedDescription: "Founders of a 50 crore B2B company, typically manufacturing, real estate, or expert-led B2B services like CA firms, architecture firms, and similar businesses.",
-  roleSeniority: "Founder and Managing Director.",
-  companyStageSize: "Post-survival SME with 50 crore annual turnover, transitioning from owner-led survival to professional management.",
-  responsibilityScope: "Accountable for topline growth, major client relationships, high-level bank and investor relations, and capital allocation for expansion.",
-  empathySayLoud: "We have the best product and service in the market, but sales is not consistent enough.\nGood talent is hard to find and harder to keep.\nThe way we did things at 5 crore will not get us to 100 crore.",
-  empathyThinkPrivately: "If I stop pushing for one week, will the momentum disappear?\nI am paying senior managers well, but am I still doing their work?\nMy competitors are younger and using technology better than I am.",
-  empathyActuallyDo: "Intervenes in sales meetings because they do not fully trust the team.\nChecks bank balances and receivables personally.\nManages key projects through WhatsApp groups, verbal instructions, and trusted loyalists.",
-  empathyFeel: "Feels the heavy weight of being the sole growth engine.\nFeels proud of the business, but quietly exhausted.\nFeels anxious that the market is changing faster than internal processes can adapt.",
-  pains: "Revenue is stuck at a plateau and every new crore feels harder to earn.\nHigh dependency on the founder for major decisions.\nCash flow gaps despite a healthy order book.\nInability to attract and retain high-quality professional leadership.",
-  fears: "The business may collapse or shrink if they step away for health or personal reasons.\nA smarter, tech-enabled competitor may steal key accounts.\nThey may be exposed as a small-time player when trying to win enterprise clients.\nTheir reputation for quality may erode as the company scales.",
-  frustrations: "Spending most of the day firefighting instead of thinking strategically.\nThe team keeps making the same mistakes despite repeated instructions.\nData is scattered across spreadsheets, paper files, and people's heads.\nSales cycles are lengthening without a clear reason.",
-  dreamOutcomes: "A dashboard that shows real-time business health without asking five people for reports.\nA self-managing leadership team that brings solutions, not just problems.\nPredictable month-on-month growth that does not require founder intervention.\nFreedom to spend time on expansion, new ventures, or family while the business grows.",
-};
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 const $  = (id) => document.getElementById(id);
@@ -39,7 +25,7 @@ function post(path, body) {
   return fetch(API + path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ model: _selectedModel, ...body }),
   }).then((r) => r.json());
 }
 function get(path) { return fetch(API + path).then((r) => r.json()); }
@@ -53,7 +39,7 @@ function postStream(path, body, onToken) {
       const res = await fetch(API + path, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ model: _selectedModel, ...body }),
       });
       if (!res.ok) { resolve({ error: `HTTP ${res.status}` }); return; }
 
@@ -332,6 +318,40 @@ async function saveSender() {
   }
 }
 
+// ─── Model Selection ──────────────────────────────────────────────────────────
+async function loadModelPreference() {
+  if (!_sb || !_userId) return;
+  try {
+    const { data } = await _sb.from("user_settings")
+      .select("value").eq("user_id", _userId).eq("key", "selected_model").maybeSingle();
+    if (data?.value) {
+      _selectedModel = data.value;
+      const sel = $("modelSelect");
+      if (sel) sel.value = _selectedModel;
+    }
+  } catch {}
+}
+
+async function saveModelPreference(model) {
+  _selectedModel = model;
+  if (!_sb || !_userId) return;
+  try {
+    await _sb.from("user_settings").upsert(
+      { user_id: _userId, key: "selected_model", value: model, updated_at: new Date().toISOString() },
+      { onConflict: "user_id,key" }
+    );
+  } catch {}
+}
+
+function wireModelSelect() {
+  const sel = $("modelSelect");
+  if (!sel) return;
+  sel.value = _selectedModel;
+  sel.addEventListener("change", () => saveModelPreference(sel.value));
+}
+
+function getSelectedModel() { return _selectedModel; }
+
 function wireSender() {
   $("saveSenderBtn").addEventListener("click", saveSender);
 
@@ -481,6 +501,7 @@ let _suppressionList = [];
 let _userId = null;
 let _currentDossier = "";
 let _appBooted = false;
+let _selectedModel = "anthropic/claude-sonnet-4-5";
 
 async function initSupabase() {
   if (typeof supabase === "undefined") { bootApp(); return; }
@@ -535,6 +556,8 @@ function bootApp(session) {
   wireIcp();
   loadSavedSender();
   loadSavedIcp();
+  loadModelPreference();
+  wireModelSelect();
   wireChain();
   wireMemory();
   wireProspectSearch();

@@ -39,6 +39,27 @@
       </div>
       <div class="sb-missing" id="sbMissing"></div>
     </div>
+    <div class="sb-model">
+      <div class="sb-status-lbl">AI MODEL</div>
+      <select id="modelSelect" class="model-select">
+        <optgroup label="Claude (via OpenRouter)">
+          <option value="anthropic/claude-opus-4-5">Claude Opus 4.5 — best quality</option>
+          <option value="anthropic/claude-sonnet-4-5" selected>Claude Sonnet 4.5 — recommended</option>
+          <option value="anthropic/claude-haiku-4-5">Claude Haiku 4.5 — fastest</option>
+        </optgroup>
+        <optgroup label="OpenAI (direct)">
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="gpt-4o-mini">GPT-4o mini — fast &amp; cheap</option>
+        </optgroup>
+        <optgroup label="Google (via OpenRouter)">
+          <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+          <option value="google/gemini-2.5-pro-preview-06-05">Gemini 2.5 Pro</option>
+        </optgroup>
+        <optgroup label="Meta (via OpenRouter)">
+          <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B</option>
+        </optgroup>
+      </select>
+    </div>
     <div class="sb-user hidden" id="sbUserInfo">
       <span id="sbUserEmail" class="sb-user-email"></span>
       <button id="sbSignOut" class="sb-signout">Sign out</button>
