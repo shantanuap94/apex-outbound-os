@@ -1088,37 +1088,78 @@ async function handleProfileExtract(req, res) {
         messages: [
           {
             role: "system",
-            content: `You are extracting a detailed sender profile for a B2B outreach system. The sender will use this to write cold emails and LinkedIn messages. Extract every field as specifically as possible — use EXACT names, numbers, certifications, client names, and product names from the source material. Never use generic filler like "premium quality" or "industry-leading" — if you can't find something specific, leave the field empty.
+            content: `You are building a B2B outreach intelligence profile. This profile will be fed directly into an AI agent that writes cold emails and LinkedIn messages on behalf of the sender. Every field you write will be used verbatim in real outreach.
 
-Extract these fields as a JSON object:
+Your job is NOT extraction — it is SYNTHESIS. Read the source material deeply, understand the business, and write each field in the exact form the email agent needs it. The agent cannot paraphrase or improve what you write. If you write vague copy, the emails will be vague.
 
-BASIC PROFILE:
-- name: The sender's full personal name (not company name)
-- role: Their exact job title and company name, e.g. "VP Growth, TBI Corn Limited"
-- offer: What they specifically offer — name the actual products/services with precise language (e.g. "corn flour, corn grits, broken corn, and corn starch" not "corn products")
-- valueProp: The specific business outcome buyers get — be concrete (e.g. "consistent batch quality and reliable supply that keeps snack lines running without stoppages")
-- proof: The strongest credibility — exact client names, exact years in business, specific certifications (BRC/ISO/FSSAI/etc.), named results with numbers
-- cta: Their preferred first step for a prospect — specific and actionable
-- tone: Communication style inferred from the content (e.g. "Warm, credible, peer-to-peer")
-- authorityBlock: A 2-sentence intro the sender would use in cold outreach — their name, company, years in business, named clients, key credential. Must be specific and ready to paste into an email.
+QUALITY STANDARD for every field:
+- Use EXACT product names, client names, certifications, numbers, and plant/location details from the source
+- Write as if a senior sales consultant who deeply understands this business is briefing a copywriter
+- Never use: "premium", "industry-leading", "world-class", "innovative", "seamless", "leverage", "synergy", "value-added", "cutting-edge", "state-of-the-art"
+- If you cannot fill a field specifically from the source, return ""  — do not fabricate
 
-ADVANCED PROFILE (extract if inferable from the content):
-- offerMechanism: How they work — their specific process, technology, or method (e.g. "BSE-listed mill with advanced dry milling technology, ISO 22000 certified plant in Akola")
-- outcomeTimeframe: A specific outcome promise with a timeframe if one exists (e.g. "matched sample within 7 days of receiving your spec")
-- lowRiskOffer: Their easiest first step — samples, trials, audits, demos (e.g. "free matched corn sample against your current spec")
-- differentiation: What makes them different — vs competitors, vs doing nothing, vs in-house sourcing (use specifics from the content)
-- proofCards: Up to 5 proof cards, one per line, format: [Customer type] | [Industry] | [Result] | [Specific detail]. Only use real information from the source.
-- authorityOpinion: One strong, slightly contrarian opinion the company holds about their industry (infer from their messaging if possible)
+FIELDS — return as a JSON object with these exact keys:
 
-Return only valid JSON with these exact field names. Leave a field as empty string "" if the source material genuinely doesn't contain enough to fill it specifically.`,
+name
+  The sender's full personal name (not company name). If not in the source, return "".
+
+role
+  Exact job title + company. e.g. "VP Growth, TBI Corn Limited"
+
+offer
+  What they sell — written for a cold email opening line. Name the actual products/grades/specs, not categories.
+  BAD: "We offer quality corn products"
+  GOOD: "TBI Corn supplies corn flour, corn grits, fine broken corn, and maize starch — milled to food-grade spec at our FSSAI-approved plant"
+
+valueProp
+  The specific operational outcome the buyer gets. Written from the buyer's perspective.
+  BAD: "customers receive consistent products that help them succeed"
+  GOOD: "Snack manufacturers get consistent particle size and moisture across batches — the kind of spec consistency that keeps extruder yields stable and avoids line stoppages"
+
+proof
+  The single strongest credibility statement — exact client names, years in business, certifications, BSE listing, capacity numbers, named awards. One dense sentence.
+  e.g. "BSE-listed since 2008; supplying ITC Limited, DFM Foods, and Haldiram's for over 23 years; ISO 22000 and FSSAI certified"
+
+cta
+  Their preferred first step — specific and easy. e.g. "Share your current corn spec and we'll send a matched free sample within 7 days"
+
+tone
+  Infer from the writing style in the source. e.g. "Warm, credible, peer-to-peer — expert without being formal"
+
+authorityBlock
+  A 2-sentence cold email intro the sender would use as LINE 2 of an outreach email. Must include: sender name, company, years operating, named clients or listed status, one key credential. Must be immediately usable.
+  e.g. "I'm Shantanu Phansalkar from TBI Corn Limited — we've been milling corn for 23 years and currently supply ITC Limited and DFM Foods. We're BSE-listed, FSSAI certified, and run a food-grade dry milling plant in Maharashtra."
+
+offerMechanism
+  How they deliver — the actual process, plant, technology, or method. Specific.
+  e.g. "Dry milling plant in Akola, Maharashtra — 150 MT/day capacity, advanced sieving for uniform particle size, ISO 22000 certified line"
+
+outcomeTimeframe
+  A specific promise with a timeframe, if the source supports one.
+  e.g. "Matched sample against your COA delivered within 7 working days" or "" if not inferable
+
+lowRiskOffer
+  Their easiest yes — samples, trials, plant visits, free audits. One sentence.
+  e.g. "Free sample matched to your current corn spec — no commitment, no minimum order to start"
+
+differentiation
+  What makes them different. Write three short angles: vs doing nothing, vs current supplier, vs competing mills. Be specific to this company.
+
+proofCards
+  Up to 5 proof cards. One per line. Format exactly:
+  [Buyer type] | [Sector] | [Outcome] | [Specific credential or named detail]
+  Only use real information from the source. Leave empty if nothing specific is available.
+
+authorityOpinion
+  One strong, slightly contrarian opinion this company holds about their industry — infer from their messaging tone and positioning. e.g. "Most snack manufacturers treat corn ingredient spec as a commodity decision — it isn't. Batch-to-batch consistency at the mill level is what decides whether your extruder runs at 94% or 87% yield."`,
           },
           {
             role: "user",
-            content: `Extract the sender profile from this source material:\n\n${sourceText}`,
+            content: `Build the outreach profile from this source material:\n\n${sourceText}`,
           },
         ],
         response_format: { type: "json_object" },
-        max_tokens: 2000,
+        max_tokens: 2500,
       }),
     });
     const data = await r.json();
