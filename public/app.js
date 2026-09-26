@@ -549,16 +549,17 @@ function _mapHeaders(headers) {
     if (!key) return null;
     // Exact match first
     if (IMPORT_COL_MAP[key]) return IMPORT_COL_MAP[key];
-    // Partial/contains match as fallback
-    if (key.includes("company") || key.includes("organisation") || key.includes("organization") || key.includes("employer")) return "pCompany";
-    if (key.includes("first") && key.includes("name")) return "pFirstName";
-    if (key.includes("last") && key.includes("name")) return "pLastName";
-    if ((key.includes("job") || key.includes("work")) && (key.includes("title") || key.includes("position"))) return "pTitle";
+    // Partial/contains match as fallback — order matters (specific before generic)
+    if (key.includes("first") && (key.includes("name") || key === "first")) return "pFirstName";
+    if ((key.includes("last") || key.includes("sur")) && key.includes("name")) return "pLastName";
+    if (key.includes("company") || key.includes("organisation") || key.includes("organization") || key.includes("employer") || key.includes("account")) return "pCompany";
     if (key.includes("email")) return "pEmail";
-    if (key.includes("phone") || key.includes("mobile") || key.includes("whatsapp")) return "pPhone";
+    if (key.includes("phone") || key.includes("mobile") || key.includes("whatsapp") || key.includes("cell")) return "pPhone";
     if (key.includes("linkedin")) return "pLinkedin";
     if (key.includes("domain") || key.includes("website")) return "pDomain";
-    if (key === "title" || key === "position" || key === "designation" || key === "role") return "pTitle";
+    if (key.includes("title") || key.includes("position") || key.includes("designation")) return "pTitle";
+    // Any remaining "name" column (not company/org) → treat as full name
+    if (key.includes("name")) return "_fullName";
     return null;
   });
 }
@@ -592,7 +593,7 @@ function _renderQueue() {
     return;
   }
   const cell = (val) => val
-    ? `<td class="iq-cell" title="${val.replace(/"/g,'&quot;')}">${val}</td>`
+    ? `<td class="iq-cell" title="${String(val).replace(/"/g,'&quot;')}">${val}</td>`
     : `<td class="iq-cell iq-missing">—</td>`;
   tbody.innerHTML = _importQueue.map((p, i) => `
     <tr class="${p._loaded ? "iq-loaded" : ""}">
@@ -602,7 +603,10 @@ function _renderQueue() {
       ${cell(p.pEmail)}
       ${cell(p.pLinkedin)}
       ${cell(p.pPhone)}
-      <td class="iq-cell"><button class="btn btn-dark iq-load-btn" onclick="loadQueueRow(${i})">${p._loaded ? "✓ Loaded" : "Load →"}</button></td>
+      <td class="iq-cell" style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-dark iq-load-btn" onclick="loadQueueRow(${i})">${p._loaded ? "✓ Loaded" : "Load →"}</button>
+        <button class="iq-remove-btn" onclick="removeQueueRow(${i})" title="Remove row">×</button>
+      </td>
     </tr>`).join("");
 }
 
@@ -622,6 +626,11 @@ function loadQueueRow(i) {
   _importQueue[i]._loaded = true;
   _renderQueue();
   $("pFirstName")?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function removeQueueRow(i) {
+  _importQueue.splice(i, 1);
+  _renderQueue();
 }
 
 function _processImport(data) {

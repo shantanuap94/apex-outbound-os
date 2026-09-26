@@ -843,6 +843,8 @@ main { padding: 24px 32px 60px; }
 .iq-loaded .iq-load-btn { opacity: 1; }
 .iq-empty { text-align: center; color: var(--text-3); padding: 14px; font-size: 12px; }
 .iq-load-btn { font-size: 11px; padding: 3px 10px; white-space: nowrap; }
+.iq-remove-btn { background: none; border: none; color: var(--text-3); font-size: 16px; cursor: pointer; padding: 0 4px; line-height: 1; }
+.iq-remove-btn:hover { color: #e05; }
 
 /* ─── Advanced / Buying Intelligence Collapsible ────────────────────────── */
 .adv-section {
