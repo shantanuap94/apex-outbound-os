@@ -584,44 +584,71 @@ ${sharedRules}
 
 CRITICAL OUTPUT RULE: Write the email exactly as it would be sent — no structural labels, no LINE markers, no section annotations in the output. Clean email only.
 
-SUBJECT LINE — do NOT use a company-name-plus-sender formula. That screams mass mail to an import procurement team. Write a subject that names their actual product(s) and hints at a specific operational tension. Formats that convert:
-- "[Product A] + [Product B] — [tension or question]?" e.g. "Krip Krip + Pilus — same corn, different spec headache?"
-- "For your QC file — [ingredient grade] lot data — [Company]" e.g. "For your QC file — tortilla flour & Pilus grits lot data"
-- "[First name] — [most critical filter for their market] + [product] consistency" e.g. "Intan — Halal docs + tortilla flour consistency"
+SENIORITY FRAMING — read ${role} carefully. The role level changes your primary hook angle entirely:
+
+TIER 1 — DIVISION HEAD / HEAD / DIRECTOR / VP / GM (titles contain "Head", "Director", "VP", "GM", "Chief", "Division Head"):
+- Primary hook: IMPORT RISK + SECOND SOURCE STRATEGY. Not mesh size first — import strategy first.
+- Their world: "The risk is not FOB price — it's having only one qualified import source for [ingredient], plus Halal docs and COA arriving after dispatch, which then holds up clearing in [port city]."
+- Port cities by country: Indonesia = Semarang (Central Java plants) / Tanjung Priok (Jakarta), India = JNPT/Mumbai, UAE/MENA = Jebel Ali, Nigeria = Apapa Lagos, UK = Tilbury/Felixstowe. Use the port nearest to their plant.
+- Specs appear but as context only: "I understand you run [Product A + Product B] — [spec numbers] — but I know your import spec will be more precise than that."
+- Subject style: "[Name] — second source for [ingredient] for [city] plant?" or "Hi [Name] — came across [Company] while researching top [ingredient] importers in [country]"
+- CTA framing: "understand how you qualify new import sources" — strategic language, not QC language
+
+TIER 2 — MANAGER / SUPERVISOR / SENIOR [ROLE] (titles contain "Manager", "Supervisor", "Senior"):
+- Primary hook: OPERATIONAL DAILY PAIN — two specs in one import file, COA timing, spec deviation stopping lines
+- Their world: "Managing two different specs in same import file + making sure COA and Halal docs come before dispatch, not after clearing"
+- Specs come in naturally: "For [Product A] we usually see clients run [spec], for [Product B], [spec] — but I know you'll have your own precise spec."
+- Subject style: "[Name] — [Product A] + [Product B] — quick hello" or product-tension subject
+- CTA framing: "understand your current import spec and how you qualify new sources"
+
+TIER 3 — ANALYST / BUYER / SPECIALIST / COORDINATOR (titles contain "Sourcing", "Procurement", "Analyst", "Specialist", "Coordinator", "Buyer"):
+- Primary hook: PRODUCT-SPECIFIC SPECS + SAMPLE QUALIFICATION
+- Their world: getting the right spec sourced and qualified for specific product lines, making the QC file complete
+- Go deepest on specs — this is their job and they will appreciate the detail
+- Subject style: "For your QC file — [grade] data — [Company]" or "[Name] — came across [specific product]"
+- CTA framing: "understand your current import spec and how you currently qualify new sources for QC"
+
+SUBJECT LINE — choose the style that matches the seniority tier above. Never use a company-name-plus-sender formula — it signals mass mail.
 BANNED subject formats: "Corn ingredients for [Company] | TBI Corn" / "Quick question" / "Partnership opportunity" / anything with sender company name in subject
 
 EMAIL BODY — write in this exact order, no labels in output:
 
-1. RESEARCH OPENER (1-2 sentences): Start with how you found them — genuine, human, not a template. "I was doing some research on [their category / market] and your name came up with [Company] — so I spent some time looking at [specific products]." This signals real effort, not a mail merge. Do NOT open with "I'm [Name]" or "I wanted to reach out" or a direct product pitch.
+1. BRIEF WARM OPENER: "Hope you are doing well." One line. Then move immediately to the research opener — do not add any filler.
 
-2. GENUINE ACKNOWLEDGMENT (1 sentence): Note what's impressive about what they've built — specific, not flattering. Reference a real fact from the dossier (city, founding year, product count, scale, export footprint). e.g. "Really impressive how you've scaled both from Pati — two very different corn applications running in parallel."
+2. RESEARCH OPENER (1-2 sentences): Start with how you found them — genuine, human. "I was doing some research on [their category / market] and your name came up as [role] at [Company] — so I spent some time looking at [specific products or the company's scale]." Do NOT use: "I wanted to reach out" / "I came across your profile."
 
-3. META-ACKNOWLEDGE (1 line): Disarm supplier-email fatigue before it builds: "I know you probably get a lot of supplier emails, so I'll keep this short and human." This line reduces resistance more than any credential.
+3. GENUINE ACKNOWLEDGMENT (1 sentence): What's impressive, specific to their situation. Reference a real fact from the dossier — city, product count, export footprint, years built. Keep it brief and real.
 
-4. SENDER INTRO (2-3 sentences — after context, not before): Who the sender is, company, credentials.
+4. META-ACKNOWLEDGE (1 line): "I know you probably get a lot of supplier emails, so I'll keep this short and human." This line disarms fatigue more than any credential.
+
+5. SENDER INTRO (2-3 sentences): Who the sender is, company, credentials — after context, not before.
 ${senderAuthorityBlock
   ? `Use this pre-approved authority block VERBATIM — do not rewrite, shorten, or paraphrase:\n"${senderAuthorityBlock}"`
-  : `Include: first name + company name (BSE/NSE status if applicable), years milling, plant count, 2-3 named clients (food manufacturers, not distributors). Natural tone.
-Example: "I'm Shantanu — I head Growth at TBI Corn Limited. We're a BSE/NSE listed corn processing company from India, milling since 1999 across 4 plants in Miraj, Mumbai, Delhi and Malkapur. We supply fine corn flour and grits to ITC, Pratap Snacks and Balaji Wafers — so same world as yours, where if particle size or moisture shifts even slightly, one line sheets unevenly and the other expands differently, and QC gets calls from both sides in the same week."`}
+  : `Include: first name + company name (BSE/NSE status if applicable), years milling, plant count, 2-3 named clients (food manufacturers, not distributors). Bridge into their pain in the same sentence.
+Example (for operational seniority): "I'm Shantanu — I head Growth at TBI Corn Limited. We're a BSE/NSE listed corn processing company from India, milling since 1999 across 4 plants in Miraj, Mumbai, Delhi and Malkapur. We supply fine corn flour and grits to ITC, Pratap Snacks and Balaji Wafers — same world where if moisture or particle size shifts even slightly, QC calls from both lines in same week."
+Example (for strategic seniority): "I'm Shantanu, heading Growth at TBI Corn Limited — BSE/NSE listed corn miller, 4 plants, since 1999. We supply to ITC, Pratap, Balaji — large scale where lot-to-lot consistency matters more than price."`}
 ONLY USE WHAT THE SENDER PROFILE PROVIDES. Never invent plant names, certifications, clients, or categories.
 
-5. MICRO-VALUE — SPECS IN THE EMAIL: Give ACTUAL TECHNICAL SPECS for their product category that ${p} can use today — before they've agreed to anything. Phrase as "we usually see clients run..." not as a prescription.
-- Corn tortilla chips: "fine flour around 80–100 mesh, under 13% moisture — for even sheeting and consistent fry"
-- Extruded puffs: "grits around 0.8–1.2mm, same moisture band — for predictable expansion"
-- Corn flakes / cereal: "flaking grits grade, consistent gelatinization, tight moisture"
-- Batter / coating: "fine mesh, controlled protein, low free fatty acid"
-- Extruded sticks / rings: "particle size + moisture — for uniform extrusion pressure and mouthfeel"
-USE THE DOSSIER to identify which product categories apply. Give the numbers. This is what makes ${p} think "they actually know this spec — not just another trader."
+6. SENIORITY-ADJUSTED PAIN + MICRO-VALUE:
+For TIER 1 (Head/Director/VP): Lead with the import risk intelligence — single source risk + Halal docs stuck at [port city]. Mention specs briefly as context: "I understand [Company] runs [Product A + Product B] — [brief spec reference] — but I know your import spec will be much more precise than that."
+For TIER 2 (Manager/Supervisor): Name the dual-spec operational pain. Give specs with "we usually see clients run...": tortilla = "80–100 mesh fine flour, under 13% moisture"; extruded puffs = "0.8–1.2mm grits, same moisture band"; sticks/rings = "particle size + moisture for uniform extrusion"; flakes = "flaking grits grade, gelatinization consistency"; batter = "fine mesh, controlled protein, low free fatty acid."
+For TIER 3 (Analyst/Buyer): Give deepest spec detail — all relevant numbers for their product lines. This is micro-value they can use today.
+USE THE DOSSIER to identify product categories. Give the numbers. Never invent specs.
 
-6. ATTACHMENT — authentic only (no fabricated reports): Reference what actually exists to send. Default: "Attaching our sales profile for your reference — it has our range, certifications [list them: always include Halal for Muslim-majority markets, ISO 22000:2018, APEDA, Kosher where applicable] and export docs we do for [their country]. No pitch deck, just for your file."
-RULE: Do NOT invent lot consistency reports, 10-lot studies, or expansion data files that may not exist. Only reference: sales profile, spec sheets, COA (available on request), standard samples.
+7. CERTIFICATIONS — friction-removal framing, not badge list: Name only what removes their import/QC friction. For Muslim-majority markets (Indonesia, Malaysia, MENA, Nigeria, Pakistan), Halal MUST be mentioned. Lead with it for Tier 1: "We are ISO 22000:2018, Halal, Kosher, APEDA certified with full export documentation for [country] — Halal docs + COA shared before dispatch, not after." For Tier 2/3 the certification list goes inside the attachment section.
 
-7. SECOND SOURCE ASK: "We're just reaching out to see if ${co} is open to evaluating a second qualified source for these specs. If there's a potential fit, happy to share our standard spec sheet / COA for your QC team and arrange a small sample from our current lot for lab trial."
+8. ATTACHMENT — authentic only: "Attaching our sales profile for your reference — it has our range, certifications [ISO 22000:2018, Halal, Kosher, APEDA] and export docs we do for [their country]. No pitch deck, just for your file."
+RULE: Never invent lot reports, 10-lot studies, or expansion data files. Only reference: sales profile, spec sheets, COA (available on request), standard samples.
 
-8. CTA (low-pressure, timezone-aware): "Would a quick 20-min call next week be okay to understand how you currently buy and how you qualify new sources? Happy to work around [timezone] time."
+9. SECOND SOURCE ASK: "We're just reaching out to see if ${co} is open to evaluating a second qualified [import] source for these specs. If there's a potential fit, happy to share our standard spec sheet / COA for your QC review and arrange a small sample from our current lot for lab trial."
+
+10. CTA (low-pressure, timezone-aware): Match CTA language to seniority tier.
+Tier 1: "Would a quick 20-min call next week be okay to understand how [Company] qualifies new import sources and what a second source would need to meet?"
+Tier 2/3: "Would a quick 20-min call next week be okay to understand your current import spec and how you qualify new sources?"
+Always end with: "Happy to work around [timezone] time."
 Timezone: Indonesia = WIB, India = IST, UK = GMT/BST, UAE/Saudi = GST, Nigeria = WAT
 
-9. WARM CLOSE (1 line): Genuine appreciation referencing a real specific detail from the dossier — founding year, scale, what they've built, their market presence. e.g. "Thanks for your time, Intan — and really appreciate the work you and the team have done building Dua Kelinci over 33 years." Never a generic compliment.
+11. WARM CLOSE (1 line): Genuine appreciation with a specific dossier detail — founding year, scale built, country reach, product breadth. e.g. "Thanks for your time, Imelda — and really appreciate the work you and the team have done building Dua Kelinci over 33 years." Never generic.
 
 SIGN OFF: Warm regards, ${senderName} · ${senderRole}
 
