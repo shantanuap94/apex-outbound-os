@@ -788,6 +788,37 @@ main { padding: 24px 32px 60px; }
 .mt-12 { margin-top: 12px; }
 .mt-16 { margin-top: 16px; }
 
+/* ─── Advanced / Buying Intelligence Collapsible ────────────────────────── */
+.adv-section {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.adv-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  text-align: left;
+  transition: background 0.15s;
+}
+.adv-toggle:hover { background: var(--bg-3); }
+.adv-arrow { font-size: 10px; color: var(--text-3); }
+.adv-body {
+  padding: 12px 14px 14px;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 /* ─── Sender Profile ("About You") ──────────────────────────────────────── */
 .sender-section { margin-bottom: 32px; }
 .sender-section-hd {

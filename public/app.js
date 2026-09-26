@@ -1,7 +1,12 @@
 // ─── Constants ────────────────────────────────────────────────────────────────
 const API = "";
 
-const SENDER_FIELDS = ["name","role","offer","valueProp","proof","cta","tone","authorityBlock"];
+const SENDER_FIELDS = [
+  "name","role","offer","valueProp","proof","cta","tone","authorityBlock",
+  // Advanced Profile
+  "offerMechanism","outcomeTimeframe","lowRiskOffer","differentiation",
+  "proofCards","voiceSamples","bannedWords","authorityOpinion",
+];
 
 const APEX_SENDER = {
   name: "Shantanu",
@@ -17,6 +22,9 @@ const ICP_FIELDS = [
   "seedDescription","roleSeniority","companyStageSize","responsibilityScope",
   "empathySayLoud","empathyThinkPrivately","empathyActuallyDo","empathyFeel",
   "pains","fears","frustrations","dreamOutcomes",
+  // Buying Intelligence
+  "triggers","currentAlternative","objections","exactWords",
+  "disqualifiers","buyingCommittee","seniorityFraming",
 ];
 
 const APEX_ICP = {
@@ -250,7 +258,7 @@ function wireIcp() {
     finally { btn.textContent = "Generate all fields"; btn.disabled = false; }
   });
 
-  document.querySelectorAll(".btn-ai[data-field]").forEach((btn) => {
+  document.querySelectorAll(".btn-ai[data-field]:not([data-target='sender'])").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const field = btn.dataset.field;
       const seed  = $("icp-seedDescription").value.trim();
@@ -271,6 +279,17 @@ function wireIcp() {
   const icpSel = $("icpProfileSelect");
   if (icpSel) icpSel.addEventListener("change", () => { if (icpSel.value) loadIcpProfile(icpSel.value); });
   loadIcpProfiles();
+
+  // Buying Intelligence collapsible
+  const icpAdvToggle = $("icpAdvToggle");
+  const icpAdvBody   = $("icpAdvBody");
+  if (icpAdvToggle && icpAdvBody) {
+    icpAdvToggle.addEventListener("click", () => {
+      const open = icpAdvBody.style.display !== "none";
+      icpAdvBody.style.display = open ? "none" : "block";
+      icpAdvToggle.querySelector(".adv-arrow").textContent = open ? "▼" : "▲";
+    });
+  }
 }
 
 // ─── Sender Profile ───────────────────────────────────────────────────────────
@@ -395,6 +414,35 @@ function wireSender() {
       $("extractProfileBtn").disabled = false;
     }
   });
+
+  // Advanced Profile AI fill buttons
+  document.querySelectorAll(".btn-ai[data-target='sender']").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const field = btn.dataset.field;
+      const seed  = getSender().offer || $("sender-offer")?.value?.trim() || "";
+      if (!seed) { alert("Fill in your Offer field first."); return; }
+      const orig = btn.textContent;
+      btn.textContent = "…"; btn.disabled = true;
+      try {
+        const { value, error } = await post("/api/icp/fill", { field, description: seed, context: "sender" });
+        if (error) { alert("Error: " + error); return; }
+        const el = $(`sender-${field}`);
+        if (el && value) { el.value = value; saveSender(); }
+      } catch (e) { alert("Network error: " + e.message); }
+      finally { btn.textContent = orig; btn.disabled = false; }
+    });
+  });
+
+  // Advanced Profile collapsible
+  const senderAdvToggle = $("senderAdvToggle");
+  const senderAdvBody   = $("senderAdvBody");
+  if (senderAdvToggle && senderAdvBody) {
+    senderAdvToggle.addEventListener("click", () => {
+      const open = senderAdvBody.style.display !== "none";
+      senderAdvBody.style.display = open ? "none" : "block";
+      senderAdvToggle.querySelector(".adv-arrow").textContent = open ? "▼" : "▲";
+    });
+  }
 }
 
 // ─── Supabase CRM ─────────────────────────────────────────────────────────────

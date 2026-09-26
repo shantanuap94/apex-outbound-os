@@ -231,7 +231,16 @@ async function handleChainRun(req, res) {
     const senderProof          = sender.proof          || "";
     const senderCta            = sender.cta            || "a 15-minute conversation";
     const senderTone           = sender.tone           || "peer-to-peer";
-    const senderAuthorityBlock = sender.authorityBlock || "";
+    const senderAuthorityBlock  = sender.authorityBlock  || "";
+    // Advanced Profile fields
+    const senderOfferMechanism  = sender.offerMechanism  || "";
+    const senderOutcomeTimeframe = sender.outcomeTimeframe || "";
+    const senderLowRiskOffer    = sender.lowRiskOffer    || "";
+    const senderDifferentiation = sender.differentiation || "";
+    const senderProofCards      = sender.proofCards      || "";
+    const senderVoiceSamples    = sender.voiceSamples    || "";
+    const senderBannedWords     = sender.bannedWords     || "";
+    const senderAuthorityOpinion = sender.authorityOpinion || "";
     const currentYear   = new Date().getFullYear();
 
     const systemPrompt = `You are a B2B outreach strategist writing on behalf of ${senderName}${senderRole ? ", " + senderRole : ""}.
@@ -270,6 +279,14 @@ CRITICAL RULES:
     const icpThinkPriv    = icp?.empathyThinkPrivately || "";
     const icpFeel         = icp?.empathyFeel || "";
     const icpActuallyDo   = icp?.empathyActuallyDo || "";
+    // Buying Intelligence fields
+    const icpTriggers          = icp?.triggers          || "";
+    const icpCurrentAlt        = icp?.currentAlternative || "";
+    const icpObjections        = icp?.objections        || "";
+    const icpExactWords        = icp?.exactWords        || "";
+    const icpDisqualifiers     = icp?.disqualifiers     || "";
+    const icpBuyingCommittee   = icp?.buyingCommittee   || "";
+    const icpSeniorityFraming  = icp?.seniorityFraming  || "";
 
     const researchPrompt = `Produce a full prospect intelligence brief for ${senderName} to send to:
 Prospect: ${JSON.stringify(prospect)}
@@ -418,13 +435,13 @@ PART 2 — THEIR WORLD (2-3 sentences):
 "I was thinking about your world..." — then describe ${p}'s specific situation using named facts from the dossier: their products, their company's market position, their recent expansion, their role. Make ${p} feel you actually looked. Not "the food industry" — name Cremica, name the fruit crush range, name the specific expansion. Use what the dossier gives you.
 
 PART 3 — EXACT PAIN MECHANISM (1-2 sentences):
-Name the specific operational problem, not the category. Not "supply chain challenges" but the actual headache: inconsistent particle size affecting yield on the extruder, OTIF pressure from a large retail account, supplier consolidation risk, seasonal volume spikes with long lead times. Draw from: ${icpFrustrations}
+Name the specific operational problem, not the category. Not "supply chain challenges" but the actual headache: inconsistent particle size affecting yield on the extruder, OTIF pressure from a large retail account, supplier consolidation risk, seasonal volume spikes with long lead times. Draw from: ${icpFrustrations}${icpExactWords ? `\nMirror their language — these are phrases real buyers use: ${icpExactWords}` : ""}
 
 PART 4 — COMPANY CONTEXT (2 sentences max):
 "${senderName} here is from [company] — [one factual, specific line on what the company does, its credentials, why it's relevant]. This context: [why this matters to ${p}'s specific situation]." Positioned as context, not pitch. Use only what's in the sender profile.
 
 PART 5 — OFFER FOR THEIR FILE (1-2 sentences):
-Offer something specific and useful — a COA, a spec sheet, a market note, a landed cost comparison. Use the phrase: "no strings attached, even if you're not looking to switch." This is value delivery, not a pitch.
+Offer something specific and useful — a COA, a spec sheet, a market note, a landed cost comparison. Use the phrase: "no strings attached, even if you're not looking to switch." This is value delivery, not a pitch.${senderLowRiskOffer ? `\nPreferred low-risk offer from the sender: ${senderLowRiskOffer}` : ""}
 
 PART 6 — SOFT CLOSE (rapport-first, no meeting ask yet):
 The goal of this DM is to build trust and start a human connection. Do NOT ask for a meeting or call in this message — that comes later in the sequence after more rapport is built.
@@ -497,13 +514,15 @@ THE SENDER:
 - Why it matters to ${p}: ${senderValueProp}
 - Proof (verbatim only): ${senderProof || "Use company credentials factually — years operating, listed status, plant count."}
 
+SENDER ADVANCED PROFILE:${senderOfferMechanism ? `\n- How it works: ${senderOfferMechanism}` : ""}${senderOutcomeTimeframe ? `\n- Outcome + timeframe: ${senderOutcomeTimeframe}` : ""}${senderLowRiskOffer ? `\n- Low-risk first offer: ${senderLowRiskOffer}` : ""}${senderDifferentiation ? `\n- Differentiation: ${senderDifferentiation}` : ""}${senderProofCards ? `\n- Proof cards:\n${senderProofCards}` : ""}${senderAuthorityOpinion ? `\n- Authority opinion (use sparingly for credibility): ${senderAuthorityOpinion}` : ""}${senderBannedWords ? `\n- ADDITIONAL BANNED WORDS (never use these): ${senderBannedWords}` : ""}${senderVoiceSamples ? `\n\nVOICE SAMPLES — match this tone and writing style exactly:\n${senderVoiceSamples}` : ""}
+
 ICP EMOTIONAL PROFILE of ${p} (${role}) at ${co}:
 - Pains: ${icpPains}
 - Fears: ${icpFears}
 - Frustrations: ${icpFrustrations}
 - Dream outcomes: ${icpDesires}
 - Says out loud: ${icpSayLoud}
-- Privately thinks: ${icpThinkPriv}
+- Privately thinks: ${icpThinkPriv}${icpTriggers ? `\n- Buying triggers: ${icpTriggers}` : ""}${icpCurrentAlt ? `\n- What they use today instead: ${icpCurrentAlt}` : ""}${icpObjections ? `\n- Key objections + responses: ${icpObjections}` : ""}${icpExactWords ? `\n- Their exact words (mirror this language): ${icpExactWords}` : ""}${icpSeniorityFraming ? `\n- Seniority framing: ${icpSeniorityFraming}` : ""}
 
 POSITIONING RULE:
 Do NOT position as a replacement. Position as a SECOND SOURCE. Most procurement managers have a primary supplier and won't switch. But they will add a second qualified source to de-risk their line. Every email should feel like a supply chain upgrade, not a disruption.

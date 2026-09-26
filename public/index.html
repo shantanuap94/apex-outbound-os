@@ -137,6 +137,71 @@
             </div>
             <textarea id="sender-authorityBlock" rows="4" placeholder="Pre-written LINE 2 intro — click ✦ to generate from your profile, then edit if needed. When set, every email uses this verbatim instead of AI-assembled text."></textarea>
           </div>
+
+          <!-- Advanced Profile (collapsible) -->
+          <div class="adv-section mt-12">
+            <button class="adv-toggle" id="senderAdvToggle">
+              <span>Advanced Profile</span>
+              <span class="adv-arrow">▼</span>
+            </button>
+            <div class="adv-body" id="senderAdvBody" style="display:none">
+              <div class="field-card">
+                <div class="fc-hd">
+                  <label>Offer Mechanism</label>
+                  <button class="btn-ai" data-field="offerMechanism" data-target="sender">AI fill</button>
+                </div>
+                <textarea id="sender-offerMechanism" rows="3" placeholder="How it works and what's different about your method — e.g. '4-week sprint using our 12-point audit framework, not generic consulting'"></textarea>
+              </div>
+              <div class="field-card">
+                <div class="fc-hd">
+                  <label>Outcome + Timeframe</label>
+                  <button class="btn-ai" data-field="outcomeTimeframe" data-target="sender">AI fill</button>
+                </div>
+                <textarea id="sender-outcomeTimeframe" rows="2" placeholder="e.g. 30 qualified meetings in 90 days, or 15% cost reduction in one quarter"></textarea>
+              </div>
+              <div class="field-card">
+                <div class="fc-hd">
+                  <label>Low-Risk First Offer</label>
+                  <button class="btn-ai" data-field="lowRiskOffer" data-target="sender">AI fill</button>
+                </div>
+                <textarea id="sender-lowRiskOffer" rows="2" placeholder="The easy yes — audit, benchmark, sample, pilot, free session, or diagnostic"></textarea>
+              </div>
+              <div class="field-card">
+                <div class="fc-hd">
+                  <label>Differentiation</label>
+                  <button class="btn-ai" data-field="differentiation" data-target="sender">AI fill</button>
+                </div>
+                <textarea id="sender-differentiation" rows="3" placeholder="vs doing nothing, vs doing it in-house, vs your main competitor — one clear angle each"></textarea>
+              </div>
+              <div class="field-card">
+                <div class="fc-hd">
+                  <label>Proof Library</label>
+                  <button class="btn-ai" data-field="proofCards" data-target="sender">AI fill</button>
+                </div>
+                <textarea id="sender-proofCards" rows="4" placeholder="Repeatable proof cards: [Customer type] | [Industry] | [Role] | [Before] | [After] | [Exact number] | [Timeframe] — one per line"></textarea>
+              </div>
+              <div class="field-card">
+                <div class="fc-hd">
+                  <label>Voice Samples</label>
+                </div>
+                <textarea id="sender-voiceSamples" rows="5" placeholder="Paste 2–3 emails or LinkedIn posts you've written. The AI will match your tone and avoid your banned words."></textarea>
+              </div>
+              <div class="field-card">
+                <div class="fc-hd">
+                  <label>Banned Words / Phrases</label>
+                </div>
+                <textarea id="sender-bannedWords" rows="2" placeholder="e.g. synergy, leverage, circle back, touch base, hop on a call"></textarea>
+              </div>
+              <div class="field-card">
+                <div class="fc-hd">
+                  <label>Authority Opinion</label>
+                  <button class="btn-ai" data-field="authorityOpinion" data-target="sender">AI fill</button>
+                </div>
+                <textarea id="sender-authorityOpinion" rows="3" placeholder="One strong, slightly contrarian opinion you hold about your industry — gives your emails a distinct voice"></textarea>
+              </div>
+            </div>
+          </div>
+
           <div class="icp-save mt-12">
             <button class="btn btn-dark btn-sm" id="saveSenderBtn">Save Profile</button>
             <span class="saved-note" id="senderSavedNote">Saved ✓</span>
@@ -258,6 +323,65 @@
                 <button class="btn-ai" data-field="dreamOutcomes">AI fill</button>
               </div>
               <textarea id="icp-dreamOutcomes" rows="4" placeholder="Self-managing team, predictable monthly growth…"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buying Intelligence (collapsible) -->
+        <div class="adv-section mt-12">
+          <button class="adv-toggle" id="icpAdvToggle">
+            <span>Buying Intelligence</span>
+            <span class="adv-arrow">▼</span>
+          </button>
+          <div class="adv-body" id="icpAdvBody" style="display:none">
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Triggers &amp; Timing</label>
+                <button class="btn-ai" data-field="triggers">AI fill</button>
+              </div>
+              <textarea id="icp-triggers" rows="3" placeholder="Buying signals: new funding, leadership change, expansion, missed targets, new regulation, competitor win…"></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Current Alternative</label>
+                <button class="btn-ai" data-field="currentAlternative">AI fill</button>
+              </div>
+              <textarea id="icp-currentAlternative" rows="2" placeholder="What they use or do today instead — in-house, freelancer, spreadsheet, doing nothing…"></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Top Objections + Responses</label>
+                <button class="btn-ai" data-field="objections">AI fill</button>
+              </div>
+              <textarea id="icp-objections" rows="4" placeholder="List top 5: Objection | Your response — e.g. 'We already have someone | Most of our clients said the same before…'"></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Their Exact Words</label>
+                <button class="btn-ai" data-field="exactWords">AI fill</button>
+              </div>
+              <textarea id="icp-exactWords" rows="3" placeholder="Real phrases buyers use — copy from sales calls, emails, LinkedIn replies. Mirror this language in outreach."></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Disqualifiers</label>
+                <button class="btn-ai" data-field="disqualifiers">AI fill</button>
+              </div>
+              <textarea id="icp-disqualifiers" rows="3" placeholder="Who looks like a fit but isn't — e.g. companies under ₹10 Cr, founders who are hands-off, teams already using X…"></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Buying Committee</label>
+                <button class="btn-ai" data-field="buyingCommittee">AI fill</button>
+              </div>
+              <textarea id="icp-buyingCommittee" rows="3" placeholder="Decision-maker (angle: ROI, risk), Champion (angle: makes them look good), Blocker (angle: reassurance) — one line each"></textarea>
+            </div>
+            <div class="field-card">
+              <div class="fc-hd">
+                <label>Seniority Framing</label>
+                <button class="btn-ai" data-field="seniorityFraming">AI fill</button>
+              </div>
+              <textarea id="icp-seniorityFraming" rows="3" placeholder="C-suite / Founder: strategy and timing. VP / Director: team and metrics. Manager: tools and tactics — describe your buyer's level and angle"></textarea>
             </div>
           </div>
         </div>
