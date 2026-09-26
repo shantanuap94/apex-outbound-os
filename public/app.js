@@ -115,9 +115,10 @@ async function checkApiStatus() {
 }
 
 function updateCounters() {
-  const dossiers = parseInt(localStorage.getItem("apex.dossierCount") || "0", 10);
-  const drafts   = parseInt(localStorage.getItem("apex.draftCount")   || "0", 10);
-  const pc = _crmProspects?.length || 0; const p = $("ctr-prospects"); if (p) p.textContent = `${pc} prospect${pc !== 1 ? "s" : ""}`;
+  const pc = _crmProspects?.length || 0;
+  const dossiers = _crmProspects?.filter(p => p.dossier?.trim()).length || 0;
+  const drafts = _crmProspects?.filter(p => p.emails && (p.emails.e1 || p.emails.sequence)).length || 0;
+  const p = $("ctr-prospects"); if (p) p.textContent = `${pc} prospect${pc !== 1 ? "s" : ""}`;
   const d = $("ctr-dossiers");  if (d) d.textContent = `${dossiers} dossier${dossiers !== 1 ? "s" : ""}`;
   const r = $("ctr-drafts");    if (r) r.textContent = `${drafts} drafts ready`;
 }
@@ -138,20 +139,26 @@ function wireTabs() {
 }
 
 // ─── ICP Builder ──────────────────────────────────────────────────────────────
-function loadSavedIcp() {
+async function loadSavedIcp() {
+  if (!_sb || !_userId) return;
   try {
-    const saved = JSON.parse(localStorage.getItem("apex.icp") || "{}");
-    ICP_FIELDS.forEach((f) => {
-      const inp = $(`icp-${f}`);
-      if (inp && saved[f]) inp.value = saved[f];
-    });
+    const { data, error } = await _sb
+      .from("icp_profiles")
+      .select("name, data")
+      .eq("user_id", _userId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !data) return;
+    const nameInp = $("icpProfileName");
+    if (nameInp) nameInp.value = data.name;
+    fillIcpFromObj(data.data || {});
   } catch {}
 }
 
 async function saveIcp() {
   const data = {};
   ICP_FIELDS.forEach((f) => { const inp = $(`icp-${f}`); if (inp) data[f] = inp.value; });
-  localStorage.setItem("apex.icp", JSON.stringify(data));
   const note = $("icpSavedNote");
   if (_sb && _userId) {
     const name = ($("icpProfileName")?.value || "").trim();
@@ -216,7 +223,6 @@ async function loadIcpProfile(id) {
     const nameInp = $("icpProfileName");
     if (nameInp) nameInp.value = data.name;
     fillIcpFromObj(data.data || {});
-    localStorage.setItem("apex.icp", JSON.stringify(data.data || {}));
   } catch {}
 }
 
@@ -243,7 +249,6 @@ async function fillSingleField(field, seed) {
 }
 
 function wireIcp() {
-  loadSavedIcp();
 
   $("icpFillBtn").addEventListener("click", async () => {
     const seed = $("icp-seedDescription").value.trim();
@@ -299,23 +304,50 @@ function getSender() {
   return data;
 }
 
-function loadSavedSender() {
+async function loadSavedSender() {
+  if (!_sb || !_userId) {
+    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && APEX_SENDER[f]) inp.value = APEX_SENDER[f]; });
+    return;
+  }
   try {
-    const saved = JSON.parse(localStorage.getItem("apex.sender") || "{}");
-    const src = Object.keys(saved).length ? saved : APEX_SENDER;
+    const { data, error } = await _sb
+      .from("sender_profiles")
+      .select("data")
+      .eq("user_id", _userId)
+      .maybeSingle();
+    if (error) throw error;
+    const src = (data?.data && Object.keys(data.data).length) ? data.data : APEX_SENDER;
     SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && src[f]) inp.value = src[f]; });
-  } catch {}
+  } catch {
+    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && APEX_SENDER[f]) inp.value = APEX_SENDER[f]; });
+  }
 }
 
-function saveSender() {
-  localStorage.setItem("apex.sender", JSON.stringify(getSender()));
+async function saveSender() {
   const note = $("senderSavedNote");
-  note.classList.add("show");
-  setTimeout(() => note.classList.remove("show"), 2000);
+  if (!_sb || !_userId) {
+    note.textContent = "Sign in to save";
+    note.classList.add("show");
+    setTimeout(() => { note.textContent = "Saved ✓"; note.classList.remove("show"); }, 2000);
+    return;
+  }
+  try {
+    const { error } = await _sb.from("sender_profiles").upsert(
+      { user_id: _userId, data: getSender(), updated_at: new Date().toISOString() },
+      { onConflict: "user_id" }
+    );
+    if (error) throw error;
+    note.classList.add("show");
+    setTimeout(() => note.classList.remove("show"), 2000);
+  } catch (e) {
+    const orig = note.textContent;
+    note.textContent = "Save failed";
+    note.classList.add("show");
+    setTimeout(() => { note.textContent = orig; note.classList.remove("show"); }, 2500);
+  }
 }
 
 function wireSender() {
-  loadSavedSender();
   $("saveSenderBtn").addEventListener("click", saveSender);
 
   const genAuthBtn = $("genAuthorityBtn");
@@ -450,8 +482,9 @@ const MEMORY_KEY = "apex.prospectMemory";
 let _sb = null;
 let _crmFilter = "all";
 let _crmProspects = [];
-let _suppressionList = []; // [{email, reason, id}]
+let _suppressionList = [];
 let _userId = null;
+let _currentDossier = "";
 let _appBooted = false;
 
 async function initSupabase() {
@@ -505,6 +538,8 @@ function bootApp(session) {
   wireTabs();
   wireSender();
   wireIcp();
+  loadSavedSender();
+  loadSavedIcp();
   wireChain();
   wireMemory();
   wireProspectSearch();
@@ -1697,7 +1732,7 @@ function wireChain() {
       const b = $(`badge-${i}`);
       if (b) { b.className = "step-badge" + (i === 1 ? " active" : ""); b.textContent = i; }
     }
-    localStorage.removeItem("apex.currentDossier");
+    _currentDossier = "";
   });
 
   // Enrich with Apollo
@@ -1810,7 +1845,7 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       }, (_, full) => { $("dossierOut").textContent = full; });
       if (error) { $("dossierOut").textContent = "Error: " + error; return; }
       $("dossierOut").textContent = content;
-      localStorage.setItem("apex.currentDossier", content);
+      _currentDossier = content;
 
       // Save to prospect memory — clear stale emails so memory shows fresh state
       await saveProspectToMemory(p, {
@@ -1828,9 +1863,6 @@ Also include any recent news, leadership changes, or awards from the last 90 day
 
       setStepDone(3); setStepDone(4);
 
-      // Update dossier counter
-      const count = parseInt(localStorage.getItem("apex.dossierCount") || "0", 10) + 1;
-      localStorage.setItem("apex.dossierCount", count);
       updateCounters();
     } catch (e) { $("dossierOut").textContent = "Network error: " + e.message; }
     resetBtn(btn, "Run Agent 1 — Research →");
@@ -1839,7 +1871,7 @@ Also include any recent news, leadership changes, or awards from the last 90 day
   // Generate Outreach (emails + LinkedIn simultaneously)
   $("genOutreachBtn").addEventListener("click", async () => {
     const p = getProspect();
-    const dossier = localStorage.getItem("apex.currentDossier") || $("dossierOut").textContent;
+    const dossier = _currentDossier || $("dossierOut").textContent;
     const btn = $("genOutreachBtn");
     setRunning(btn, "Generate Outreach");
 
@@ -1867,8 +1899,6 @@ Also include any recent news, leadership changes, or awards from the last 90 day
 
       if (emailContent) {
         $("emailOut-a").textContent = emailContent;
-        const count = parseInt(localStorage.getItem("apex.draftCount") || "0", 10) + 4;
-        localStorage.setItem("apex.draftCount", count);
         updateCounters();
       }
       if (liContent) $("liOut").textContent = liContent;
@@ -1891,7 +1921,7 @@ Also include any recent news, leadership changes, or awards from the last 90 day
   // Build Follow-up Sequence
   $("buildSequenceBtn").addEventListener("click", async () => {
     const p = getProspect();
-    const dossier = localStorage.getItem("apex.currentDossier") || "";
+    const dossier = _currentDossier || "";
     const state   = $("sequenceState").value;
     const btn = $("buildSequenceBtn");
     btn.textContent = "Building…"; btn.disabled = true;
