@@ -506,22 +506,61 @@ let _selectedModel = "anthropic/claude-sonnet-4-5";
 // ─── Prospect Import ──────────────────────────────────────────────────────────
 
 const IMPORT_COL_MAP = {
-  "company": "pCompany", "company name": "pCompany", "organization": "pCompany", "org": "pCompany", "account": "pCompany",
-  "first name": "pFirstName", "first": "pFirstName", "firstname": "pFirstName", "given name": "pFirstName",
+  // Company
+  "company": "pCompany", "company name": "pCompany", "organization": "pCompany", "organization name": "pCompany",
+  "org": "pCompany", "account": "pCompany", "account name": "pCompany", "employer": "pCompany",
+  "current company": "pCompany", "current employer": "pCompany", "workplace": "pCompany",
+  // First name
+  "first name": "pFirstName", "first": "pFirstName", "firstname": "pFirstName", "given name": "pFirstName", "given": "pFirstName",
+  // Last name
   "last name": "pLastName", "last": "pLastName", "lastname": "pLastName", "surname": "pLastName", "family name": "pLastName",
+  // Full name (will be split)
   "name": "_fullName", "full name": "_fullName", "contact name": "_fullName", "contact": "_fullName",
+  "person name": "_fullName", "prospect name": "_fullName", "lead name": "_fullName",
+  // Title
   "title": "pTitle", "job title": "pTitle", "position": "pTitle", "role": "pTitle", "designation": "pTitle",
+  "current title": "pTitle", "current position": "pTitle", "job function": "pTitle", "seniority": "pTitle",
+  "headline": "pTitle",
+  // Email
   "email": "pEmail", "email address": "pEmail", "work email": "pEmail", "business email": "pEmail",
+  "corporate email": "pEmail", "professional email": "pEmail", "primary email": "pEmail",
+  "email 1": "pEmail", "email1": "pEmail",
+  // Phone
   "phone": "pPhone", "mobile": "pPhone", "phone number": "pPhone", "tel": "pPhone", "whatsapp": "pPhone",
-  "linkedin": "pLinkedin", "linkedin url": "pLinkedin", "linkedin profile": "pLinkedin", "profile url": "pLinkedin",
+  "mobile number": "pPhone", "cell": "pPhone", "cell phone": "pPhone", "direct phone": "pPhone",
+  "work phone": "pPhone", "work direct phone": "pPhone", "primary phone": "pPhone",
+  "phone 1": "pPhone", "phone1": "pPhone", "contact number": "pPhone",
+  // LinkedIn
+  "linkedin": "pLinkedin", "linkedin url": "pLinkedin", "linkedin profile": "pLinkedin",
+  "profile url": "pLinkedin", "linkedin profile url": "pLinkedin", "person linkedin url": "pLinkedin",
+  "linkedin link": "pLinkedin", "social url": "pLinkedin",
+  // Domain
   "domain": "pDomain", "website": "pDomain", "company domain": "pDomain", "company website": "pDomain",
-  "industry": "pIndustry",
+  "web": "pDomain", "url": "pDomain", "company url": "pDomain", "website url": "pDomain",
+  // Industry
+  "industry": "pIndustry", "sector": "pIndustry", "vertical": "pIndustry",
 };
 
 let _importQueue = [];
 
 function _mapHeaders(headers) {
-  return headers.map(h => IMPORT_COL_MAP[(h || "").toLowerCase().trim()] || null);
+  return headers.map(h => {
+    const key = (h || "").toLowerCase().trim();
+    if (!key) return null;
+    // Exact match first
+    if (IMPORT_COL_MAP[key]) return IMPORT_COL_MAP[key];
+    // Partial/contains match as fallback
+    if (key.includes("company") || key.includes("organisation") || key.includes("organization") || key.includes("employer")) return "pCompany";
+    if (key.includes("first") && key.includes("name")) return "pFirstName";
+    if (key.includes("last") && key.includes("name")) return "pLastName";
+    if ((key.includes("job") || key.includes("work")) && (key.includes("title") || key.includes("position"))) return "pTitle";
+    if (key.includes("email")) return "pEmail";
+    if (key.includes("phone") || key.includes("mobile") || key.includes("whatsapp")) return "pPhone";
+    if (key.includes("linkedin")) return "pLinkedin";
+    if (key.includes("domain") || key.includes("website")) return "pDomain";
+    if (key === "title" || key === "position" || key === "designation" || key === "role") return "pTitle";
+    return null;
+  });
 }
 
 function _parseToQueue(rows, headers) {
@@ -587,10 +626,22 @@ function loadQueueRow(i) {
 
 function _processImport(data) {
   if (!data || data.length < 2) { alert("File must have at least a header row and one data row."); return; }
-  const headers = data[0].map(String);
-  const rows = data.slice(1).map(r => r.map(String));
+
+  // Skip empty leading rows to find the actual header row (common in Apollo exports)
+  let headerRowIdx = 0;
+  for (let i = 0; i < Math.min(5, data.length); i++) {
+    if (data[i].some(v => String(v || "").trim())) { headerRowIdx = i; break; }
+  }
+
+  const headers = data[headerRowIdx].map(String);
+  const rows = data.slice(headerRowIdx + 1).map(r => r.map(String));
   const queue = _parseToQueue(rows, headers);
-  if (!queue.length) { alert("No usable rows found. Make sure the first row has column headers like Company, Name, Email etc."); return; }
+
+  if (!queue.length) {
+    const detected = headers.filter(h => h.trim()).join(", ");
+    alert(`No usable rows found.\n\nDetected column headers:\n${detected || "(none)"}\n\nRename at least one column to match: Company, Name, Email, Phone, Title, LinkedIn, or Domain.`);
+    return;
+  }
   _importQueue = [..._importQueue, ...queue];
   _renderQueue();
 }
