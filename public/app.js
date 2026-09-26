@@ -8,15 +8,6 @@ const SENDER_FIELDS = [
   "proofCards","voiceSamples","bannedWords","authorityOpinion",
 ];
 
-const APEX_SENDER = {
-  name: "Shantanu",
-  role: "Founder, Apex Growth Partners",
-  offer: "We help founder-led B2B companies between 30–200 crore scale revenue without adding founder dependency.",
-  valueProp: "We build the systems, team structures, and sales processes that let a founder step back without the business slowing down.",
-  proof: "Helped founder-led manufacturing and services companies unlock the next stage of growth.",
-  cta: "15-minute conversation to see if there's a fit",
-  tone: "Peer-to-peer — like a smart colleague who genuinely gets it",
-};
 
 const ICP_FIELDS = [
   "seedDescription","roleSeniority","companyStageSize","responsibilityScope",
@@ -305,22 +296,16 @@ function getSender() {
 }
 
 async function loadSavedSender() {
-  if (!_sb || !_userId) {
-    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && APEX_SENDER[f]) inp.value = APEX_SENDER[f]; });
-    return;
-  }
+  if (!_sb || !_userId) return;
   try {
     const { data, error } = await _sb
       .from("sender_profiles")
       .select("data")
       .eq("user_id", _userId)
       .maybeSingle();
-    if (error) throw error;
-    const src = (data?.data && Object.keys(data.data).length) ? data.data : APEX_SENDER;
-    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && src[f]) inp.value = src[f]; });
-  } catch {
-    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && APEX_SENDER[f]) inp.value = APEX_SENDER[f]; });
-  }
+    if (error || !data?.data) return;
+    SENDER_FIELDS.forEach((f) => { const inp = $(`sender-${f}`); if (inp && data.data[f]) inp.value = data.data[f]; });
+  } catch {}
 }
 
 async function saveSender() {
