@@ -705,15 +705,25 @@ USE THE DOSSIER to identify product categories. Give the numbers. Never invent s
 8. ATTACHMENT — authentic only: "Attaching our sales profile for your reference — it has our range, certifications [ISO 22000:2018, Halal, Kosher, APEDA] and export docs we do for [their country]. No pitch deck, just for your file."
 RULE: Never invent lot reports, 10-lot studies, or expansion data files. Only reference: sales profile, spec sheets, COA (available on request), standard samples.
 
-9. SECOND SOURCE ASK: "We're just reaching out to see if ${co} is open to evaluating a second qualified [import] source for these specs. If there's a potential fit, happy to share our standard spec sheet / COA for your QC review and arrange a small sample from our current lot for lab trial."
+9. PRODUCT SPLIT BRIDGE (only when the company makes multiple products with different raw material needs): If the dossier shows a company makes both a product that DOES use TBI's ingredient AND a product that does NOT, explicitly bridge this before pitching. e.g.:
+- Company makes popcorn (whole kernels — NOT milled corn) AND tortilla chips (milled corn — YES): "I know popcorn uses whole kernels, but for Tortilla Chips you would need milled corn — corn meal / fine flour — so I thought of reaching out."
+- Company makes noodles (wheat flour — NOT corn) AND corn puffs (corn grits — YES): "I know your noodle range runs on wheat, but for the corn puff line you would need corn grits..."
+- Company is a JV group where the parent does X and the related brand does Y: handle this via the referral email type, not Email 1.
+This line shows you understand their portfolio before pitching — it removes the "this doesn't apply to us" instant delete.
 
-10. CTA (low-pressure, timezone-aware): Match CTA language to seniority tier.
+10. PROSPECT CONFIDENCE — adjust the second source ask based on whether the corn fit is CONFIRMED or LIKELY:
+CONFIRMED user (they definitely buy/need this ingredient — you saw it in the product list or dossier): "We're just reaching out to see if ${co} is open to evaluating a second qualified source for these specs."
+LIKELY user (they probably use the ingredient but it's inferred, not confirmed): "We're just reaching out to see if ${co} is currently buying [milled corn / corn grits / etc.] for [product] and, if so, whether you'd be open to evaluating a second source. If we have it wrong, do let us know — happy to understand your exact setup."
+Read the dossier to determine which applies. When in doubt, use LIKELY framing — it's softer and never wrong.
+If there's a potential fit: "happy to share our standard spec sheet / COA for your QC review and arrange a small sample from our current lot for lab trial."
+
+11. CTA (low-pressure, timezone-aware): Match CTA language to seniority tier.
 Tier 1: "Would a quick 20-min call next week be okay to understand how [Company] qualifies new import sources and what a second source would need to meet?"
-Tier 2/3: "Would a quick 20-min call next week be okay to understand your current import spec and how you qualify new sources?"
+Tier 2/3: "Would a quick 20-min call next week be okay to understand how you currently buy and how you qualify new sources?"
 Always end with: "Happy to work around [timezone] time."
 Timezone: Indonesia = WIB, India = IST, UK = GMT/BST, UAE/Saudi = GST, Nigeria = WAT
 
-11. WARM CLOSE (1 line): Genuine appreciation with a specific dossier detail — founding year, scale built, country reach, product breadth. e.g. "Thanks for your time, Imelda — and really appreciate the work you and the team have done building Dua Kelinci over 33 years." Never generic.
+12. WARM CLOSE (1 line): Genuine appreciation with a specific dossier detail — founding year, scale built, country reach, product breadth. e.g. "Thanks for your time, Imelda — and really appreciate the work you and the team have done building Dua Kelinci over 33 years." Never generic.
 
 SIGN OFF: Warm regards, ${senderName} · ${senderRole}
 
