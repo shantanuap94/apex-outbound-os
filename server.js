@@ -553,8 +553,9 @@ POSITIONING RULE:
 Do NOT position as a replacement. Position as a SECOND SOURCE. Most procurement managers have a primary supplier and won't switch. But they will add a second qualified source to de-risk their line. Every email should feel like a supply chain upgrade, not a disruption.
 
 WORD COUNT:
-- India/MENA/West Africa: 180–250 words. Relationship markets. They read.
-- UK/US/Europe: 100–140 words. They skim.
+This is long-cycle B2B to procurement and technical buyers in food manufacturing. They evaluate suppliers on credibility and specificity — not email brevity. Write as long as the message needs to be specific and true. A 300-word email with exact specs and real proof beats a 120-word email that could have been sent to anyone.
+- Minimum: enough detail to feel genuinely researched
+- Maximum: none — cut only what's generic or fluffy, never what's specific
 Long and credible beats short and vague. Long and fluffy loses.
 
 SENTENCE STRUCTURE:
@@ -578,31 +579,54 @@ Subject line: specific, under 8 words, references a real thing from the dossier.
 REAL EXAMPLES THAT GOT REPLIES — study tone, length, specificity. Do not copy:
 ${fewShotExamples.map((ex, i) => `--- Example ${i+1} ---\nSubject: ${ex.subject || "(no subject)"}\n${ex.body}`).join("\n\n")}` : ""}`;
 
-        if (emailNum === 1) return `Write EMAIL 1 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. This is the FIRST email. ${p} does not know ${senderName} at all. Goal: intrigue, build credibility, and earn a reply.
+        if (emailNum === 1) return `Write EMAIL 1 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. This is the FIRST email. ${p} does not know ${senderName} at all. Goal: make ${p} feel genuinely understood before you sell anything — earn the reply by naming their exact world.
 ${sharedRules}
 
 CRITICAL OUTPUT RULE: Write the email exactly as it would be sent — no structural labels, no LINE markers, no section annotations in the output. Clean email only.
 
-Use this exact subject line (do not change it): Subject: Corn ingredients for ${co} | TBI Corn
+SUBJECT LINE — do NOT use a company-name-plus-sender formula. That screams mass mail to an import procurement team. Write a subject that names their actual product(s) and hints at a specific operational tension. Formats that convert:
+- "[Product A] + [Product B] — [tension or question]?" e.g. "Krip Krip + Pilus — same corn, different spec headache?"
+- "For your QC file — [ingredient grade] lot data — [Company]" e.g. "For your QC file — tortilla flour & Pilus grits lot data"
+- "[First name] — [most critical filter for their market] + [product] consistency" e.g. "Intan — Halal docs + tortilla flour consistency"
+BANNED subject formats: "Corn ingredients for [Company] | TBI Corn" / "Quick question" / "Partnership opportunity" / anything with sender company name in subject
 
-EMAIL BODY — write in this order, no labels or markers in your output:
+EMAIL BODY — write in this exact order, no labels in output:
 
-1. ICEBREAKER (opening line): One specific, researched observation about ${p} or ${co}. Must name an ACTUAL PRODUCT, BRAND, LAUNCH, or SPECIFIC FACT from the dossier. Not a generic compliment. This line must make ${p} feel you did your homework on them specifically.
-BANNED: "I've been following [company]'s impressive move to..." / "A testament to your growth" / "Congrats on [generic achievement]"
-GOOD: "Gopal Snacks is rolling out 26 new products by November — that kind of push across Gathiya, Bhujia, and extruded lines puts real pressure on corn grit consistency run to run."
-BAD: "I've been following Gopal Snacks' impressive move to add 26 new products — a testament to your market growth."
+1. HOOK (opening 2-3 sentences): Name their 2 most specific products or product lines running in parallel (or one product with two conflicting spec requirements). Then state the exact operational headache this creates — not generic "consistency challenges" but the specific mechanism: particle size shift causing uneven fry on one line AND poor expansion on another in the same week, two QC calls from different supervisors, batch-to-batch deviation that's hard to trace back to the supplier. Make ${p} think: "how do they know our exact problem."
+BANNED opening: "I'm Shantanu..." / "I wanted to reach out..." / "I've been following..."
+GOOD: "Running Krip Krip Tortilla and Pilus on parallel lines in Pati means two very different corn specs — but the same daily headache: if particle size or moisture shifts even slightly, one line puffs less, the other fries unevenly, and QC gets calls from both sides in the same week."
 
-2. SENDER INTRO: Who the sender is — natural, not salesy. 1-2 sentences. ${p} is a stranger who needs enough context to keep reading.
+2. NORMALIZE (1 short line): Position the pain as a recognized pattern you've seen with other clients. e.g. "We see this a lot with clients running tortilla + extruded together." This earns trust before you introduce yourself.
+
+3. SENDER INTRO (2-3 sentences — after the pain, not before): Who the sender is, company, brief credentials.
 ${senderAuthorityBlock
   ? `Use this pre-approved authority block VERBATIM — do not rewrite, shorten, or paraphrase:\n"${senderAuthorityBlock}"`
-  : `Include: full name and role, company name (BSE/NSE status if applicable), exact product categories (named), years in operation, plant count, named clients, certifications. Earn the right to keep reading.\nExample: "I'm Shantanu — I head Growth at TBI Corn Limited, a BSE/NSE-listed corn processing company with 4 plants across Miraj, Mumbai, Delhi, and Malkapur, milling since 1999. We supply corn grits and fine corn flour to ITC, Pratap Snacks, and Balaji Wafers — ingredients where particle size uniformity, consistent expansion, and controlled oil uptake drive line efficiency and OTIF reliability at scale. ISO 22000:2018, ISO 9001, Halal, APEDA, and Kosher certified."`}
+  : `Include: first name + company name (BSE/NSE status if applicable), years milling, plant count, 2-3 named clients (food manufacturers only, no distributors). Keep it natural — peer-to-peer, not a pitch.
+Example: "I'm Shantanu from TBI Corn — BSE/NSE listed corn miller since 1999, 4 plants in Miraj, Mumbai, Delhi, Malkapur. We supply fine corn flour and grits to ITC, Pratap Snacks, and Balaji Wafers — same world where lot-to-lot uniformity decides line efficiency."`}
 ONLY USE WHAT THE SENDER PROFILE PROVIDES. Never invent plant names, certifications, clients, or categories.
 
-3. TECHNICAL BRIDGE: Connect their specific product category to the exact corn ingredient and the operational mechanism. Not "supply chain challenges" — the actual headache: inconsistent particle size, batch deviations, QA escalations, OTIF pressure. Name their specific products. Make ${p} feel understood.
+4. MICRO-VALUE — SPECS IN THE EMAIL (not promised later): Give ACTUAL TECHNICAL SPECS for their product category that ${p} can use today — before they've agreed to anything:
+- Corn tortilla chips / Krip Krip style: "80–100 mesh fine flour, moisture <13%, low black specks — for even sheeting and consistent fry"
+- Extruded puffs / Pilus style: "0.8–1.2mm grits, same moisture band — for predictable expansion, not 4.2x one lot and 3.6x the next"
+- Corn flakes / breakfast cereal: "flaking grits grade, consistent gelatinization, tight moisture"
+- Batter / coating: "fine mesh, controlled protein content, low free fatty acid"
+- Extruded sticks / rings: "grits particle size + moisture — for uniform extrusion pressure and mouthfeel consistency"
+USE THE DOSSIER to identify which product categories apply. Give the numbers. This is what makes a procurement manager think: "they actually know this spec."
 
-4. SOFT CTA: "Would love to understand ${co}'s current sourcing setup and share our spec sheets / COA for your review — no commitment at all. Happy to arrange a sample for your NPD / QC team if there's a potential fit. If the dossier mentions a specific destination port or city, add: ', and we can work on a competitive landed cost to [city].'"
+5. CERTIFICATIONS + SOCIAL PROOF — market-aware ordering:
+- HALAL FIRST for any buyer in Indonesia, Malaysia, Bangladesh, MENA, Nigeria, Pakistan, or any Muslim-majority market. Halal is not a credential bullet — it is the FIRST filter their import clearing team applies. Frame it as friction removal: "Full Halal, ISO 22000:2018, APEDA + complete export docs for Indonesia — your clearing team doesn't chase papers."
+- For all markets: name only certifications that directly remove the buyer's import or QC friction. Not a badge list.
+- Close this section with "second source" positioning — not cheapest, but reliable: e.g. "That's why we became second qualified source for a few Southeast Asia buyers — not cheapest, but boringly consistent."
 
-Then add: "Would a quick 20-min call next week be useful?"
+6. "FOR YOUR FILE" OFFER: Frame the COA and consistency data as something useful NOW, with or without intent to buy:
+- "Attaching for your QC file: [1. specific grade COA + X-lot consistency report, 2. specific grade expansion data]"
+- "No commitment needed — even if you keep us as backup in your AVL, it's useful to have a benchmark."
+
+7. TWO-STEP CTA (sample first, call second):
+- SAMPLE ASK comes before call ask: "Would it be okay to send a [2kg / 5kg] sample from same lot for your QC team to trial?"
+- CALL is secondary, lower-pressure: "And if open, happy to do a quick 20-min to understand ${co}'s exact import spec for [their product lines] — happy to work around [their timezone]."
+- Timezone to use: Indonesia = WIB, India = IST, UK = GMT/BST, UAE/Saudi = GST, Nigeria = WAT
+- Do NOT use "Would a quick 20-min call next week be useful?" alone as the CTA — it's too open with no hook to say yes
 
 SIGN OFF: Warm regards, ${senderName} · ${senderRole}
 
