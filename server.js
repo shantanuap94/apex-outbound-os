@@ -805,6 +805,92 @@ Be honest: if this is a polite no, say so and recommend a graceful break-up mess
   }
 }
 
+async function handleQualify(req, res) {
+  try {
+    const body = await readBody(req);
+    const { company, domain, senderOffer } = body;
+    if (!company && !domain) return json(res, { error: "Company name or domain required" }, 400);
+
+    // Step 1: Perplexity — what does this company make?
+    let productInfo = "";
+    if (process.env.PERPLEXITY_API_KEY) {
+      try {
+        const pr = await fetch("https://api.perplexity.ai/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "sonar-pro",
+            messages: [{
+              role: "user",
+              content: `What food or consumer products does ${company} manufacture or sell? List their specific product brands, product lines, and SKUs. What raw materials or ingredients do they likely purchase for manufacturing? Company domain: ${domain || "not provided"}.`,
+            }],
+            max_tokens: 600,
+          }),
+        });
+        if (pr.ok) {
+          const pData = await pr.json();
+          productInfo = pData.choices?.[0]?.message?.content || "";
+        }
+      } catch (_) {}
+    }
+
+    // Step 2: AI fit assessment
+    const ep = getAIEndpoint(body.model || "gpt-4o-mini");
+    const qr = await fetch(ep.url, {
+      method: "POST",
+      headers: aiHeaders(ep),
+      body: JSON.stringify({
+        model: ep.model,
+        messages: [{
+          role: "user",
+          content: `You are qualifying whether a company is a genuine buyer for a B2B seller's products.
+
+SELLER'S OFFER:
+${senderOffer || "food ingredients"}
+
+COMPANY BEING EVALUATED: ${company}${domain ? ` (${domain})` : ""}
+
+PRODUCT RESEARCH:
+${productInfo || "(no research found — assess from company name only)"}
+
+QUALIFICATION TASK:
+Determine if ${company} is a genuine buyer for the seller's specific products. Be accurate — a company using a related but different ingredient is NOT a fit.
+
+Key distinction: if the seller offers DRY-MILLED corn products (corn grits, fine corn flour, corn meal), the right buyers are companies making extruded snacks, puffed snacks, corn chips, corn flakes, brewing products, or batter/coating applications where corn FLOUR or GRITS are used. Companies that primarily use CORN STARCH (a wet-milled product used as a thickener/binder in nuggets, sauces, biscuits) are NOT a fit for dry-milled corn products.
+
+Respond ONLY in this JSON format:
+{
+  "fit": "high" or "medium" or "low" or "none",
+  "score": 1 to 5,
+  "reasoning": "2-3 sentences — what they make and why they do or don't need the seller's specific product",
+  "products_found": ["specific", "product", "names", "found"],
+  "flag": "key mismatch or concern to surface (e.g. 'Uses corn STARCH not corn grits — wet mill product'), or null",
+  "recommendation": "one sentence — proceed, approach carefully, or skip and explain why"
+}`,
+        }],
+        max_tokens: 500,
+        ...(ep.url.includes("openai") ? { response_format: { type: "json_object" } } : {}),
+      }),
+    });
+
+    if (!qr.ok) {
+      const errText = await qr.text();
+      return json(res, { fit: "unknown", error: `AI error: ${errText.substring(0, 100)}` }, 500);
+    }
+
+    const qData = await qr.json();
+    const raw = qData.choices?.[0]?.message?.content || "{}";
+    const result = parseAIJson(raw);
+    json(res, { ...result, company, productSummary: productInfo.substring(0, 500) });
+
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
 async function handlePerplexitySearch(req, res) {
   try {
     const body = await readBody(req);
@@ -1319,6 +1405,7 @@ async function handleWebhookEmailEvent(req, res) {
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 const POST_ROUTES = {
+  "/api/qualify": handleQualify,
   "/api/icp/fill": handleIcpFill,
   "/api/chain/run": handleChainRun,
   "/api/profile/authority": handleProfileAuthority,

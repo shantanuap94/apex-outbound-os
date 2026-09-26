@@ -2043,6 +2043,53 @@ Also include any recent news, leadership changes, or awards from the last 90 day
     resetBtn(btn, "Research with Perplexity →");
   });
 
+  // Qualify Prospect
+  $("qualifyBtn").addEventListener("click", async () => {
+    const p = getProspect();
+    if (!p.company) { alert("Enter the company name first."); return; }
+    const btn = $("qualifyBtn");
+    setRunning(btn, "Qualify Prospect");
+    const el = $("qualifyResult");
+    el.style.display = "block";
+    el.className = "qualify-card";
+    el.innerHTML = '<span style="color:var(--text-3);font-size:13px">Researching products and checking fit…</span>';
+    try {
+      const sender = getSender();
+      const result = await post("/api/qualify", {
+        company: p.company,
+        domain: p.domain || "",
+        senderOffer: sender.offer || "",
+        model: $("modelSelect")?.value || "gpt-4o-mini",
+      });
+
+      const fitClass = { high: "fit-high", medium: "fit-medium", low: "fit-low", none: "fit-none" }[result.fit] || "fit-none";
+      const fitLabel = { high: "High Fit ✓", medium: "Medium Fit", low: "Low Fit ⚠", none: "No Fit ✗" }[result.fit] || "Unknown";
+      const scoreBar = result.score ? `${result.score}/5` : "";
+      const productsHtml = result.products_found?.length
+        ? `<div class="qualify-products">Products found: ${result.products_found.join(", ")}</div>`
+        : "";
+      const flagHtml = result.flag && result.flag !== "null"
+        ? `<div class="qualify-flag">⚠ ${result.flag}</div>`
+        : "";
+
+      el.className = `qualify-card ${fitClass}`;
+      el.innerHTML = `
+        <div class="qualify-hd">
+          <span class="qualify-badge">${fitLabel}</span>
+          <span class="qualify-score">${scoreBar}</span>
+          <span class="qualify-company">${result.company || p.company}</span>
+        </div>
+        <div class="qualify-reasoning">${result.reasoning || ""}</div>
+        ${productsHtml}
+        ${flagHtml}
+        <div class="qualify-rec">${result.recommendation || ""}</div>
+      `;
+    } catch (e) {
+      el.innerHTML = `<span style="color:#c04010;font-size:13px">Qualification error: ${e.message}</span>`;
+    }
+    resetBtn(btn, "Qualify Prospect →");
+  });
+
   // Run Agent 1 — Research
   $("runResearchBtn").addEventListener("click", async () => {
     const p = getProspect();
