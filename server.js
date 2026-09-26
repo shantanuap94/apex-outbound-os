@@ -592,41 +592,36 @@ BANNED subject formats: "Corn ingredients for [Company] | TBI Corn" / "Quick que
 
 EMAIL BODY — write in this exact order, no labels in output:
 
-1. HOOK (opening 2-3 sentences): Name their 2 most specific products or product lines running in parallel (or one product with two conflicting spec requirements). Then state the exact operational headache this creates — not generic "consistency challenges" but the specific mechanism: particle size shift causing uneven fry on one line AND poor expansion on another in the same week, two QC calls from different supervisors, batch-to-batch deviation that's hard to trace back to the supplier. Make ${p} think: "how do they know our exact problem."
-BANNED opening: "I'm Shantanu..." / "I wanted to reach out..." / "I've been following..."
-GOOD: "Running Krip Krip Tortilla and Pilus on parallel lines in Pati means two very different corn specs — but the same daily headache: if particle size or moisture shifts even slightly, one line puffs less, the other fries unevenly, and QC gets calls from both sides in the same week."
+1. RESEARCH OPENER (1-2 sentences): Start with how you found them — genuine, human, not a template. "I was doing some research on [their category / market] and your name came up with [Company] — so I spent some time looking at [specific products]." This signals real effort, not a mail merge. Do NOT open with "I'm [Name]" or "I wanted to reach out" or a direct product pitch.
 
-2. NORMALIZE (1 short line): Position the pain as a recognized pattern you've seen with other clients. e.g. "We see this a lot with clients running tortilla + extruded together." This earns trust before you introduce yourself.
+2. GENUINE ACKNOWLEDGMENT (1 sentence): Note what's impressive about what they've built — specific, not flattering. Reference a real fact from the dossier (city, founding year, product count, scale, export footprint). e.g. "Really impressive how you've scaled both from Pati — two very different corn applications running in parallel."
 
-3. SENDER INTRO (2-3 sentences — after the pain, not before): Who the sender is, company, brief credentials.
+3. META-ACKNOWLEDGE (1 line): Disarm supplier-email fatigue before it builds: "I know you probably get a lot of supplier emails, so I'll keep this short and human." This line reduces resistance more than any credential.
+
+4. SENDER INTRO (2-3 sentences — after context, not before): Who the sender is, company, credentials.
 ${senderAuthorityBlock
   ? `Use this pre-approved authority block VERBATIM — do not rewrite, shorten, or paraphrase:\n"${senderAuthorityBlock}"`
-  : `Include: first name + company name (BSE/NSE status if applicable), years milling, plant count, 2-3 named clients (food manufacturers only, no distributors). Keep it natural — peer-to-peer, not a pitch.
-Example: "I'm Shantanu from TBI Corn — BSE/NSE listed corn miller since 1999, 4 plants in Miraj, Mumbai, Delhi, Malkapur. We supply fine corn flour and grits to ITC, Pratap Snacks, and Balaji Wafers — same world where lot-to-lot uniformity decides line efficiency."`}
+  : `Include: first name + company name (BSE/NSE status if applicable), years milling, plant count, 2-3 named clients (food manufacturers, not distributors). Natural tone.
+Example: "I'm Shantanu — I head Growth at TBI Corn Limited. We're a BSE/NSE listed corn processing company from India, milling since 1999 across 4 plants in Miraj, Mumbai, Delhi and Malkapur. We supply fine corn flour and grits to ITC, Pratap Snacks and Balaji Wafers — so same world as yours, where if particle size or moisture shifts even slightly, one line sheets unevenly and the other expands differently, and QC gets calls from both sides in the same week."`}
 ONLY USE WHAT THE SENDER PROFILE PROVIDES. Never invent plant names, certifications, clients, or categories.
 
-4. MICRO-VALUE — SPECS IN THE EMAIL (not promised later): Give ACTUAL TECHNICAL SPECS for their product category that ${p} can use today — before they've agreed to anything:
-- Corn tortilla chips / Krip Krip style: "80–100 mesh fine flour, moisture <13%, low black specks — for even sheeting and consistent fry"
-- Extruded puffs / Pilus style: "0.8–1.2mm grits, same moisture band — for predictable expansion, not 4.2x one lot and 3.6x the next"
-- Corn flakes / breakfast cereal: "flaking grits grade, consistent gelatinization, tight moisture"
-- Batter / coating: "fine mesh, controlled protein content, low free fatty acid"
-- Extruded sticks / rings: "grits particle size + moisture — for uniform extrusion pressure and mouthfeel consistency"
-USE THE DOSSIER to identify which product categories apply. Give the numbers. This is what makes a procurement manager think: "they actually know this spec."
+5. MICRO-VALUE — SPECS IN THE EMAIL: Give ACTUAL TECHNICAL SPECS for their product category that ${p} can use today — before they've agreed to anything. Phrase as "we usually see clients run..." not as a prescription.
+- Corn tortilla chips: "fine flour around 80–100 mesh, under 13% moisture — for even sheeting and consistent fry"
+- Extruded puffs: "grits around 0.8–1.2mm, same moisture band — for predictable expansion"
+- Corn flakes / cereal: "flaking grits grade, consistent gelatinization, tight moisture"
+- Batter / coating: "fine mesh, controlled protein, low free fatty acid"
+- Extruded sticks / rings: "particle size + moisture — for uniform extrusion pressure and mouthfeel"
+USE THE DOSSIER to identify which product categories apply. Give the numbers. This is what makes ${p} think "they actually know this spec — not just another trader."
 
-5. CERTIFICATIONS + SOCIAL PROOF — market-aware ordering:
-- HALAL FIRST for any buyer in Indonesia, Malaysia, Bangladesh, MENA, Nigeria, Pakistan, or any Muslim-majority market. Halal is not a credential bullet — it is the FIRST filter their import clearing team applies. Frame it as friction removal: "Full Halal, ISO 22000:2018, APEDA + complete export docs for Indonesia — your clearing team doesn't chase papers."
-- For all markets: name only certifications that directly remove the buyer's import or QC friction. Not a badge list.
-- Close this section with "second source" positioning — not cheapest, but reliable: e.g. "That's why we became second qualified source for a few Southeast Asia buyers — not cheapest, but boringly consistent."
+6. ATTACHMENT — authentic only (no fabricated reports): Reference what actually exists to send. Default: "Attaching our sales profile for your reference — it has our range, certifications [list them: always include Halal for Muslim-majority markets, ISO 22000:2018, APEDA, Kosher where applicable] and export docs we do for [their country]. No pitch deck, just for your file."
+RULE: Do NOT invent lot consistency reports, 10-lot studies, or expansion data files that may not exist. Only reference: sales profile, spec sheets, COA (available on request), standard samples.
 
-6. "FOR YOUR FILE" OFFER: Frame the COA and consistency data as something useful NOW, with or without intent to buy:
-- "Attaching for your QC file: [1. specific grade COA + X-lot consistency report, 2. specific grade expansion data]"
-- "No commitment needed — even if you keep us as backup in your AVL, it's useful to have a benchmark."
+7. SECOND SOURCE ASK: "We're just reaching out to see if ${co} is open to evaluating a second qualified source for these specs. If there's a potential fit, happy to share our standard spec sheet / COA for your QC team and arrange a small sample from our current lot for lab trial."
 
-7. TWO-STEP CTA (sample first, call second):
-- SAMPLE ASK comes before call ask: "Would it be okay to send a [2kg / 5kg] sample from same lot for your QC team to trial?"
-- CALL is secondary, lower-pressure: "And if open, happy to do a quick 20-min to understand ${co}'s exact import spec for [their product lines] — happy to work around [their timezone]."
-- Timezone to use: Indonesia = WIB, India = IST, UK = GMT/BST, UAE/Saudi = GST, Nigeria = WAT
-- Do NOT use "Would a quick 20-min call next week be useful?" alone as the CTA — it's too open with no hook to say yes
+8. CTA (low-pressure, timezone-aware): "Would a quick 20-min call next week be okay to understand how you currently buy and how you qualify new sources? Happy to work around [timezone] time."
+Timezone: Indonesia = WIB, India = IST, UK = GMT/BST, UAE/Saudi = GST, Nigeria = WAT
+
+9. WARM CLOSE (1 line): Genuine appreciation referencing a real specific detail from the dossier — founding year, scale, what they've built, their market presence. e.g. "Thanks for your time, Intan — and really appreciate the work you and the team have done building Dua Kelinci over 33 years." Never a generic compliment.
 
 SIGN OFF: Warm regards, ${senderName} · ${senderRole}
 
