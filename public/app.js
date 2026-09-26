@@ -503,6 +503,136 @@ let _currentDossier = "";
 let _appBooted = false;
 let _selectedModel = "anthropic/claude-sonnet-4-5";
 
+// ─── Prospect Import ──────────────────────────────────────────────────────────
+
+const IMPORT_COL_MAP = {
+  "company": "pCompany", "company name": "pCompany", "organization": "pCompany", "org": "pCompany", "account": "pCompany",
+  "first name": "pFirstName", "first": "pFirstName", "firstname": "pFirstName", "given name": "pFirstName",
+  "last name": "pLastName", "last": "pLastName", "lastname": "pLastName", "surname": "pLastName", "family name": "pLastName",
+  "name": "_fullName", "full name": "_fullName", "contact name": "_fullName", "contact": "_fullName",
+  "title": "pTitle", "job title": "pTitle", "position": "pTitle", "role": "pTitle", "designation": "pTitle",
+  "email": "pEmail", "email address": "pEmail", "work email": "pEmail", "business email": "pEmail",
+  "phone": "pPhone", "mobile": "pPhone", "phone number": "pPhone", "tel": "pPhone", "whatsapp": "pPhone",
+  "linkedin": "pLinkedin", "linkedin url": "pLinkedin", "linkedin profile": "pLinkedin", "profile url": "pLinkedin",
+  "domain": "pDomain", "website": "pDomain", "company domain": "pDomain", "company website": "pDomain",
+  "industry": "pIndustry",
+};
+
+let _importQueue = [];
+
+function _mapHeaders(headers) {
+  return headers.map(h => IMPORT_COL_MAP[(h || "").toLowerCase().trim()] || null);
+}
+
+function _parseToQueue(rows, headers) {
+  const colMap = _mapHeaders(headers);
+  return rows
+    .filter(r => r.some(v => String(v || "").trim()))
+    .map(row => {
+      const p = {};
+      row.forEach((val, i) => {
+        const field = colMap[i];
+        if (field && String(val || "").trim()) p[field] = String(val).trim();
+      });
+      if (p._fullName && !p.pFirstName) {
+        const parts = p._fullName.trim().split(/\s+/);
+        p.pFirstName = parts[0] || "";
+        p.pLastName = parts.slice(1).join(" ") || "";
+        delete p._fullName;
+      }
+      return p;
+    })
+    .filter(p => p.pCompany || p.pFirstName || p.pLastName || p.pEmail);
+}
+
+function _renderQueue() {
+  const tbody = $("importQueueBody");
+  if (!tbody) return;
+  if (!_importQueue.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="iq-empty">Upload a file or paste from Google Sheets to build a queue</td></tr>';
+    return;
+  }
+  const cell = (val) => val
+    ? `<td class="iq-cell" title="${val.replace(/"/g,'&quot;')}">${val}</td>`
+    : `<td class="iq-cell iq-missing">—</td>`;
+  tbody.innerHTML = _importQueue.map((p, i) => `
+    <tr class="${p._loaded ? "iq-loaded" : ""}">
+      ${cell(p.pCompany)}
+      ${cell([p.pFirstName, p.pLastName].filter(Boolean).join(" ") || "")}
+      ${cell(p.pTitle)}
+      ${cell(p.pEmail)}
+      ${cell(p.pLinkedin)}
+      ${cell(p.pPhone)}
+      <td class="iq-cell"><button class="btn btn-dark iq-load-btn" onclick="loadQueueRow(${i})">${p._loaded ? "✓ Loaded" : "Load →"}</button></td>
+    </tr>`).join("");
+}
+
+function loadQueueRow(i) {
+  const p = _importQueue[i];
+  if (!p) return;
+  ["pFirstName","pLastName","pTitle","pCompany","pDomain","pLinkedin","pEmail","pPhone"].forEach(f => {
+    const el = $(f); if (el) el.value = p[f] || "";
+  });
+  if (p.pIndustry) {
+    const sel = $("pIndustry");
+    if (sel) {
+      const opt = [...sel.options].find(o => o.value.toLowerCase().includes((p.pIndustry || "").toLowerCase()));
+      if (opt) sel.value = opt.value;
+    }
+  }
+  _importQueue[i]._loaded = true;
+  _renderQueue();
+  $("pFirstName")?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function _processImport(data) {
+  if (!data || data.length < 2) { alert("File must have at least a header row and one data row."); return; }
+  const headers = data[0].map(String);
+  const rows = data.slice(1).map(r => r.map(String));
+  const queue = _parseToQueue(rows, headers);
+  if (!queue.length) { alert("No usable rows found. Make sure the first row has column headers like Company, Name, Email etc."); return; }
+  _importQueue = [..._importQueue, ...queue];
+  _renderQueue();
+}
+
+function wireImport() {
+  const fileInput = $("importFileInput");
+  if (fileInput) {
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const ext = file.name.split(".").pop().toLowerCase();
+      try {
+        if (ext === "csv") {
+          const text = await file.text();
+          const result = Papa.parse(text, { skipEmptyLines: true });
+          _processImport(result.data);
+        } else if (ext === "xlsx" || ext === "xls") {
+          const buf = await file.arrayBuffer();
+          const wb = XLSX.read(buf);
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          _processImport(XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" }));
+        }
+      } catch (err) { alert("Could not parse file: " + err.message); }
+      fileInput.value = "";
+    });
+  }
+  const pasteArea = $("importPasteArea");
+  if (pasteArea) {
+    pasteArea.addEventListener("paste", () => {
+      setTimeout(() => {
+        const text = pasteArea.value.trim();
+        if (!text) return;
+        const rows = text.split("\n").map(r => r.split("\t"));
+        _processImport(rows);
+        pasteArea.value = "";
+      }, 50);
+    });
+  }
+  const clearBtn = $("importClearBtn");
+  if (clearBtn) clearBtn.addEventListener("click", () => { _importQueue = []; _renderQueue(); });
+}
+
 async function initSupabase() {
   if (typeof supabase === "undefined") { bootApp(); return; }
   try {
@@ -561,6 +691,7 @@ function bootApp(session) {
   wireChain();
   wireMemory();
   wireProspectSearch();
+  wireImport();
   checkApiStatus();
   setInterval(checkApiStatus, 30000);
   document.querySelectorAll(".nav-item").forEach((btn) => {
@@ -1715,6 +1846,8 @@ function getProspect() {
     company: $("pCompany").value,
     domain:  $("pDomain").value,
     linkedin: $("pLinkedin").value,
+    email:   $("pEmail")?.value || "",
+    phone:   $("pPhone")?.value || "",
     industry: $("pIndustry").value,
   };
 }

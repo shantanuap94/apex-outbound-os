@@ -298,6 +298,8 @@ CRITICAL RULES:
     const p = prospect?.name || "this prospect";
     const co = prospect?.company || "their company";
     const role = prospect?.title || "their role";
+    const prospectEmail = prospect?.email ? `\nEmail: ${prospect.email}` : "";
+    const prospectPhone = prospect?.phone ? `\nPhone/WhatsApp: ${prospect.phone}` : "";
     const dossierCtx = dossier ? `\n\nIntelligence Dossier:\n${dossier}` : "";
 
     // ── ICP emotional shortcuts for prompt injection ──
@@ -545,6 +547,11 @@ THE SENDER:
 - Proof (verbatim only): ${senderProof || "Use company credentials factually — years operating, listed status, plant count."}
 
 SENDER ADVANCED PROFILE:${senderOfferMechanism ? `\n- How it works: ${senderOfferMechanism}` : ""}${senderOutcomeTimeframe ? `\n- Outcome + timeframe: ${senderOutcomeTimeframe}` : ""}${senderLowRiskOffer ? `\n- Low-risk first offer: ${senderLowRiskOffer}` : ""}${senderDifferentiation ? `\n- Differentiation: ${senderDifferentiation}` : ""}${senderProofCards ? `\n- Proof cards:\n${senderProofCards}` : ""}${senderAuthorityOpinion ? `\n- Authority opinion (use sparingly for credibility): ${senderAuthorityOpinion}` : ""}${senderBannedWords ? `\n- ADDITIONAL BANNED WORDS (never use these): ${senderBannedWords}` : ""}${senderVoiceSamples ? `\n\nVOICE SAMPLES — match this tone and writing style exactly:\n${senderVoiceSamples}` : ""}
+
+PROSPECT CONTACT DATA:
+- Name: ${p}
+- Title: ${role}
+- Company: ${co}${prospectEmail}${prospectPhone}${prospect?.linkedin ? `\n- LinkedIn: ${prospect.linkedin}` : ""}
 
 ICP EMOTIONAL PROFILE of ${p} (${role}) at ${co}:
 - Pains: ${icpPains}

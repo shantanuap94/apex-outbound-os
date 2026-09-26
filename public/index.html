@@ -539,6 +539,32 @@
             </div>
           </div>
           <div class="step-card-body">
+
+            <!-- Import queue -->
+            <div class="import-section" id="importSection">
+              <div class="import-hd">
+                <span class="import-title">Import prospects</span>
+                <div class="import-actions">
+                  <label class="btn btn-outline import-file-btn">
+                    ↑ CSV / Excel
+                    <input type="file" id="importFileInput" accept=".csv,.xlsx,.xls" style="display:none">
+                  </label>
+                  <button class="btn btn-outline import-clear-btn" id="importClearBtn">Clear queue</button>
+                </div>
+              </div>
+              <textarea id="importPasteArea" class="import-paste" placeholder="Paste from Google Sheets (Ctrl+V) — first row must be column headers (Company, Name, Email, etc.)"></textarea>
+              <div class="import-queue-wrap">
+                <table class="iq-table">
+                  <thead>
+                    <tr><th>Company</th><th>Name</th><th>Title</th><th>Email</th><th>LinkedIn</th><th>Phone</th><th></th></tr>
+                  </thead>
+                  <tbody id="importQueueBody">
+                    <tr><td colspan="7" class="iq-empty">Upload a file or paste from Google Sheets to build a queue</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             <div class="prospect-grid">
               <div class="pfield"><label>First Name</label><input type="text" id="pFirstName" placeholder="Rajesh"></div>
               <div class="pfield"><label>Last Name</label><input type="text" id="pLastName" placeholder="Mehta"></div>
@@ -546,6 +572,8 @@
               <div class="pfield"><label>Company Name</label><input type="text" id="pCompany" placeholder="Mehta Industries"></div>
               <div class="pfield"><label>Company Domain</label><input type="text" id="pDomain" placeholder="mehtaindustries.com"></div>
               <div class="pfield"><label>LinkedIn URL</label><input type="text" id="pLinkedin" placeholder="linkedin.com/in/rajeshmehta"></div>
+              <div class="pfield"><label>Email</label><input type="text" id="pEmail" placeholder="rajesh@mehtaindustries.com"></div>
+              <div class="pfield"><label>Phone / WhatsApp</label><input type="text" id="pPhone" placeholder="+91 98200 00000"></div>
             </div>
             <div class="pfield" style="max-width:300px;margin-bottom:14px">
               <label>Industry</label>
@@ -851,6 +879,8 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
