@@ -1527,9 +1527,13 @@ async function generateNextEmail(prospectId, emailNum) {
   const entry = _crmProspects.find((x) => x.id === prospectId);
   if (!entry) return;
 
+  const isReferral = emailNum === "referral";
+  const btnLabel = isReferral ? "Referral Email" : `E${emailNum}`;
+  const storageKey = isReferral ? "referral" : `e${emailNum}`;
+
   const content = $("drawerContent");
   const btn = $(`#genEmail${emailNum}Btn`);
-  if (btn) { btn.textContent = `Generating E${emailNum}…`; btn.disabled = true; }
+  if (btn) { btn.textContent = `Generating ${btnLabel}…`; btn.disabled = true; }
 
   const streamBox = $("drawerEmailStream");
   if (streamBox) { streamBox.textContent = ""; streamBox.style.display = "block"; }
@@ -1552,6 +1556,7 @@ async function generateNextEmail(prospectId, emailNum) {
         senderProfile: sender,
         step: "outreach",
         emailNumber: emailNum,
+        emailType: isReferral ? "referral" : undefined,
         dossier: entry.dossier || "",
         previousEmails,
       },
@@ -1559,17 +1564,16 @@ async function generateNextEmail(prospectId, emailNum) {
     );
 
     const emailContent = (typeof text === "string" ? text : text?.content) || "";
-    if (!emailContent) { if (btn) { btn.textContent = `Generate E${emailNum}`; btn.disabled = false; } return; }
+    if (!emailContent) { if (btn) { btn.textContent = `Generate ${btnLabel}`; btn.disabled = false; } return; }
 
-    // Merge new email into existing emails object
-    const updatedEmails = { ...(entry.emails || {}), [`e${emailNum}`]: emailContent };
+    const updatedEmails = { ...(entry.emails || {}), [storageKey]: emailContent };
     await crmUpdateFields(prospectId, { emails: updatedEmails, updated_at: new Date().toISOString() });
     if (streamBox) streamBox.style.display = "none";
     const updated = _crmProspects.find((x) => x.id === prospectId);
     if (updated) renderDrawerTab("emails", updated);
   } catch (e) {
     if (streamBox) streamBox.textContent = "Error: " + e.message;
-    if (btn) { btn.textContent = `Generate E${emailNum}`; btn.disabled = false; }
+    if (btn) { btn.textContent = `Generate ${btnLabel}`; btn.disabled = false; }
   }
 }
 
@@ -1627,11 +1631,26 @@ function renderDrawerTab(tab, entry) {
         genBtn = `<button class="btn btn-dark btn-sm" id="genEmail${nextIdx}Btn">✦ Generate E${nextIdx}</button>`;
       }
 
+      // Referral email — separate standalone type for JV/subsidiary cases
+      const referralText = entry.emails?.referral || "";
+      const referralSection = `
+        <div class="referral-email-section">
+          <div class="referral-hd">
+            <span class="referral-label">Referral Ask</span>
+            <span class="referral-desc">Contact is at parent/sister company — use to request referral to actual buyer</span>
+            <button class="btn btn-outline btn-sm" id="genEmailreferralBtn" style="margin-left:auto">
+              ${referralText ? '↺ Regenerate' : '✦ Generate Referral Email'}
+            </button>
+          </div>
+          ${referralText ? `<pre class="drawer-pre" style="margin-top:8px">${referralText}</pre>` : ''}
+        </div>`;
+
       content.innerHTML = `
         ${statusBar}
         <div class="email-progress-bar">${progressPills}${genBtn ? `<div style="margin-left:auto">${genBtn}</div>` : ''}</div>
         <div id="drawerEmailStream" class="drawer-pre stream-box" style="display:none"></div>
-        <pre class="drawer-pre">${currentEmailText || `E${idx} not yet generated — click "Generate E${idx}" above.`}</pre>`;
+        <pre class="drawer-pre">${currentEmailText || `E${idx} not yet generated — click "Generate E${idx}" above.`}</pre>
+        ${referralSection}`;
     } else {
       // Old format — show full sequence text
       const seq = entry.emails?.sequence || entry.emails?.a || "";
@@ -1839,8 +1858,13 @@ function wireMemory() {
       if (markBtn) { markBtn.textContent = "Saving…"; markBtn.disabled = true; await markEmailSent(_currentDrawerId); return; }
       const genBtn = e.target.closest("[id^='genEmail'][id$='Btn']");
       if (genBtn) {
-        const num = parseInt(genBtn.id.replace("genEmail", "").replace("Btn", ""), 10);
-        if (num >= 1 && num <= 4) await generateNextEmail(_currentDrawerId, num);
+        const rawId = genBtn.id.replace("genEmail", "").replace("Btn", "");
+        if (rawId === "referral") {
+          await generateNextEmail(_currentDrawerId, "referral");
+        } else {
+          const num = parseInt(rawId, 10);
+          if (num >= 1 && num <= 4) await generateNextEmail(_currentDrawerId, num);
+        }
       }
     });
   }

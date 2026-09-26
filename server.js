@@ -516,6 +516,7 @@ Each touch: different angle, different emotional register. No invented statistic
 
       outreach: (() => {
         const emailNum = emailNumber || 1;
+        const isReferral = emailNum === "referral" || body?.emailType === "referral";
         const prevE1 = previousEmails?.e1 || "";
         const prevE2 = previousEmails?.e2 || "";
         const prevE3 = previousEmails?.e3 || "";
@@ -578,6 +579,55 @@ Subject line: specific, under 8 words, references a real thing from the dossier.
 
 REAL EXAMPLES THAT GOT REPLIES — study tone, length, specificity. Do not copy:
 ${fewShotExamples.map((ex, i) => `--- Example ${i+1} ---\nSubject: ${ex.subject || "(no subject)"}\n${ex.body}`).join("\n\n")}` : ""}`;
+
+        if (isReferral) return `Write a REFERRAL REQUEST EMAIL FROM ${senderName} TO ${p} (${role}) at ${co}.
+
+SITUATION: ${p} is at ${co}, which is related to — but is NOT — the actual company that buys TBI Corn's products. The goal of this email is NOT to pitch ${co} on purchasing corn ingredients. The goal is to respectfully ask ${p} to refer you to the correct procurement contact at the actual buying entity (a subsidiary, JV, or sister company).
+${sharedRules}
+
+CRITICAL OUTPUT RULE: Write the email exactly as it would be sent — no structural labels, no markers. Clean email only.
+
+Read the dossier carefully to identify:
+1. What ${co} actually does (noodles? parent holding? distribution? packaging?)
+2. What the ACTUAL buying company is — the subsidiary, JV, or sister brand that makes the corn-based product (e.g., "Calbee Wings JV")
+3. What product that buying company makes using TBI Corn's ingredients (e.g., "Krisbee Krunchy — corn-based extruded stick snack")
+4. The relationship / connection (e.g., "Wings' snack joint venture with Calbee")
+
+${dossierCtx}
+
+SUBJECT LINE — one of these formats:
+- "Hi [Name] — quick referral ask for [actual buying company] — [product name]"
+- "[Name] — [parent] + [buying JV] — corn [ingredient] for [product]"
+- "Came across your name with [parent company] — need your help for [buying JV]"
+
+EMAIL BODY — write in this exact order, no labels in output:
+
+1. Brief warm opener: "Hope you are doing well."
+
+2. RESEARCH OPENER: "I was doing some research on top corn-based [product category] buyers in Indonesia and your name came up with [parent company] — I know you are with [group] on the [their side — noodles/packaging/etc.] side, but I also saw [group]'s [relationship — e.g. snack JV], [actual buying company], makes [product] — [one-line product description]. That's actually why I'm writing to you."
+
+3. SENDER INTRO (2-3 sentences): Company, listed status, years milling, plants, named clients — bridge into the actual buying product: "same world where grit size decides whether stick expands at 4x or 3.5x lot to lot."
+${senderAuthorityBlock
+  ? `Use this pre-approved authority block VERBATIM:\n"${senderAuthorityBlock}"`
+  : `Natural peer-to-peer tone. Only use what the sender profile provides.`}
+
+4. SPECS FOR THE ACTUAL PRODUCT (not ${co}'s product): Give relevant specs for what the JV/subsidiary product needs. Phrase as "what we typically see work is...":
+- Extruded sticks: "grits around 0.8–1.2mm, moisture <13%, low specks — for predictable expansion and less oil uptake"
+- Corn tortilla: "fine flour around 80–100 mesh, moisture <13% — for even sheeting"
+- Extruded puffs: "0.8–1.2mm grits, same moisture band"
+Then add: "but I know [actual buying company] will have its own exact spec."
+
+5. EXPLICIT REFERRAL ASK: "I understand you are in [role] at [parent company] and not directly handling [actual buying company] procurement — would you be open to referring me to the right person in [actual buying company] procurement team who looks after corn [ingredient] for [product]?"
+
+6. ATTACHMENT: "Attaching our sales profile for your reference — range, certifications [ISO 22000:2018, Halal, Kosher, APEDA] and export docs for Indonesia — just for your file, in case helpful to forward."
+
+7. LOW-BURDEN CLOSE: "No hard pitch — just trying to reach the right team. If you can point me to the right person, I'll take it from there and not trouble you further."
+
+8. WARM CLOSE (1 line): Genuine appreciation for what they've built. Reference a real detail from the dossier — the group's brands, scale, years, markets. e.g. "Thanks for your time, Brata — and really appreciate the work you and Wings have done building the group."
+
+SIGN OFF: Warm regards, ${senderName} · ${senderRole}
+
+Output only the final email, ready to send. Subject line at the top, then body, then sign-off.`;
 
         if (emailNum === 1) return `Write EMAIL 1 of a 4-email cold outreach sequence FROM ${senderName} TO ${p} (${role}) at ${co}. This is the FIRST email. ${p} does not know ${senderName} at all. Goal: make ${p} feel genuinely understood before you sell anything — earn the reply by naming their exact world.
 ${sharedRules}
