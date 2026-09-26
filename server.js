@@ -204,7 +204,7 @@ Be specific, concrete, and insight-driven. Avoid buzzwords. Return only valid JS
           { role: "user", content: description || "" },
         ],
         ...(ep2.url.includes("openai") ? { response_format: { type: "json_object" } } : {}),
-        max_tokens: 1500,
+        max_tokens: 2500,
       }),
     });
     const data = await r.json();
@@ -1186,7 +1186,7 @@ authorityOpinion
           },
         ],
         ...(epExtract.url.includes("openai") ? { response_format: { type: "json_object" } } : {}),
-        max_tokens: 2500,
+        max_tokens: 4096,
       }),
     });
     const data = await r.json();
