@@ -764,6 +764,85 @@ async function handleAuthSession(session) {
   bootApp(session);
 }
 
+// ─── Settings Tab ─────────────────────────────────────────────────────────────
+const SERVICES = ["openrouter", "perplexity", "apollo", "apify", "openai"];
+
+function _setDot(svc, on) {
+  const el = $(`dot-${svc}`);
+  if (!el) return;
+  el.classList.toggle("on", on);
+  el.title = on ? "Configured" : "Not set";
+}
+
+function _setMasked(svc, masked) {
+  const el = $(`masked-${svc}`);
+  if (el) el.textContent = masked || "not set";
+}
+
+function wireSettings() {
+  document.querySelectorAll(".svc-save-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const svc = btn.dataset.svc;
+      const input = $(`key-${svc}`);
+      const key = (input?.value || "").trim();
+      if (!key) { alert("Paste your API key first."); return; }
+      btn.disabled = true;
+      try {
+        const res = await post("/api/settings/key", { service: svc, key });
+        if (res.error) throw new Error(res.error);
+        _setDot(svc, true);
+        _setMasked(svc, res.masked);
+        input.value = "";
+        // Show brief confirmation
+        const msg = document.createElement("span");
+        msg.className = "svc-save-msg show";
+        msg.textContent = "✓ Saved";
+        btn.insertAdjacentElement("afterend", msg);
+        setTimeout(() => msg.remove(), 2000);
+        if (svc === "openrouter") fetchOpenRouterCredits();
+      } catch (e) {
+        alert("Could not save key: " + e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+}
+
+async function loadSettingsTab() {
+  try {
+    const s = await get("/api/settings");
+    SERVICES.forEach(svc => {
+      const info = s[svc];
+      if (!info) return;
+      _setDot(svc, info.configured);
+      _setMasked(svc, info.masked);
+    });
+  } catch (e) { /* silent */ }
+  fetchOpenRouterCredits();
+}
+
+async function fetchOpenRouterCredits() {
+  const el = $("credval-openrouter");
+  if (!el) return;
+  try {
+    const data = await get("/api/credits/openrouter");
+    if (data.error) { el.textContent = "—"; return; }
+    const d = data.data || data;
+    const usage = parseFloat(d.usage ?? 0);
+    const limit = d.limit !== null && d.limit !== undefined ? parseFloat(d.limit) : null;
+    if (limit !== null) {
+      const remaining = limit - usage;
+      el.textContent = `$${remaining.toFixed(2)} remaining`;
+      el.classList.toggle("low", remaining < 2);
+    } else {
+      el.textContent = `$${usage.toFixed(4)} used`;
+    }
+  } catch (e) {
+    el.textContent = "—";
+  }
+}
+
 function bootApp(session) {
   if (_appBooted) return;
   _appBooted = true;
@@ -787,11 +866,13 @@ function bootApp(session) {
   wireMemory();
   wireProspectSearch();
   wireImport();
+  wireSettings();
   checkApiStatus();
   setInterval(checkApiStatus, 30000);
   document.querySelectorAll(".nav-item").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (btn.dataset.tab === "campaigns") renderMemoryList();
+      if (btn.dataset.tab === "settings") loadSettingsTab();
     });
   });
 }

@@ -29,6 +29,7 @@
       <button class="nav-item active" data-tab="icp"><span class="nav-num">1</span>Profile &amp; ICP</button>
       <button class="nav-item" data-tab="chain"><span class="nav-num">2</span>Agent Chain</button>
       <button class="nav-item" data-tab="campaigns"><span class="nav-num">3</span>Campaigns</button>
+      <button class="nav-item nav-item-settings" data-tab="settings">⚙ Settings</button>
     </nav>
     <div class="sb-status">
       <div class="sb-status-lbl">STACK STATUS</div>
@@ -882,6 +883,128 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<!-- ────────────────────────────────── Settings ── -->
+<section id="tab-settings" class="tab-panel" style="display:none">
+  <div class="step-eyebrow">SETTINGS</div>
+  <div class="step-hd">
+    <div>
+      <h2>API Keys &amp; Billing</h2>
+      <p class="step-desc">Manage your API keys and monitor credits. Key changes apply immediately but are in-memory only — update Render environment variables to persist after a restart.</p>
+    </div>
+  </div>
+
+  <div class="settings-grid">
+
+    <!-- OpenRouter -->
+    <div class="svc-card" id="svc-openrouter">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">OpenRouter</span>
+          <span class="svc-role">AI generation (emails, qualify, research)</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-openrouter"></span>
+          <span class="svc-masked" id="masked-openrouter">—</span>
+        </div>
+      </div>
+      <div class="svc-credits" id="credits-openrouter">
+        <span class="credits-label">Credits</span>
+        <span class="credits-val" id="credval-openrouter">Loading…</span>
+        <a class="credits-link" href="https://openrouter.ai/credits" target="_blank">Top up →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-openrouter" placeholder="sk-or-...">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="openrouter">Save</button>
+      </div>
+    </div>
+
+    <!-- Perplexity -->
+    <div class="svc-card" id="svc-perplexity">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">Perplexity</span>
+          <span class="svc-role">Prospect research (web search)</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-perplexity"></span>
+          <span class="svc-masked" id="masked-perplexity">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://www.perplexity.ai/settings/api" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-perplexity" placeholder="pplx-...">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="perplexity">Save</button>
+      </div>
+    </div>
+
+    <!-- Apollo -->
+    <div class="svc-card" id="svc-apollo">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">Apollo</span>
+          <span class="svc-role">Contact enrichment &amp; prospect search</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-apollo"></span>
+          <span class="svc-masked" id="masked-apollo">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://app.apollo.io/#/settings/billing/overview" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-apollo" placeholder="Apollo API key">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="apollo">Save</button>
+      </div>
+    </div>
+
+    <!-- Apify -->
+    <div class="svc-card" id="svc-apify">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">Apify</span>
+          <span class="svc-role">LinkedIn scraping</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-apify"></span>
+          <span class="svc-masked" id="masked-apify">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://console.apify.com/billing" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-apify" placeholder="apify_api_...">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="apify">Save</button>
+      </div>
+    </div>
+
+    <!-- OpenAI -->
+    <div class="svc-card" id="svc-openai">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">OpenAI</span>
+          <span class="svc-role">Direct GPT calls (optional — OpenRouter covers this)</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-openai"></span>
+          <span class="svc-masked" id="masked-openai">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-openai" placeholder="sk-...">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="openai">Save</button>
+      </div>
+    </div>
+
+  </div><!-- /settings-grid -->
+</section>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="app.js"></script>
 </body>

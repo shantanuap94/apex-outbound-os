@@ -1524,6 +1524,49 @@ async function handleWebhookEmailEvent(req, res) {
   }
 }
 
+async function handleSettings(req, res) {
+  const mask = (k) => k ? `...${k.slice(-8)}` : null;
+  json(res, {
+    openrouter: { configured: !!process.env.OPENROUTER_API_KEY, masked: mask(process.env.OPENROUTER_API_KEY) },
+    openai:     { configured: !!process.env.OPENAI_API_KEY,     masked: mask(process.env.OPENAI_API_KEY) },
+    perplexity: { configured: !!process.env.PERPLEXITY_API_KEY, masked: mask(process.env.PERPLEXITY_API_KEY) },
+    apollo:     { configured: !!process.env.APOLLO_API_KEY,     masked: mask(process.env.APOLLO_API_KEY) },
+    apify:      { configured: !!process.env.APIFY_API_KEY,      masked: mask(process.env.APIFY_API_KEY) },
+  });
+}
+
+async function handleSettingsKey(req, res) {
+  try {
+    const body = await readBody(req);
+    const { service, key } = body;
+    const MAP = {
+      openrouter: "OPENROUTER_API_KEY",
+      openai:     "OPENAI_API_KEY",
+      perplexity: "PERPLEXITY_API_KEY",
+      apollo:     "APOLLO_API_KEY",
+      apify:      "APIFY_API_KEY",
+    };
+    if (!MAP[service] || !String(key || "").trim()) { json(res, { error: "Invalid service or key" }, 400); return; }
+    process.env[MAP[service]] = String(key).trim();
+    json(res, { ok: true, masked: `...${String(key).trim().slice(-8)}` });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
+async function handleCreditsOpenRouter(req, res) {
+  if (!process.env.OPENROUTER_API_KEY) { json(res, { error: "No key configured" }); return; }
+  try {
+    const r = await fetch("https://openrouter.ai/api/v1/auth/key", {
+      headers: { "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}` },
+    });
+    const data = await r.json();
+    json(res, data);
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
 async function handleImportParse(req, res) {
   try {
     const body = await readBody(req);
@@ -1591,6 +1634,7 @@ const POST_ROUTES = {
   "/api/profile/extract": handleProfileExtract,
   "/api/webhook/email-event": handleWebhookEmailEvent,
   "/api/import/parse": handleImportParse,
+  "/api/settings/key": handleSettingsKey,
 };
 
 const server = http.createServer(async (req, res) => {
@@ -1609,6 +1653,8 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && pathname === "/api/status") return handleStatus(req, res);
   if (req.method === "GET" && pathname === "/api/config") return handleConfig(req, res);
   if (req.method === "GET" && pathname === "/api/health") return handleHealth(req, res);
+  if (req.method === "GET" && pathname === "/api/settings") return handleSettings(req, res);
+  if (req.method === "GET" && pathname === "/api/credits/openrouter") return handleCreditsOpenRouter(req, res);
 
   const runMatch = pathname.match(/^\/api\/leads\/run\/(.+)$/);
   if (req.method === "GET" && runMatch) return handleLeadsRunStatus(req, res, runMatch[1]);
