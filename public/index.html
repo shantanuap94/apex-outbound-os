@@ -593,9 +593,11 @@
             </div>
             <div class="chain-actions">
               <button class="btn btn-dark" id="enrichApolloBtn">Enrich with Apollo →</button>
+              <button class="btn btn-outline" id="enrichWaterfallBtn">✦ Enrich Contact</button>
               <button class="btn btn-outline" id="researchPerplexityBtn">Research with Perplexity →</button>
               <button class="btn btn-outline" id="qualifyBtn">Qualify Prospect →</button>
             </div>
+            <div id="waterfallResult" style="display:none" class="waterfall-result"></div>
             <div id="qualifyResult" style="display:none" class="qualify-card"></div>
           </div>
         </div>
@@ -999,6 +1001,132 @@
       <div class="svc-edit">
         <input type="password" class="svc-key-input" id="key-openai" placeholder="sk-...">
         <button class="btn btn-dark btn-sm svc-save-btn" data-svc="openai">Save</button>
+      </div>
+    </div>
+
+    <!-- BetterContact -->
+    <div class="svc-card" id="svc-bettercontact">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">BetterContact</span>
+          <span class="svc-role">Primary enrichment waterfall — email + phone across 20+ sources</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-bettercontact"></span>
+          <span class="svc-masked" id="masked-bettercontact">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://app.bettercontact.rocks/settings/billing" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-bettercontact" placeholder="API key">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="bettercontact">Save</button>
+      </div>
+    </div>
+
+    <!-- Datagma -->
+    <div class="svc-card" id="svc-datagma">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">Datagma</span>
+          <span class="svc-role">Phone fallback — strong APAC &amp; EMEA mobile coverage</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-datagma"></span>
+          <span class="svc-masked" id="masked-datagma">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://datagma.com/dashboard/billing" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-datagma" placeholder="API key">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="datagma">Save</button>
+      </div>
+    </div>
+
+    <!-- FullEnrich -->
+    <div class="svc-card" id="svc-fullenrich">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">FullEnrich</span>
+          <span class="svc-role">Enrichment fallback — activates automatically when key is added</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-fullenrich"></span>
+          <span class="svc-masked" id="masked-fullenrich">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://fullenrich.com/dashboard" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-fullenrich" placeholder="API key">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="fullenrich">Save</button>
+      </div>
+    </div>
+
+    <!-- LeadMagic -->
+    <div class="svc-card" id="svc-leadmagic">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">LeadMagic</span>
+          <span class="svc-role">Enrichment fallback — activates automatically when key is added</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-leadmagic"></span>
+          <span class="svc-masked" id="masked-leadmagic">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://app.leadmagic.io/billing" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-leadmagic" placeholder="API key">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="leadmagic">Save</button>
+      </div>
+    </div>
+
+    <!-- Hunter -->
+    <div class="svc-card" id="svc-hunter">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">Hunter.io</span>
+          <span class="svc-role">Email finder fallback — domain + name lookup</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-hunter"></span>
+          <span class="svc-masked" id="masked-hunter">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://hunter.io/users/me/billing" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-hunter" placeholder="API key">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="hunter">Save</button>
+      </div>
+    </div>
+
+    <!-- Icypeas -->
+    <div class="svc-card" id="svc-icypeas">
+      <div class="svc-hd">
+        <div class="svc-info">
+          <span class="svc-name">Icypeas</span>
+          <span class="svc-role">Email finder fallback — activates automatically when key is added</span>
+        </div>
+        <div class="svc-status-wrap">
+          <span class="svc-dot" id="dot-icypeas"></span>
+          <span class="svc-masked" id="masked-icypeas">—</span>
+        </div>
+      </div>
+      <div class="svc-billing-link">
+        <a href="https://app.icypeas.com/billing" target="_blank">View usage &amp; billing →</a>
+      </div>
+      <div class="svc-edit">
+        <input type="password" class="svc-key-input" id="key-icypeas" placeholder="API key">
+        <button class="btn btn-dark btn-sm svc-save-btn" data-svc="icypeas">Save</button>
       </div>
     </div>
 

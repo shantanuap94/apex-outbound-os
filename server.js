@@ -63,6 +63,305 @@ async function apifyRunActor(actorId, input) {
   return { runId: data.data.id, datasetId: data.data.defaultDatasetId };
 }
 
+async function apifyRunAndWait(actorId, input, maxWaitMs = 45000) {
+  if (!process.env.APIFY_API_KEY) return [];
+  try {
+    const { runId, datasetId } = await apifyRunActor(actorId, input);
+    const start = Date.now();
+    while (Date.now() - start < maxWaitMs) {
+      await new Promise(r => setTimeout(r, 3000));
+      const sr = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { "Authorization": `Bearer ${process.env.APIFY_API_KEY}` },
+      });
+      const sd = await sr.json();
+      const status = sd?.data?.status;
+      if (status === "SUCCEEDED") {
+        const dr = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?format=json&clean=true`, {
+          headers: { "Authorization": `Bearer ${process.env.APIFY_API_KEY}` },
+        });
+        const items = await dr.json();
+        return Array.isArray(items) ? items : [];
+      }
+      if (["FAILED", "ABORTED", "TIMED-OUT"].includes(status)) break;
+    }
+    return [];
+  } catch (e) {
+    console.warn("Apify run error:", e.message);
+    return [];
+  }
+}
+
+// LinkedIn people discovery when Apollo has no record of the company
+async function apifyLinkedInDiscover(company, country) {
+  if (!process.env.APIFY_API_KEY) return [];
+  const actorId = process.env.APIFY_LINKEDIN_ACTOR || "anchor~linkedin-search-people-scraper";
+  const queries = [
+    `procurement manager ${company} ${country || ""}`.trim(),
+    `purchasing manager ${company} ${country || ""}`.trim(),
+    `supply chain ${company} ${country || ""}`.trim(),
+  ].filter(Boolean);
+  try {
+    return await apifyRunAndWait(actorId, { searchQueries: queries, maxResults: 10 }, 45000);
+  } catch (e) {
+    console.warn("Apify LinkedIn discover failed:", e.message);
+    return [];
+  }
+}
+
+// ─── Enrichment Providers ─────────────────────────────────────────────────────
+
+async function enrichViaBetterContact(prospect) {
+  const key = process.env.BETTERCONTACT_API_KEY;
+  if (!key) return null;
+  try {
+    const contact = {};
+    if (prospect.firstName)  contact.first_name     = prospect.firstName;
+    if (prospect.lastName)   contact.last_name      = prospect.lastName;
+    if (prospect.company)    contact.company_name   = prospect.company;
+    if (prospect.domain)     contact.company_domain = prospect.domain;
+    if (prospect.linkedin) {
+      contact.linkedin_url = prospect.linkedin.startsWith("http")
+        ? prospect.linkedin
+        : `https://www.linkedin.com/in/${prospect.linkedin}`;
+    }
+
+    const initR = await fetch("https://app.bettercontact.rocks/api/v2/async", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "api_key": key },
+      body: JSON.stringify({ contact }),
+    });
+    if (!initR.ok) { console.warn("BetterContact init failed:", initR.status); return null; }
+    const init = await initR.json();
+    const requestId = init?.request_id || init?.requestId || init?.id;
+    if (!requestId) { console.warn("BetterContact: no requestId in response"); return null; }
+
+    // Poll up to 25 seconds (10 × 2.5 s)
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, 2500));
+      const pr = await fetch(`https://app.bettercontact.rocks/api/v2/async/${requestId}`, {
+        headers: { "api_key": key },
+      });
+      if (!pr.ok) continue;
+      const pd = await pr.json();
+      const status = pd?.status || pd?.enrichment_status;
+      if (status === "not_found" || status === "failed") return null;
+      const d = pd?.data || pd;
+      if (d?.email || d?.phone_number || d?.phoneNumber) {
+        return {
+          email:       d.email || null,
+          emailStatus: d.email_status || d.emailStatus || null,
+          phone:       d.phone_number || d.phoneNumber || d.phone || null,
+          provider:    "bettercontact",
+        };
+      }
+      if (status === "completed") return null;
+    }
+    return null;
+  } catch (e) {
+    console.warn("BetterContact enrichment error:", e.message);
+    return null;
+  }
+}
+
+async function enrichViaDatagma(prospect) {
+  const key = process.env.DATAGMA_API_KEY;
+  if (!key) return null;
+  const data = prospect.linkedin || prospect.email;
+  if (!data) return null;
+  try {
+    const url = `https://api.datagma.com/api/ingress?apiId=${encodeURIComponent(key)}&data=${encodeURIComponent(data)}&type=person`;
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const d = await r.json();
+    const phone = d?.person?.phoneNumbers?.[0] || d?.phoneNumber || d?.phone || null;
+    return phone ? { phone, provider: "datagma" } : null;
+  } catch (e) {
+    console.warn("Datagma enrichment error:", e.message);
+    return null;
+  }
+}
+
+// Named stubs — each activates automatically when the env key is added
+async function enrichViaFullEnrich(prospect) {
+  const key = process.env.FULLENRICH_API_KEY;
+  if (!key) return null;
+  try {
+    const r = await fetch("https://api.fullenrich.com/v1/enrichments", {
+      method: "POST",
+      headers: { "Authorization": `Basic ${Buffer.from(key + ":").toString("base64")}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requests: [{
+          linkedin_url: prospect.linkedin || undefined,
+          first_name:   prospect.firstName || undefined,
+          last_name:    prospect.lastName || undefined,
+          company_name: prospect.company || undefined,
+          domain:       prospect.domain || undefined,
+        }],
+      }),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const item = d?.requests?.[0] || {};
+    return (item.email || item.phone) ? { email: item.email || null, phone: item.phone || null, provider: "fullenrich" } : null;
+  } catch (e) { console.warn("FullEnrich error:", e.message); return null; }
+}
+
+async function enrichViaLeadMagic(prospect) {
+  const key = process.env.LEADMAGIC_API_KEY;
+  if (!key) return null;
+  try {
+    const r = await fetch("https://api.leadmagic.io/v1/people/enrich", {
+      method: "POST",
+      headers: { "X-API-Key": key, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name:   prospect.firstName,
+        last_name:    prospect.lastName,
+        company_name: prospect.company,
+        company_domain: prospect.domain,
+        linkedin_url: prospect.linkedin,
+      }),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return (d.email || d.phone) ? { email: d.email || null, phone: d.phone || null, provider: "leadmagic" } : null;
+  } catch (e) { console.warn("LeadMagic error:", e.message); return null; }
+}
+
+async function enrichViaHunter(prospect) {
+  const key = process.env.HUNTER_API_KEY;
+  if (!key || !prospect.firstName || !prospect.lastName || !prospect.domain) return null;
+  try {
+    const url = `https://api.hunter.io/v2/email-finder?domain=${encodeURIComponent(prospect.domain)}&first_name=${encodeURIComponent(prospect.firstName)}&last_name=${encodeURIComponent(prospect.lastName)}&api_key=${key}`;
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const d = await r.json();
+    const email = d?.data?.email;
+    return email ? { email, emailStatus: d?.data?.confidence ? `${d.data.confidence}%` : null, provider: "hunter" } : null;
+  } catch (e) { console.warn("Hunter error:", e.message); return null; }
+}
+
+async function enrichViaIcypeas(prospect) {
+  const key = process.env.ICYPEAS_API_KEY;
+  if (!key || !prospect.firstName || !prospect.lastName || !prospect.domain) return null;
+  try {
+    const r = await fetch("https://app.icypeas.com/api/email-search", {
+      method: "POST",
+      headers: { "Authorization": key, "Content-Type": "application/json" },
+      body: JSON.stringify({ firstname: prospect.firstName, lastname: prospect.lastName, domainOrCompany: prospect.domain }),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const email = d?.item?.email;
+    return email ? { email, provider: "icypeas" } : null;
+  } catch (e) { console.warn("Icypeas error:", e.message); return null; }
+}
+
+// ─── Waterfall Orchestrator ───────────────────────────────────────────────────
+async function handleEnrichWaterfall(req, res) {
+  try {
+    const body = await readBody(req);
+    const { firstName, lastName, company, domain, linkedin, country,
+            email: existingEmail, phone: existingPhone } = body;
+
+    if (!firstName && !lastName && !company) {
+      return json(res, { error: "Need at least a name or company" }, 400);
+    }
+
+    const provenance = [];
+    let email     = existingEmail  || null;
+    let phone     = existingPhone  || null;
+    let linkedinUrl = linkedin     || null;
+
+    const hit = (field, value, provider) => provenance.push({ field, value, provider, ts: new Date().toISOString() });
+    const prospect = () => ({ firstName, lastName, company, domain, linkedin: linkedinUrl, country, email, phone });
+
+    // ── 1. Apollo (fast — always try first)
+    if (process.env.APOLLO_API_KEY) {
+      try {
+        const ar = await fetch("https://api.apollo.io/v1/people/match", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-api-key": process.env.APOLLO_API_KEY },
+          body: JSON.stringify({ first_name: firstName, last_name: lastName,
+                                  organization_name: company, domain, linkedin_url: linkedin }),
+        });
+        if (ar.ok) {
+          const ad = await ar.json();
+          const p = ad?.person;
+          if (p) {
+            if (!email && p.email)                                    { email = p.email;  hit("email",   email,  "apollo"); }
+            if (!phone && p.phone_numbers?.[0]?.sanitized_number)     { phone = p.phone_numbers[0].sanitized_number; hit("phone", phone, "apollo"); }
+            if (!linkedinUrl && p.linkedin_url)                       { linkedinUrl = p.linkedin_url; }
+          }
+        }
+      } catch (e) { console.warn("Apollo step failed:", e.message); }
+    }
+
+    // ── 1b. Apify LinkedIn discovery (only if Apollo found nobody AND no LinkedIn URL)
+    if (!email && !linkedinUrl && process.env.APIFY_API_KEY && company) {
+      try {
+        const items = await apifyLinkedInDiscover(company, country);
+        if (items.length) {
+          const target = `${firstName || ""} ${lastName || ""}`.toLowerCase().trim();
+          const match = target
+            ? (items.find(it => {
+                const n = (it.name || it.fullName || "").toLowerCase();
+                return n.includes((firstName || "").toLowerCase()) || n.includes((lastName || "").toLowerCase());
+              }) || items[0])
+            : items[0];
+          if (match) {
+            const li = match.linkedInUrl || match.linkedin_url || match.profileUrl || match.url;
+            if (li) { linkedinUrl = li; hit("linkedin", linkedinUrl, "apify"); }
+          }
+        }
+      } catch (e) { console.warn("Apify discovery step failed:", e.message); }
+    }
+
+    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, complete: true });
+
+    // ── 2. BetterContact (primary waterfall — email + phone across 20+ sources)
+    if (!email || !phone) {
+      const bc = await enrichViaBetterContact(prospect());
+      if (bc) {
+        if (!email && bc.email) { email = bc.email; hit("email", email, bc.emailStatus ? `bettercontact (${bc.emailStatus})` : "bettercontact"); }
+        if (!phone && bc.phone) { phone = bc.phone; hit("phone", phone, "bettercontact"); }
+      }
+    }
+
+    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, complete: true });
+
+    // ── 3. Datagma phone fallback (APAC/EMEA specialist)
+    if (!phone) {
+      const dg = await enrichViaDatagma(prospect());
+      if (dg?.phone) { phone = dg.phone; hit("phone", phone, "datagma"); }
+    }
+
+    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, complete: true });
+
+    // ── 4-7. Named stubs — activate automatically when keys are added
+    const fallbacks = [
+      [enrichViaFullEnrich, "fullenrich"],
+      [enrichViaLeadMagic,  "leadmagic"],
+      [enrichViaHunter,     "hunter"],
+      [enrichViaIcypeas,    "icypeas"],
+    ];
+    for (const [fn, name] of fallbacks) {
+      if (email && phone) break;
+      try {
+        const r = await fn(prospect());
+        if (r) {
+          if (!email && r.email) { email = r.email; hit("email", email, name); }
+          if (!phone && r.phone) { phone = r.phone; hit("phone", phone, name); }
+        }
+      } catch (e) { console.warn(`${name} step failed:`, e.message); }
+    }
+
+    json(res, { email, phone, linkedin: linkedinUrl, provenance, complete: !!(email && phone) });
+  } catch (e) {
+    console.error("Waterfall error:", e.message);
+    json(res, { error: e.message }, 500);
+  }
+}
+
 // ─── Quick Score ──────────────────────────────────────────────────────────────
 function quickScoreLead(lead) {
   let score = 0;
@@ -1526,12 +1825,19 @@ async function handleWebhookEmailEvent(req, res) {
 
 async function handleSettings(req, res) {
   const mask = (k) => k ? `...${k.slice(-8)}` : null;
+  const s = (envKey) => ({ configured: !!process.env[envKey], masked: mask(process.env[envKey]) });
   json(res, {
-    openrouter: { configured: !!process.env.OPENROUTER_API_KEY, masked: mask(process.env.OPENROUTER_API_KEY) },
-    openai:     { configured: !!process.env.OPENAI_API_KEY,     masked: mask(process.env.OPENAI_API_KEY) },
-    perplexity: { configured: !!process.env.PERPLEXITY_API_KEY, masked: mask(process.env.PERPLEXITY_API_KEY) },
-    apollo:     { configured: !!process.env.APOLLO_API_KEY,     masked: mask(process.env.APOLLO_API_KEY) },
-    apify:      { configured: !!process.env.APIFY_API_KEY,      masked: mask(process.env.APIFY_API_KEY) },
+    openrouter:   s("OPENROUTER_API_KEY"),
+    openai:       s("OPENAI_API_KEY"),
+    perplexity:   s("PERPLEXITY_API_KEY"),
+    apollo:       s("APOLLO_API_KEY"),
+    apify:        s("APIFY_API_KEY"),
+    bettercontact: s("BETTERCONTACT_API_KEY"),
+    datagma:      s("DATAGMA_API_KEY"),
+    fullenrich:   s("FULLENRICH_API_KEY"),
+    leadmagic:    s("LEADMAGIC_API_KEY"),
+    hunter:       s("HUNTER_API_KEY"),
+    icypeas:      s("ICYPEAS_API_KEY"),
   });
 }
 
@@ -1540,11 +1846,17 @@ async function handleSettingsKey(req, res) {
     const body = await readBody(req);
     const { service, key } = body;
     const MAP = {
-      openrouter: "OPENROUTER_API_KEY",
-      openai:     "OPENAI_API_KEY",
-      perplexity: "PERPLEXITY_API_KEY",
-      apollo:     "APOLLO_API_KEY",
-      apify:      "APIFY_API_KEY",
+      openrouter:    "OPENROUTER_API_KEY",
+      openai:        "OPENAI_API_KEY",
+      perplexity:    "PERPLEXITY_API_KEY",
+      apollo:        "APOLLO_API_KEY",
+      apify:         "APIFY_API_KEY",
+      bettercontact: "BETTERCONTACT_API_KEY",
+      datagma:       "DATAGMA_API_KEY",
+      fullenrich:    "FULLENRICH_API_KEY",
+      leadmagic:     "LEADMAGIC_API_KEY",
+      hunter:        "HUNTER_API_KEY",
+      icypeas:       "ICYPEAS_API_KEY",
     };
     if (!MAP[service] || !String(key || "").trim()) { json(res, { error: "Invalid service or key" }, 400); return; }
     process.env[MAP[service]] = String(key).trim();
@@ -1633,8 +1945,9 @@ const POST_ROUTES = {
   "/api/leads/generate": handleLeadsGenerate,
   "/api/profile/extract": handleProfileExtract,
   "/api/webhook/email-event": handleWebhookEmailEvent,
-  "/api/import/parse": handleImportParse,
-  "/api/settings/key": handleSettingsKey,
+  "/api/import/parse":     handleImportParse,
+  "/api/settings/key":    handleSettingsKey,
+  "/api/enrich/waterfall": handleEnrichWaterfall,
 };
 
 const server = http.createServer(async (req, res) => {

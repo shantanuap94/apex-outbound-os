@@ -765,7 +765,8 @@ async function handleAuthSession(session) {
 }
 
 // ─── Settings Tab ─────────────────────────────────────────────────────────────
-const SERVICES = ["openrouter", "perplexity", "apollo", "apify", "openai"];
+const SERVICES = ["openrouter", "perplexity", "apollo", "apify", "openai",
+                  "bettercontact", "datagma", "fullenrich", "leadmagic", "hunter", "icypeas"];
 
 function _setDot(svc, on) {
   const el = $(`dot-${svc}`);
@@ -2147,6 +2148,54 @@ function wireChain() {
       $("snapshotOut").textContent = "Apollo API not connected. Add APOLLO_API_KEY to your environment.";
     }
     resetBtn(btn, "Enrich with Apollo →");
+  });
+
+  // Enrich Contact (waterfall)
+  $("enrichWaterfallBtn").addEventListener("click", async () => {
+    const p = getProspect();
+    if (!p.firstName && !p.lastName && !p.company) {
+      alert("Enter at least a name or company first."); return;
+    }
+    const btn = $("enrichWaterfallBtn");
+    setRunning(btn, "✦ Enrich Contact");
+    const box = $("waterfallResult");
+    box.style.display = "none";
+    try {
+      const res = await post("/api/enrich/waterfall", {
+        firstName: p.firstName, lastName: p.lastName,
+        company: p.company,     domain: p.domain,
+        linkedin: p.linkedin,   country: null,
+        email: $("pEmail")?.value || "",
+        phone: $("pPhone")?.value || "",
+      });
+      if (res.error) {
+        box.innerHTML = `<span style="color:var(--danger)">Error: ${res.error}</span>`;
+      } else {
+        const found = [];
+        if (res.email)   found.push(`<strong>Email:</strong> ${res.email}`);
+        if (res.phone)   found.push(`<strong>Phone:</strong> ${res.phone}`);
+        if (res.linkedin && !p.linkedin) found.push(`<strong>LinkedIn:</strong> <a href="${res.linkedin}" target="_blank">${res.linkedin}</a>`);
+
+        const pills = (res.provenance || []).map(pv =>
+          `<span class="prov-pill">${pv.field} via <em>${pv.provider}</em></span>`
+        ).join(" ");
+
+        if (found.length) {
+          box.innerHTML = found.join("<br>") + (pills ? `<div class="prov-pills">${pills}</div>` : "");
+          // Back-fill form fields if empty
+          if (res.email && !$("pEmail").value)   $("pEmail").value   = res.email;
+          if (res.phone && !$("pPhone").value)   $("pPhone").value   = res.phone;
+          if (res.linkedin && !$("pLinkedin").value) $("pLinkedin").value = res.linkedin;
+        } else {
+          box.innerHTML = `<span style="color:var(--text-3)">No contact data found — try adding more provider keys in Settings.</span>`;
+        }
+      }
+      box.style.display = "block";
+    } catch (e) {
+      box.innerHTML = `<span style="color:var(--danger)">${e.message}</span>`;
+      box.style.display = "block";
+    }
+    resetBtn(btn, "✦ Enrich Contact");
   });
 
   // Research with Perplexity

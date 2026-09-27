@@ -847,6 +847,9 @@ main { padding: 24px 32px 60px; }
 .iq-remove-btn:hover { color: #e05; }
 
 /* ─── Prospect Qualification Card ───────────────────────────────────────── */
+.waterfall-result { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2, #faf8f5); font-size: 13.5px; line-height: 1.7; }
+.prov-pills { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.prov-pill { font-size: 11px; background: rgba(60,185,122,.12); color: #1e7a4c; border-radius: 20px; padding: 2px 9px; }
 .qualify-card { margin-top: 14px; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--bg-2, #faf8f5); }
 .qualify-card.fit-high  { border-color: #22a55a; background: #f0faf4; }
 .qualify-card.fit-medium{ border-color: #e8a015; background: #fffbf0; }
