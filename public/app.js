@@ -688,9 +688,12 @@ function wireImport() {
         const text = pasteArea.value.trim();
         if (!text) return;
 
-        // Structured paste (TSV from Google Sheets / Excel copy) — has tabs
-        if (text.includes("\t")) {
-          const rows = text.split("\n").map(r => r.split("\t"));
+        // Structured paste: must have 2+ rows AND first row must look like column headers
+        const HEADER_KEYWORDS = /company|name|email|phone|linkedin|title|domain|website|first|last|mobile|whatsapp|position|designation|industry/i;
+        const lines = text.split("\n").filter(l => l.trim());
+        const isStructured = lines.length >= 2 && text.includes("\t") && HEADER_KEYWORDS.test(lines[0]);
+        if (isStructured) {
+          const rows = lines.map(r => r.split("\t"));
           _processImport(rows);
           pasteArea.value = "";
           return;
