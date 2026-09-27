@@ -1524,6 +1524,60 @@ async function handleWebhookEmailEvent(req, res) {
   }
 }
 
+async function handleImportParse(req, res) {
+  try {
+    const body = await readBody(req);
+    const { text } = body;
+    if (!text || !String(text).trim()) { json(res, { error: "No text provided" }, 400); return; }
+
+    const ep = getAIEndpoint("gpt-4o-mini");
+    const prompt = `Extract contact/prospect information from the text below and return ONLY a JSON object with exactly these fields (use empty string "" for anything not found):
+
+{
+  "pFirstName": "",
+  "pLastName": "",
+  "pTitle": "",
+  "pCompany": "",
+  "pEmail": "",
+  "pPhone": "",
+  "pLinkedin": "",
+  "pDomain": ""
+}
+
+Rules:
+- pFirstName / pLastName: split the full name; if only one word, put it in pFirstName
+- pTitle: job title or designation (e.g. "Purchase Manager", "VP Procurement")
+- pCompany: company or organisation name
+- pEmail: email address if present
+- pPhone: phone or WhatsApp number if present
+- pLinkedin: full LinkedIn profile URL (e.g. https://linkedin.com/in/xyz) or username only if no full URL
+- pDomain: company website domain (e.g. wingscorp.com) — infer from email domain or website URL if present, leave blank if unknown
+
+Text to parse:
+---
+${String(text).trim()}
+---`;
+
+    const r = await fetch(ep.url, {
+      method: "POST",
+      headers: aiHeaders(ep),
+      body: JSON.stringify({
+        model: ep.model,
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 400,
+        temperature: 0,
+      }),
+    });
+    const data = await r.json();
+    const content = data.choices?.[0]?.message?.content || "{}";
+    const parsed = parseAIJson(content);
+    json(res, parsed);
+  } catch (e) {
+    console.error("Import parse error:", e.message);
+    json(res, { error: e.message }, 500);
+  }
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 const POST_ROUTES = {
   "/api/qualify": handleQualify,
@@ -1536,6 +1590,7 @@ const POST_ROUTES = {
   "/api/leads/generate": handleLeadsGenerate,
   "/api/profile/extract": handleProfileExtract,
   "/api/webhook/email-event": handleWebhookEmailEvent,
+  "/api/import/parse": handleImportParse,
 };
 
 const server = http.createServer(async (req, res) => {

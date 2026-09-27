@@ -684,12 +684,40 @@ function wireImport() {
   const pasteArea = $("importPasteArea");
   if (pasteArea) {
     pasteArea.addEventListener("paste", () => {
-      setTimeout(() => {
+      setTimeout(async () => {
         const text = pasteArea.value.trim();
         if (!text) return;
-        const rows = text.split("\n").map(r => r.split("\t"));
-        _processImport(rows);
-        pasteArea.value = "";
+
+        // Structured paste (TSV from Google Sheets / Excel copy) — has tabs
+        if (text.includes("\t")) {
+          const rows = text.split("\n").map(r => r.split("\t"));
+          _processImport(rows);
+          pasteArea.value = "";
+          return;
+        }
+
+        // Free-form text — send to AI for parsing
+        const origPlaceholder = pasteArea.placeholder;
+        pasteArea.disabled = true;
+        pasteArea.placeholder = "Parsing with AI…";
+        try {
+          const result = await post("/api/import/parse", { text });
+          if (result.error) throw new Error(result.error);
+          const hasData = result.pFirstName || result.pLastName || result.pCompany || result.pEmail;
+          if (!hasData) {
+            alert("Could not extract prospect details. Try including a name, company, or email address.");
+            pasteArea.value = "";
+            return;
+          }
+          _importQueue.push(result);
+          _renderQueue();
+          pasteArea.value = "";
+        } catch (e) {
+          alert("Could not parse prospect details: " + e.message);
+        } finally {
+          pasteArea.disabled = false;
+          pasteArea.placeholder = origPlaceholder;
+        }
       }, 50);
     });
   }
