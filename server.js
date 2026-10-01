@@ -898,13 +898,9 @@ GOOD: "The spec sheet looks fine. The COA matches. But batch 47 behaves differen
 
 USE CONTRACTIONS — always: you're / we've / it's / don't / that's / I'm / we're / they've / you'll
 
-BANNED PHRASES:
-"Hope this finds you well" / "Just following up" / "Circling back" / "As per my last email"
-"We help companies like yours" / "Leverage synergies" / "seamless efficiency" / "value proposition"
-"A testament to your growth / market leadership" / "innovative" / "premium" / "industry-leading"
-"Leader in [X] Industry" — never in signature or anywhere else
-Any fabricated statistic or trend not directly from the dossier
-Any company tagline you invented for the sender
+ACCURACY RULES:
+Never fabricate statistics, percentages, or data not in the dossier.
+Never invent company taglines, plant names, certifications, or client names for the sender.
 
 TONE: ${senderTone} — warm, peer-to-peer, expert but not arrogant.
 Subject line: specific, under 8 words, references a real thing from the dossier.${dossierCtx}${fewShotExamples && fewShotExamples.length > 0 ? `
@@ -1653,7 +1649,7 @@ Your job is NOT extraction — it is SYNTHESIS. Read the source material deeply,
 QUALITY STANDARD for every field:
 - Use EXACT product names, client names, certifications, numbers, and plant/location details from the source
 - Write as if a senior sales consultant who deeply understands this business is briefing a copywriter
-- Never use: "premium", "industry-leading", "world-class", "innovative", "seamless", "leverage", "synergy", "value-added", "cutting-edge", "state-of-the-art"
+- Write in natural, warm, human language — avoid hollow corporate filler, but don't avoid specific words
 - If you cannot fill a field specifically from the source, return ""  — do not fabricate
 
 FIELDS — return as a JSON object with these exact keys:
