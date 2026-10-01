@@ -1114,12 +1114,12 @@ main { padding: 24px 32px 60px; }
 .dc-chip:hover { background: rgba(var(--accent-rgb, 74,144,226),.15); }
 .drawer-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
 .tab-toolbar { display: flex; gap: 6px; margin-bottom: 8px; }
-.ttb-btn { font-size: 11.5px; padding: 3px 10px; border-radius: 5px; border: 1px solid var(--border); background: var(--bg-2, rgba(255,255,255,.06)); color: var(--text-2); cursor: pointer; transition: background .15s, color .15s; }
-.ttb-btn:hover { background: var(--bg-3, rgba(255,255,255,.1)); color: var(--text-1); }
-.ttb-save, .ttb-save-email { background: var(--accent); color: #fff; border-color: var(--accent); }
+.ttb-btn { font-size: 11.5px; padding: 3px 10px; border-radius: 5px; border: 1px solid var(--border, #e4ddd3); background: var(--card, #fff); color: var(--text-2, #4a4440); cursor: pointer; transition: background .15s, color .15s; }
+.ttb-btn:hover { background: var(--page, #f0ece3); color: var(--text, #1a1715); }
+.ttb-save, .ttb-save-email { background: var(--accent, #c85a1c); color: #fff; border-color: var(--accent, #c85a1c); }
 .ttb-save:hover, .ttb-save-email:hover { opacity: .85; }
-.drawer-edit-textarea { width: 100%; min-height: 320px; font-family: inherit; font-size: 12.5px; line-height: 1.7; padding: 12px 14px; border: 1px solid var(--border); border-radius: 7px; background: transparent; color: var(--text-1); resize: vertical; outline: none; box-sizing: border-box; word-break: break-word; }
-.drawer-edit-textarea:focus { border-color: var(--accent); }
+.drawer-edit-textarea { width: 100%; min-height: 320px; font-family: inherit; font-size: 12.5px; line-height: 1.7; padding: 12px 14px; border: 1px solid var(--border, #e4ddd3); border-radius: 7px; background-color: var(--card, #ffffff); color: var(--text, #1a1715); color-scheme: light; resize: vertical; outline: none; box-sizing: border-box; word-break: break-word; }
+.drawer-edit-textarea:focus { border-color: var(--accent, #c85a1c); }
 .drawer-tabs  {
   display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 22px;
 }
