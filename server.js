@@ -1859,8 +1859,26 @@ async function handleSettingsKey(req, res) {
       icypeas:       "ICYPEAS_API_KEY",
     };
     if (!MAP[service] || !String(key || "").trim()) { json(res, { error: "Invalid service or key" }, 400); return; }
-    process.env[MAP[service]] = String(key).trim();
-    json(res, { ok: true, masked: `...${String(key).trim().slice(-8)}` });
+    const envKey = MAP[service];
+    const trimmedKey = String(key).trim();
+    process.env[envKey] = trimmedKey;
+
+    // Persist to .env so the key survives local restarts
+    // (silently ignored on Render where the FS is read-only)
+    try {
+      const envPath = path.join(__dirname, ".env");
+      let content = "";
+      try { content = fs.readFileSync(envPath, "utf8"); } catch (_) {}
+      const lines = content.split("\n");
+      const idx = lines.findIndex(l => l.startsWith(envKey + "="));
+      if (idx >= 0) { lines[idx] = `${envKey}=${trimmedKey}`; }
+      else { lines.push(`${envKey}=${trimmedKey}`); }
+      fs.writeFileSync(envPath, lines.join("\n").trimEnd() + "\n", "utf8");
+    } catch (writeErr) {
+      console.warn(".env write skipped (read-only fs):", writeErr.message);
+    }
+
+    json(res, { ok: true, masked: `...${trimmedKey.slice(-8)}` });
   } catch (e) {
     json(res, { error: e.message }, 500);
   }
