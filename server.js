@@ -1026,6 +1026,29 @@ ${sharedRules}
 
 CRITICAL OUTPUT RULE: Write the email exactly as it would be sent — no structural labels, no LINE markers, no section annotations in the output. Clean email only.
 
+⛔ FORBIDDEN OUTPUT — these will get the email deleted instantly. Never write any of the following:
+- Opening with a trend-observation or flattery opener. "The push for...", "In a world where...", "I've been following..." are ALL banned. The ONLY permitted opener is: "Hope you are doing well."
+- Subject line containing the sender's company name (e.g. "| TBI Corn" is banned — signals mass mail)
+- Fabricated facts of any kind: product launches, SKU names, test results, lot reports, IPO percentages, client stories — UNLESS explicitly stated in the dossier or sender profile. If you don't see it in the data, do not write it.
+- A "curiosity question" CTA: "One thing I'm curious about...", "I'd love to understand how your team thinks about...", "How does procurement typically get involved in..." — ALL banned. The only valid CTA is the 20-minute call ask as prescribed in Step 11.
+- Incomplete sign-off. The full block (name, title, company, website, phone, email) is MANDATORY.
+
+CORRECT opener: "Hope you are doing well."
+WRONG opener: "The push for protein-enhanced snacks like Doritos Protein must be keeping your team on high alert..."
+WRONG opener: "Clean-label is reshaping..."
+WRONG opener: "I've been following PepsiCo's launch..."
+
+CORRECT CTA (Tier 2): "Would a quick 20-min call next week be okay to understand how you currently buy and how you qualify new sources? Happy to work around IST time."
+WRONG CTA: "One thing I'm curious about: how often does procurement get looped in when R&D trials a new SKU with alternative grains?"
+
+ROLE → SIGNAL MATCHING — critical. Read the role before picking the hook angle:
+- Supply Chain / Procurement / Sourcing / Materials Manager → their world is sourcing continuity, OTIF, COA timing, spec consistency lot-to-lot, import docs, second source risk. They do NOT own NPD, clean-label strategy, or protein reformulation. NEVER lead this persona with innovation/product-launch signals — it signals you don't know who you're writing to.
+- R&D / NPD / Innovation / Food Scientist → product formulation, ingredient performance, new SKU trials, certifications for new claims
+- Commercial / Sales / Brand → launches, market expansion, retail listings
+- CEO / MD / Founder → strategic supply security, cost structure, import risk
+
+ACCURACY RULE: Only use facts that appear in the dossier or sender profile. When in doubt, use LIKELY framing ("for products like X") not CONFIRMED ("your X product"). Never invent: named product SKUs, client anecdotes, certifications, IPO data, expansion news.
+
 SENIORITY FRAMING — read ${role} carefully. The role level changes your primary hook angle entirely:
 
 TIER 1 — DIVISION HEAD / HEAD / DIRECTOR / VP / GM (titles contain "Head", "Director", "VP", "GM", "Chief", "Division Head"):
@@ -1102,7 +1125,17 @@ Timezone: Indonesia = WIB, India = IST, UK = GMT/BST, UAE/Saudi = GST, Nigeria =
 
 12. WARM CLOSE (1 line): Genuine appreciation with a specific dossier detail — founding year, scale built, country reach, product breadth. e.g. "Thanks for your time, Imelda — and really appreciate the work you and the team have done building Dua Kelinci over 33 years." Never generic.
 
-SIGN OFF: Warm regards, ${senderName} · ${senderRole}
+SIGN OFF — MANDATORY. Write the full 4-line block using the sender's details from the authority block or sender profile:
+Line 1: "Warm regards,"
+Line 2: ${senderName}
+Line 3: ${senderRole}
+Line 4: Company name | website (from sender profile)
+Line 5: Phone number | email address (from sender profile)
+${senderAuthorityBlock ? `The sender profile includes this authority block — the contact details at the bottom are the sign-off details: "${senderAuthorityBlock}"` : `If you cannot find the phone/email in the sender profile, write "TBI Corn Limited | www.tbicorn.com" and "+91 77099 96909 | growth@tbicorn.com" as the defaults for Shantanu at TBI Corn.`}
+
+⛔ Do NOT write just "Warm regards, Shantanu" or "Warm regards, Shantanu · VP" — the full 5-line block is required every time.
+
+After writing the email: STOP. Do not write "Why This Works:", "Key Elements:", structural notes, or any post-email commentary.
 
 Output only the final email, ready to send. Subject line at the top, then the body, then sign-off.`;
 
