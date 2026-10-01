@@ -2048,14 +2048,17 @@ function wireMemory() {
       const editBtn = e.target.closest(".ttb-edit");
       if (editBtn) {
         const toolbar = editBtn.closest(".tab-toolbar");
-        const pre = toolbar.nextElementSibling;
+        // Walk siblings to find the <pre> — some tabs have other elements between toolbar and pre
+        let pre = toolbar.nextElementSibling;
+        while (pre && pre.tagName !== "PRE") pre = pre.nextElementSibling;
+        if (!pre) return;
         const originalText = pre.textContent;
         toolbar.innerHTML = `<button class="ttb-btn ttb-save">✓ Save</button><button class="ttb-btn ttb-cancel">✕ Cancel</button>`;
         const ta = document.createElement("textarea");
         ta.className = "drawer-edit-textarea";
         ta.value = originalText;
         pre.style.display = "none";
-        toolbar.parentNode.insertBefore(ta, toolbar.nextSibling);
+        toolbar.parentNode.insertBefore(ta, pre);
         ta.focus();
         return;
       }
@@ -2065,14 +2068,16 @@ function wireMemory() {
       if (editEmailBtn) {
         const idx = parseInt(editEmailBtn.dataset.idx, 10);
         const toolbar = editEmailBtn.closest(".tab-toolbar");
-        const pre = toolbar.nextElementSibling;
+        let pre = toolbar.nextElementSibling;
+        while (pre && pre.tagName !== "PRE") pre = pre.nextElementSibling;
+        if (!pre) return;
         const originalText = pre.textContent;
         toolbar.innerHTML = `<button class="ttb-btn ttb-save-email" data-idx="${idx}">✓ Save</button><button class="ttb-btn ttb-cancel">✕ Cancel</button>`;
         const ta = document.createElement("textarea");
         ta.className = "drawer-edit-textarea";
         ta.value = originalText;
         pre.style.display = "none";
-        toolbar.parentNode.insertBefore(ta, toolbar.nextSibling);
+        toolbar.parentNode.insertBefore(ta, pre);
         ta.focus();
         return;
       }
