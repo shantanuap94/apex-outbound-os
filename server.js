@@ -786,7 +786,31 @@ Rules:
 
 ## FOLLOW-UP DM — send 3-4 days after connecting (write as long as needed — DO NOT compress):
 
-CRITICAL OUTPUT RULE: Write a single flowing message with NO section labels, NO "Part 1 / Part 2 / Part 3" markers, NO structural headers of any kind. The message should read exactly as if a real person typed it on their phone. Do not output any meta-commentary about the structure.
+⛔ FORBIDDEN OUTPUT — THESE WILL RUIN THE MESSAGE. Never write any of the following:
+- Section labels inside the DM body: "PART 1", "PART 2", "PART 3", "PART 1 — Warm Greeting", "PART 2 — Their World", etc.
+- Post-message analysis: "Why This Works:", "Key Elements:", "Structural Notes:", "This opener works because..."
+- Parenthetical commentary: "(this creates curiosity)", "(soft pitch)", "(builds trust)", "(establishes credibility)"
+- Markdown headers: ###, **bold labels**, ---dividers--- inside the DM itself
+- Any explanation of what you wrote or why
+
+WRONG OUTPUT (never write like this):
+---
+PART 1 — Warm Greeting
+Hi Eunice, appreciate the connection...
+
+PART 2 — Their World
+I was thinking about your world at PepsiCo...
+
+Why This Works:
+This structure builds rapport because it mirrors the buyer's language...
+---
+
+CORRECT OUTPUT (write like this — a single block of plain text with no labels):
+---
+Hi Eunice, appreciate the connection — really glad to have you in my network. I've followed PepsiCo's APAC expansion for a while and your role sits right at the centre of where procurement strategy meets innovation pipeline.
+
+I was thinking about your world — specifically the pressure that comes with managing ingredient specs across co-manufacturers when you're simultaneously scaling Lay's into new formats and defending shelf space...
+---
 
 Write the DM working through these points in order — invisibly, without labelling them:
 
@@ -810,6 +834,8 @@ Rules:
 - Write like a real person sent it from their phone
 
 Tone: ${senderTone} — conversational, warm, peer-to-peer.
+
+After writing the DM: STOP. Do not write "Why This Works", do not explain the message, do not add any labels or commentary. Your output ends with the sign-off line.
 
 ---
 

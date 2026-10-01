@@ -1706,6 +1706,11 @@ async function generateNextEmail(prospectId, emailNum) {
   }
 }
 
+function _tabToolbar(hasContent, field) {
+  if (!hasContent) return "";
+  return `<div class="tab-toolbar"><button class="ttb-btn ttb-edit" data-field="${field}">✎ Edit</button><button class="ttb-btn ttb-del" data-field="${field}">✕ Clear</button></div>`;
+}
+
 function renderDrawerTab(tab, entry) {
   const content = $("drawerContent");
   document.querySelectorAll(".dtab").forEach((t) => t.classList.toggle("active", t.dataset.dtab === tab));
@@ -1713,7 +1718,8 @@ function renderDrawerTab(tab, entry) {
   if (clearBtn) clearBtn.style.display = (tab === "emails" || tab === "linkedin") ? "inline-flex" : "none";
 
   if (tab === "dossier") {
-    content.innerHTML = `<pre class="drawer-pre">${entry.dossier || "No dossier yet — run the Agent Chain first."}</pre>`;
+    const text = entry.dossier || "";
+    content.innerHTML = `${_tabToolbar(!!text, "dossier")}<pre class="drawer-pre">${text || "No dossier yet — run the Agent Chain first."}</pre>`;
   } else if (tab === "emails") {
     const idx  = entry.active_email_idx || 1;
     const due  = getEmailDueStatus(entry);
@@ -1774,10 +1780,12 @@ function renderDrawerTab(tab, entry) {
           ${referralText ? `<pre class="drawer-pre" style="margin-top:8px">${referralText}</pre>` : ''}
         </div>`;
 
+      const editEmailToolbar = currentEmailText ? `<div class="tab-toolbar"><button class="ttb-btn ttb-edit-email" data-idx="${idx}">✎ Edit E${idx}</button></div>` : "";
       content.innerHTML = `
         ${statusBar}
         <div class="email-progress-bar">${progressPills}${genBtn ? `<div style="margin-left:auto">${genBtn}</div>` : ''}</div>
         <div id="drawerEmailStream" class="drawer-pre stream-box" style="display:none"></div>
+        ${editEmailToolbar}
         <pre class="drawer-pre">${currentEmailText || `E${idx} not yet generated — click "Generate E${idx}" above.`}</pre>
         ${referralSection}`;
     } else {
@@ -1786,11 +1794,14 @@ function renderDrawerTab(tab, entry) {
       content.innerHTML = `${statusBar}<pre class="drawer-pre">${seq || "No emails yet — run Generate Outreach."}</pre>`;
     }
   } else if (tab === "linkedin") {
-    content.innerHTML = `<pre class="drawer-pre">${entry.linkedin_messages || "No LinkedIn copy yet."}</pre>`;
+    const text = entry.linkedin_messages || "";
+    content.innerHTML = `${_tabToolbar(!!text, "linkedin_messages")}<pre class="drawer-pre">${text || "No LinkedIn copy yet."}</pre>`;
   } else if (tab === "cadence") {
-    content.innerHTML = `<pre class="drawer-pre">${entry.cadence || "No 8-touch cadence yet — run Step 7."}</pre>`;
+    const text = entry.cadence || "";
+    content.innerHTML = `${_tabToolbar(!!text, "cadence")}<pre class="drawer-pre">${text || "No 8-touch cadence yet — run Step 7."}</pre>`;
   } else if (tab === "objection") {
-    content.innerHTML = `<pre class="drawer-pre">${entry.objection_response || "No objection handler yet."}</pre>`;
+    const text = entry.objection_response || "";
+    content.innerHTML = `${_tabToolbar(!!text, "objection_response")}<pre class="drawer-pre">${text || "No objection handler yet."}</pre>`;
   }
 }
 
@@ -1994,6 +2005,103 @@ function wireMemory() {
           const num = parseInt(rawId, 10);
           if (num >= 1 && num <= 4) await generateNextEmail(_currentDrawerId, num);
         }
+        return;
+      }
+
+      // Edit tab content (dossier / linkedin / cadence / objection)
+      const editBtn = e.target.closest(".ttb-edit");
+      if (editBtn) {
+        const toolbar = editBtn.closest(".tab-toolbar");
+        const pre = toolbar.nextElementSibling;
+        const originalText = pre.textContent;
+        toolbar.innerHTML = `<button class="ttb-btn ttb-save">✓ Save</button><button class="ttb-btn ttb-cancel">✕ Cancel</button>`;
+        const ta = document.createElement("textarea");
+        ta.className = "drawer-edit-textarea";
+        ta.value = originalText;
+        pre.style.display = "none";
+        toolbar.parentNode.insertBefore(ta, toolbar.nextSibling);
+        ta.focus();
+        return;
+      }
+
+      // Edit current email
+      const editEmailBtn = e.target.closest(".ttb-edit-email");
+      if (editEmailBtn) {
+        const idx = parseInt(editEmailBtn.dataset.idx, 10);
+        const toolbar = editEmailBtn.closest(".tab-toolbar");
+        const pre = toolbar.nextElementSibling;
+        const originalText = pre.textContent;
+        toolbar.innerHTML = `<button class="ttb-btn ttb-save-email" data-idx="${idx}">✓ Save</button><button class="ttb-btn ttb-cancel">✕ Cancel</button>`;
+        const ta = document.createElement("textarea");
+        ta.className = "drawer-edit-textarea";
+        ta.value = originalText;
+        pre.style.display = "none";
+        toolbar.parentNode.insertBefore(ta, toolbar.nextSibling);
+        ta.focus();
+        return;
+      }
+
+      // Save tab content edit
+      const saveBtn = e.target.closest(".ttb-save");
+      if (saveBtn) {
+        const ta = content.querySelector(".drawer-edit-textarea");
+        if (!ta) return;
+        const activeTab = document.querySelector(".dtab.active")?.dataset.dtab;
+        const fieldMap = { linkedin: "linkedin_messages", cadence: "cadence", objection: "objection_response", dossier: "dossier" };
+        const field = fieldMap[activeTab];
+        if (!field) return;
+        const orig = saveBtn.textContent;
+        saveBtn.textContent = "Saving…"; saveBtn.disabled = true;
+        try {
+          await crmUpdateFields(_currentDrawerId, { [field]: ta.value, updated_at: new Date().toISOString() });
+          const updated = _crmProspects.find(p => p.id === _currentDrawerId);
+          if (updated) renderDrawerTab(activeTab, updated);
+        } catch (err) {
+          saveBtn.textContent = "Error"; saveBtn.disabled = false;
+          console.error("Save error:", err);
+        }
+        return;
+      }
+
+      // Save email edit
+      const saveEmailBtn = e.target.closest(".ttb-save-email");
+      if (saveEmailBtn) {
+        const ta = content.querySelector(".drawer-edit-textarea");
+        const idx = parseInt(saveEmailBtn.dataset.idx, 10);
+        if (!ta || !idx) return;
+        const entry = _crmProspects.find(p => p.id === _currentDrawerId);
+        saveEmailBtn.textContent = "Saving…"; saveEmailBtn.disabled = true;
+        try {
+          const updatedEmails = { ...(entry?.emails || {}), [`e${idx}`]: ta.value };
+          await crmUpdateFields(_currentDrawerId, { emails: updatedEmails, updated_at: new Date().toISOString() });
+          const updated = _crmProspects.find(p => p.id === _currentDrawerId);
+          if (updated) renderDrawerTab("emails", updated);
+        } catch (err) {
+          saveEmailBtn.textContent = "Error"; saveEmailBtn.disabled = false;
+          console.error("Save email error:", err);
+        }
+        return;
+      }
+
+      // Cancel edit
+      const cancelBtn = e.target.closest(".ttb-cancel");
+      if (cancelBtn) {
+        const activeTab = document.querySelector(".dtab.active")?.dataset.dtab;
+        const entry = _crmProspects.find(p => p.id === _currentDrawerId);
+        if (entry) renderDrawerTab(activeTab, entry);
+        return;
+      }
+
+      // Clear tab content
+      const delBtn = e.target.closest(".ttb-del");
+      if (delBtn) {
+        const field = delBtn.dataset.field;
+        const activeTab = document.querySelector(".dtab.active")?.dataset.dtab;
+        if (!confirm(`Clear ${activeTab} content for this prospect? This cannot be undone.`)) return;
+        await crmUpdateFields(_currentDrawerId, { [field]: null, updated_at: new Date().toISOString() });
+        const updated = _crmProspects.find(p => p.id === _currentDrawerId);
+        if (updated) renderDrawerTab(activeTab, updated);
+        return;
       }
     });
   }
