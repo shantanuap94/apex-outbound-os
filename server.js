@@ -768,16 +768,39 @@ Emotional context for ${p}:
 
 ## CONNECTION REQUEST (under 280 characters — strict):
 
-Formula: "Hi [Name], [ONE specific signal from dossier — name the actual product/launch/fact/career move]. I'm [${senderName}] from [company], [1 short line on what the company does]. Would love to connect."
+Formula: "Hi [Name], [ONE role-relevant signal from dossier]. I'm [${senderName}] from [company], [1 short line on what the company does]. Would love to connect."
 
-BAD (do not write this): "Vivek, your emphasis on seamless efficiency and compliance deeply resonates. I'm Shantanu from TBI Corn. Would love to connect."
-WHY BAD: sycophantic, vague, no real signal, sounds like a bot.
+CRITICAL — SIGNAL MUST MATCH THEIR JOB FUNCTION:
+The signal is only powerful if it lands inside their professional world — the decisions they own, the pressures they carry, the moves they personally made. A supply chain manager does not care about a consumer product launch the brand team ran. A procurement director does not care about a new packaging design.
 
-GOOD (write this): "Hi Vivek, noticed Cremica just added 6 extruded snack SKUs to the Crunch range. I'm Shantanu from TBI Corn — BSE-listed corn processor, supplying to ITC and Haldiram's. Would love to connect."
-WHY GOOD: names the actual product/signal, introduces the sender with a credibility hook, sounds like a peer.
+SIGNAL HIERARCHY — use the highest one available in the dossier:
+1. BEST — Their own career move: joined from X, promoted to Y, expanded scope to Z
+2. STRONG — Their company's operational move that they own: supply chain consolidation, co-manufacturer change, new sourcing region, ingredient switch, plant expansion, sustainability commitment
+3. GOOD — Company expansion or strategic shift that creates pressure in their lane: entering a new market, scaling a product line rapidly, cutting SKUs
+4. LAST RESORT ONLY — Consumer product launch: only use if nothing above exists in the dossier
+
+Role-to-signal matching guide (use this to pick the right angle):
+- Supply Chain / Procurement / Sourcing / Operations → sourcing moves, supplier changes, cost pressure, OTIF targets, plant capacity, ingredient specs
+- R&D / NPD / Innovation → formulation changes, new ingredient trials, certifications, product launches
+- Commercial / Sales / Marketing / Brand → launches, channel expansion, retail listings, brand campaigns
+- CEO / MD / Founder → strategic direction, market entry, acquisitions, growth targets
+
+BAD — signal ignores their actual role:
+"Hi Eunice, noticed the Tostitos Guacamole launch. I'm Shantanu from TBI Corn — we supply maize to ITC and Balaji. Would love to connect."
+WHY BAD: Eunice is Supply Chain Manager. A consumer product launch is marketing's world, not hers. She didn't own this signal. It tells her you don't know what she actually does.
+
+GOOD — signal lands in their professional reality:
+"Hi Eunice, noticed PepsiCo's move to consolidate APAC ingredient sourcing — that kind of shift puts real pressure on specs and lead times. I'm Shantanu from TBI Corn, supplying certified maize to ITC and Balaji. Would love to connect."
+WHY GOOD: This is exactly the kind of operational pressure a Supply Chain Manager owns. It tells her you understand her world.
+
+ALSO GOOD — career move as signal:
+"Hi Eunice, saw you moved from Kellogg's procurement to PepsiCo Supply Chain — that's a significant jump in complexity. I'm Shantanu from TBI Corn — BSE-listed corn processor, supplying ITC and Balaji Wafers. Would love to connect."
+WHY GOOD: Personal, specific, flatters her career without being sycophantic.
 
 Rules:
-- The signal MUST name something REAL and SPECIFIC — a product name, a launch, an expansion. NOT "your work in food manufacturing" or "your focus on supply chain efficiency."
+- The signal MUST be role-relevant — ask: would this person have personally cared about this signal in their job?
+- The signal MUST name something REAL and SPECIFIC from the dossier — not a category, not a generic capability
+- If the dossier has no strong role-relevant signal, use the company's most operationally significant recent move — not their most famous product
 - Introduce ${senderName} with one authority hook — company name + one credential (listed status, named client)
 - No sycophancy: no "deeply resonates", "love your work", "great profile", "inspiring journey"
 - Under 280 characters strictly
