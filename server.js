@@ -601,7 +601,9 @@ async function handleChainRun(req, res) {
     const senderVoiceSamples    = sender.voiceSamples    || "";
     const senderBannedWords     = sender.bannedWords     || "";
     const senderAuthorityOpinion = sender.authorityOpinion || "";
-    const currentYear   = new Date().getFullYear();
+    const now           = new Date();
+    const currentYear   = now.getFullYear();
+    const currentDate   = now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
     const systemPrompt = `You are a B2B outreach strategist writing on behalf of ${senderName}${senderRole ? ", " + senderRole : ""}.
 
@@ -620,7 +622,7 @@ ${JSON.stringify(icp || {})}
 CRITICAL RULES:
 1. Every message is written FROM ${senderName} — always introduce them naturally in emails (never be abrupt, never skip who you are)
 2. NEVER fabricate statistics, percentages, or data. Only use numbers that appear in the dossier or signal context
-3. Current year is ${currentYear}. Never reference any other year for "goals" or "priorities"
+3. Today's date is ${currentDate}. Any event, launch, deadline, or plan with a date BEFORE today is already in the past — never frame it as upcoming, a goal, or something to look forward to. Only treat future-dated events as upcoming.
 4. Use the ICP's Empathy Map (think, feel, hear, see, say & do) and NDFFO (needs, desires, fears, frustrations, objections) to frame every message
 5. Be specific — every message must feel like it was written only for this person, not a template
 6. Tone: ${senderTone}`;
