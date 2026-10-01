@@ -1706,6 +1706,37 @@ async function generateNextEmail(prospectId, emailNum) {
   }
 }
 
+async function generateLinkedInMessages(prospectId) {
+  const entry = _crmProspects.find((x) => x.id === prospectId);
+  if (!entry) return;
+  const btn = $("regenLinkedInBtn");
+  const streamBox = $("drawerLinkedInStream");
+  if (btn) { btn.textContent = "Generating…"; btn.disabled = true; }
+  if (streamBox) { streamBox.textContent = ""; streamBox.style.display = "block"; }
+  const icp = getIcp();
+  const sender = getSender();
+  try {
+    const text = await postStream(
+      "/api/chain/run",
+      { prospect: { name: entry.name, title: entry.title, company: entry.company,
+                    domain: entry.domain, email: entry.email },
+        icp, senderProfile: sender, step: "linkedin",
+        dossier: entry.dossier || "",
+        linkedinPosts: "" },
+      (_, full) => { if (streamBox) streamBox.textContent = full; }
+    );
+    const liContent = (typeof text === "string" ? text : text?.content) || "";
+    if (!liContent) { if (btn) { btn.textContent = "↺ Generate LinkedIn Messages"; btn.disabled = false; } return; }
+    await crmUpdateFields(prospectId, { linkedin_messages: liContent, updated_at: new Date().toISOString() });
+    if (streamBox) streamBox.style.display = "none";
+    const updated = _crmProspects.find((x) => x.id === prospectId);
+    if (updated) renderDrawerTab("linkedin", updated);
+  } catch (e) {
+    if (streamBox) streamBox.textContent = "Error: " + e.message;
+    if (btn) { btn.textContent = "↺ Generate LinkedIn Messages"; btn.disabled = false; }
+  }
+}
+
 function _tabToolbar(hasContent, field) {
   if (!hasContent) return "";
   return `<div class="tab-toolbar"><button class="ttb-btn ttb-edit" data-field="${field}">✎ Edit</button><button class="ttb-btn ttb-del" data-field="${field}">✕ Clear</button></div>`;
@@ -1795,7 +1826,8 @@ function renderDrawerTab(tab, entry) {
     }
   } else if (tab === "linkedin") {
     const text = entry.linkedin_messages || "";
-    content.innerHTML = `${_tabToolbar(!!text, "linkedin_messages")}<pre class="drawer-pre">${text || "No LinkedIn copy yet."}</pre>`;
+    const regenBtn = !text ? `<div style="margin-bottom:12px"><button class="btn btn-dark btn-sm" id="regenLinkedInBtn">↺ Generate LinkedIn Messages</button></div>` : "";
+    content.innerHTML = `${_tabToolbar(!!text, "linkedin_messages")}${regenBtn}<div id="drawerLinkedInStream" class="drawer-pre stream-box" style="display:none"></div><pre class="drawer-pre">${text || "No LinkedIn copy yet — click Generate above."}</pre>`;
   } else if (tab === "cadence") {
     const text = entry.cadence || "";
     content.innerHTML = `${_tabToolbar(!!text, "cadence")}<pre class="drawer-pre">${text || "No 8-touch cadence yet — run Step 7."}</pre>`;
@@ -2008,6 +2040,10 @@ function wireMemory() {
         return;
       }
 
+      // Regenerate LinkedIn messages
+      const regenLiBtn = e.target.closest("#regenLinkedInBtn");
+      if (regenLiBtn) { await generateLinkedInMessages(_currentDrawerId); return; }
+
       // Edit tab content (dossier / linkedin / cadence / objection)
       const editBtn = e.target.closest(".ttb-edit");
       if (editBtn) {
@@ -2044,16 +2080,16 @@ function wireMemory() {
       // Save tab content edit
       const saveBtn = e.target.closest(".ttb-save");
       if (saveBtn) {
-        const ta = content.querySelector(".drawer-edit-textarea");
+        const ta = drawerContent.querySelector(".drawer-edit-textarea");
         if (!ta) return;
         const activeTab = document.querySelector(".dtab.active")?.dataset.dtab;
         const fieldMap = { linkedin: "linkedin_messages", cadence: "cadence", objection: "objection_response", dossier: "dossier" };
         const field = fieldMap[activeTab];
         if (!field) return;
-        const orig = saveBtn.textContent;
         saveBtn.textContent = "Saving…"; saveBtn.disabled = true;
+        const valueToSave = ta.value.trim() || null;
         try {
-          await crmUpdateFields(_currentDrawerId, { [field]: ta.value, updated_at: new Date().toISOString() });
+          await crmUpdateFields(_currentDrawerId, { [field]: valueToSave, updated_at: new Date().toISOString() });
           const updated = _crmProspects.find(p => p.id === _currentDrawerId);
           if (updated) renderDrawerTab(activeTab, updated);
         } catch (err) {
@@ -2066,7 +2102,7 @@ function wireMemory() {
       // Save email edit
       const saveEmailBtn = e.target.closest(".ttb-save-email");
       if (saveEmailBtn) {
-        const ta = content.querySelector(".drawer-edit-textarea");
+        const ta = drawerContent.querySelector(".drawer-edit-textarea");
         const idx = parseInt(saveEmailBtn.dataset.idx, 10);
         if (!ta || !idx) return;
         const entry = _crmProspects.find(p => p.id === _currentDrawerId);
