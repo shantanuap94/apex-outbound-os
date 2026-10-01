@@ -1553,10 +1553,16 @@ function renderMemoryList() {
     const seqBadge   = getSequenceBadge(p);
     const suppBadge  = isSuppressed(p.email) ? `<span class="seq-badge seq-supp" title="Suppressed — no outreach">⊘</span>` : "";
     const nextLine   = p.next_action ? `<div class="mr-next-action">→ ${p.next_action}${p.next_action_date ? " · " + p.next_action_date : ""}</div>` : "";
+    const contactChips = [
+      p.email       ? `<span class="mr-contact-chip" title="${p.email}">✉ ${p.email}</span>` : "",
+      p.phone       ? `<span class="mr-contact-chip" title="${p.phone}">📞 ${p.phone}</span>` : "",
+      p.linkedin_url ? `<span class="mr-contact-chip">in ↗</span>` : "",
+    ].filter(Boolean).join("");
     return `<div class="memory-row${isSuppressed(p.email) ? ' row-suppressed' : ''}" data-id="${p.id}">
       <div class="mr-main">
         <div class="mr-name">${p.name || "Unknown"} ${touchBadge}${seqBadge}${suppBadge}</div>
         <div class="mr-meta">${[p.title, p.company].filter(Boolean).join(" · ")}</div>
+        ${contactChips ? `<div class="mr-contacts">${contactChips}</div>` : ""}
         ${nextLine}
       </div>
       <div class="mr-right">
@@ -1584,6 +1590,16 @@ function openMemoryDrawer(id) {
 
   $("drawerName").textContent = entry.name || "Unknown";
   $("drawerMeta").textContent = [entry.title, entry.company].filter(Boolean).join(" · ");
+
+  const dc = $("drawerContacts");
+  if (dc) {
+    const chips = [];
+    if (entry.email)       chips.push(`<a class="dc-chip" href="mailto:${entry.email}" title="Email">${entry.email}</a>`);
+    if (entry.phone)       chips.push(`<a class="dc-chip" href="tel:${entry.phone}" title="Phone/WhatsApp">${entry.phone}</a>`);
+    if (entry.linkedin_url) chips.push(`<a class="dc-chip" href="${entry.linkedin_url}" target="_blank" title="LinkedIn">LinkedIn ↗</a>`);
+    dc.innerHTML = chips.join("");
+    dc.style.display = chips.length ? "" : "none";
+  }
 
   if ($("drawerStatus"))     $("drawerStatus").value     = entry.status || "active";
   if ($("drawerTouch"))      $("drawerTouch").value      = entry.current_touch || 0;
