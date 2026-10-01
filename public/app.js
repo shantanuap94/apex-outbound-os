@@ -1649,8 +1649,8 @@ function getEmailText(emails, idx) {
 
 // Returns true if the prospect has any emails in new per-email format
 function isNewEmailFormat(emails) {
-  // Treat null/undefined (cleared) as new format so the generate button appears
-  if (!emails) return true;
+  // Treat null/undefined/empty-object (cleared) as new format so generate button appears
+  if (!emails || Object.keys(emails).length === 0) return true;
   return !!(emails?.e1 || emails?.e2 || emails?.e3 || emails?.e4);
 }
 
@@ -1822,9 +1822,10 @@ function renderDrawerTab(tab, entry) {
         <pre class="drawer-pre">${currentEmailText || `E${idx} not yet generated — click "Generate E${idx}" above.`}</pre>
         ${referralSection}`;
     } else {
-      // Old format — show full sequence text
+      // Old format — show full sequence text + generate button if empty
       const seq = entry.emails?.sequence || entry.emails?.a || "";
-      content.innerHTML = `${statusBar}<pre class="drawer-pre">${seq || "No emails yet — run Generate Outreach."}</pre>`;
+      const regenBtn = !seq ? `<div style="margin-bottom:12px"><button class="btn btn-dark btn-sm" id="genEmail1Btn">✦ Generate E1</button></div>` : "";
+      content.innerHTML = `${statusBar}${regenBtn}<pre class="drawer-pre">${seq || "No emails yet — click Generate E1 above."}</pre>`;
     }
   } else if (tab === "linkedin") {
     const text = entry.linkedin_messages || "";
