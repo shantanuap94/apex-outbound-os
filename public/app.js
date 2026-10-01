@@ -1649,6 +1649,8 @@ function getEmailText(emails, idx) {
 
 // Returns true if the prospect has any emails in new per-email format
 function isNewEmailFormat(emails) {
+  // Treat null/undefined (cleared) as new format so the generate button appears
+  if (!emails) return true;
   return !!(emails?.e1 || emails?.e2 || emails?.e3 || emails?.e4);
 }
 
