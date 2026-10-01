@@ -2180,14 +2180,20 @@ function wireChain() {
           `<span class="prov-pill">${pv.field} via <em>${pv.provider}</em></span>`
         ).join(" ");
 
+        const warningHtml = (res.warnings || []).length
+          ? `<div class="waterfall-warnings">${(res.warnings).map(w =>
+              `⚠️ <strong>${w.provider}</strong>: ${w.reason}`
+            ).join("<br>")}</div>`
+          : "";
+
         if (found.length) {
-          box.innerHTML = found.join("<br>") + (pills ? `<div class="prov-pills">${pills}</div>` : "");
+          box.innerHTML = found.join("<br>") + (pills ? `<div class="prov-pills">${pills}</div>` : "") + warningHtml;
           // Back-fill form fields if empty
           if (res.email && !$("pEmail").value)   $("pEmail").value   = res.email;
           if (res.phone && !$("pPhone").value)   $("pPhone").value   = res.phone;
           if (res.linkedin && !$("pLinkedin").value) $("pLinkedin").value = res.linkedin;
         } else {
-          box.innerHTML = `<span style="color:var(--text-3)">No contact data found — try adding more provider keys in Settings.</span>`;
+          box.innerHTML = `<span style="color:var(--text-3)">No contact data found.</span>` + warningHtml;
         }
       }
       box.style.display = "block";

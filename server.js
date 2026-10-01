@@ -130,7 +130,13 @@ async function enrichViaBetterContact(prospect) {
       headers: { "Content-Type": "application/json", "api_key": key },
       body: JSON.stringify({ contact }),
     });
-    if (!initR.ok) { console.warn("BetterContact init failed:", initR.status); return null; }
+    if (!initR.ok) {
+      const s = initR.status;
+      console.warn("BetterContact init failed:", s);
+      if (s === 401 || s === 403) return { _error: true, provider: "bettercontact", reason: "Invalid API key" };
+      if (s === 402 || s === 429) return { _error: true, provider: "bettercontact", reason: "Credits exhausted or rate limited" };
+      return { _error: true, provider: "bettercontact", reason: `API error ${s}` };
+    }
     const init = await initR.json();
     const requestId = init?.request_id || init?.requestId || init?.id;
     if (!requestId) { console.warn("BetterContact: no requestId in response"); return null; }
@@ -171,7 +177,12 @@ async function enrichViaDatagma(prospect) {
   try {
     const url = `https://api.datagma.com/api/ingress?apiId=${encodeURIComponent(key)}&data=${encodeURIComponent(data)}&type=person`;
     const r = await fetch(url);
-    if (!r.ok) return null;
+    if (!r.ok) {
+      const s = r.status;
+      if (s === 401 || s === 403) return { _error: true, provider: "datagma", reason: "Invalid API key" };
+      if (s === 402 || s === 429) return { _error: true, provider: "datagma", reason: "Credits exhausted or rate limited" };
+      return { _error: true, provider: "datagma", reason: `API error ${s}` };
+    }
     const d = await r.json();
     const phone = d?.person?.phoneNumbers?.[0] || d?.phoneNumber || d?.phone || null;
     return phone ? { phone, provider: "datagma" } : null;
@@ -199,7 +210,12 @@ async function enrichViaFullEnrich(prospect) {
         }],
       }),
     });
-    if (!r.ok) return null;
+    if (!r.ok) {
+      const s = r.status;
+      if (s === 401 || s === 403) return { _error: true, provider: "fullenrich", reason: "Invalid API key" };
+      if (s === 402 || s === 429) return { _error: true, provider: "fullenrich", reason: "Credits exhausted or rate limited" };
+      return { _error: true, provider: "fullenrich", reason: `API error ${s}` };
+    }
     const d = await r.json();
     const item = d?.requests?.[0] || {};
     return (item.email || item.phone) ? { email: item.email || null, phone: item.phone || null, provider: "fullenrich" } : null;
@@ -233,7 +249,12 @@ async function enrichViaHunter(prospect) {
   try {
     const url = `https://api.hunter.io/v2/email-finder?domain=${encodeURIComponent(prospect.domain)}&first_name=${encodeURIComponent(prospect.firstName)}&last_name=${encodeURIComponent(prospect.lastName)}&api_key=${key}`;
     const r = await fetch(url);
-    if (!r.ok) return null;
+    if (!r.ok) {
+      const s = r.status;
+      if (s === 401 || s === 403) return { _error: true, provider: "hunter", reason: "Invalid API key" };
+      if (s === 402 || s === 429) return { _error: true, provider: "hunter", reason: "Credits exhausted or rate limited" };
+      return { _error: true, provider: "hunter", reason: `API error ${s}` };
+    }
     const d = await r.json();
     const email = d?.data?.email;
     return email ? { email, emailStatus: d?.data?.confidence ? `${d.data.confidence}%` : null, provider: "hunter" } : null;
@@ -249,7 +270,12 @@ async function enrichViaIcypeas(prospect) {
       headers: { "Authorization": key, "Content-Type": "application/json" },
       body: JSON.stringify({ firstname: prospect.firstName, lastname: prospect.lastName, domainOrCompany: prospect.domain }),
     });
-    if (!r.ok) return null;
+    if (!r.ok) {
+      const s = r.status;
+      if (s === 401 || s === 403) return { _error: true, provider: "icypeas", reason: "Invalid API key" };
+      if (s === 402 || s === 429) return { _error: true, provider: "icypeas", reason: "Credits exhausted or rate limited" };
+      return { _error: true, provider: "icypeas", reason: `API error ${s}` };
+    }
     const d = await r.json();
     const email = d?.item?.email;
     return email ? { email, provider: "icypeas" } : null;
@@ -268,11 +294,13 @@ async function handleEnrichWaterfall(req, res) {
     }
 
     const provenance = [];
+    const warnings  = [];
     let email     = existingEmail  || null;
     let phone     = existingPhone  || null;
     let linkedinUrl = linkedin     || null;
 
     const hit = (field, value, provider) => provenance.push({ field, value, provider, ts: new Date().toISOString() });
+    const warn = (r) => { if (r?._error) warnings.push({ provider: r.provider, reason: r.reason }); };
     const prospect = () => ({ firstName, lastName, company, domain, linkedin: linkedinUrl, country, email, phone });
 
     // ── 1. Apollo (fast — always try first)
@@ -316,26 +344,28 @@ async function handleEnrichWaterfall(req, res) {
       } catch (e) { console.warn("Apify discovery step failed:", e.message); }
     }
 
-    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, complete: true });
+    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, warnings, complete: true });
 
     // ── 2. BetterContact (primary waterfall — email + phone across 20+ sources)
     if (!email || !phone) {
       const bc = await enrichViaBetterContact(prospect());
-      if (bc) {
+      warn(bc);
+      if (bc && !bc._error) {
         if (!email && bc.email) { email = bc.email; hit("email", email, bc.emailStatus ? `bettercontact (${bc.emailStatus})` : "bettercontact"); }
         if (!phone && bc.phone) { phone = bc.phone; hit("phone", phone, "bettercontact"); }
       }
     }
 
-    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, complete: true });
+    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, warnings, complete: true });
 
     // ── 3. Datagma phone fallback (APAC/EMEA specialist)
     if (!phone) {
       const dg = await enrichViaDatagma(prospect());
-      if (dg?.phone) { phone = dg.phone; hit("phone", phone, "datagma"); }
+      warn(dg);
+      if (dg && !dg._error && dg.phone) { phone = dg.phone; hit("phone", phone, "datagma"); }
     }
 
-    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, complete: true });
+    if (email && phone) return json(res, { email, phone, linkedin: linkedinUrl, provenance, warnings, complete: true });
 
     // ── 4-7. Named stubs — activate automatically when keys are added
     const fallbacks = [
@@ -348,14 +378,15 @@ async function handleEnrichWaterfall(req, res) {
       if (email && phone) break;
       try {
         const r = await fn(prospect());
-        if (r) {
+        warn(r);
+        if (r && !r._error) {
           if (!email && r.email) { email = r.email; hit("email", email, name); }
           if (!phone && r.phone) { phone = r.phone; hit("phone", phone, name); }
         }
       } catch (e) { console.warn(`${name} step failed:`, e.message); }
     }
 
-    json(res, { email, phone, linkedin: linkedinUrl, provenance, complete: !!(email && phone) });
+    json(res, { email, phone, linkedin: linkedinUrl, provenance, warnings, complete: !!(email && phone) });
   } catch (e) {
     console.error("Waterfall error:", e.message);
     json(res, { error: e.message }, 500);
