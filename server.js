@@ -755,8 +755,9 @@ Rules:
         const isConnected = liStage === "connected";
         const contextNote = liContext ? `\nCONVERSATION CONTEXT — this may be the actual message thread so far (what ${senderName} said, what ${p} said back), or just a note. Read it carefully before writing. Reference specifics from it naturally. Do NOT repeat points already made in it. Do NOT restate things ${p} already said or already knows:\n"""\n${liContext}\n"""\n` : "";
         if (isConnected) {
+          const hasEmail = !!(prospect?.email && String(prospect.email).trim());
           // Stage 2 — they accepted the connection request, now send the warm follow-up DM
-          return `Write a FOLLOW-UP DM (post-connection) for ${p} (${role}) at ${co}, from ${senderName}.
+          return `Write a FOLLOW-UP DM (post-connection, no reply yet) for ${p} (${role}) at ${co}, from ${senderName}.
 ${p} has already accepted the connection request. Do NOT write a connection request. Write only the follow-up DM.
 ${contextNote}${dossierCtx}
 ${linkedinPosts ? `\nTheir recent LinkedIn posts:\n${linkedinPosts}\n` : ""}
@@ -764,6 +765,7 @@ ${linkedinPosts ? `\nTheir recent LinkedIn posts:\n${linkedinPosts}\n` : ""}
 THE SENDER:
 - ${senderName}, ${senderRole}
 - Company: ${senderOffer}
+${senderAuthorityBlock ? `- Pre-approved authority block (use verbatim where the formula calls for company context): "${senderAuthorityBlock}"` : ""}
 
 Emotional context for ${p}:
 - They feel: ${icpFeel}
@@ -773,27 +775,50 @@ Emotional context for ${p}:
 
 ---
 
-## FOLLOW-UP DM (post-accept) — the goal is one thing: get their official email + book a 20-min call
+## FOLLOW-UP DM — GOAL: ${hasEmail ? "book a 20-min call (their work email is already known: " + prospect.email + ")" : "get their official work email AND book a 20-min call, in this one message"}
 
-STRUCTURE (write in this order, no labels in output):
-1. Warm thanks for connecting — genuine, 1 line, reference something specific about them or their company (not generic "great to connect")
-2. Their world — 1-2 sentences on the operational or professional pressure they live with. Show you understand their day-to-day. Draw from the dossier.
-3. What TBI Corn does in their world — 1-2 sentences connecting the sender's offer to their exact application (not a generic pitch). Named Indian clients if relevant.
-4. File offer — offer a COA, spec sheet, or sample "for their file" — no commitment framing. "No strings attached."
-5. One soft ask — get their work email OR suggest a 20-min call. One or the other, not both.
+Key insight: Long is fine if it's relevant. You are not asking for business — you are asking permission to send something useful to their official email. That earns the contact and the meeting in one go. Do not compress this into 3 sentences — a short, generic DM signals mass AI generation to a technical buyer.
+
+STRUCTURE — write in this exact order, no labels in output:
+
+1. SOFT RESTART: One warm line thanking them for accepting — reference something specific and real about them or their company from the dossier (not "great to connect" or "thanks for connecting" alone).
+
+2. "I WAS THINKING ABOUT YOUR WORLD...": Name their specific situation right now — their role, what their company is scaling/building/changing, a pressure tied to THEIR function (not generic "growth is hard"). Pull this from the dossier — never invent it.
+
+3. NAME THE SPECIFIC PAIN — not category, not industry, their exact headache:
+${role && /production|plant|manufactur|operations/i.test(role)
+  ? `${p} is in PRODUCTION/OPERATIONS — name a line-level mechanism: a spec deviation stopping a line mid-run, grit expansion or oil uptake shifting between lots, a changeover delay, a QC hold on an incoming batch. NOT generic "commodity volatility" or "missed delivery risk" — those are procurement-level clichés, not a production manager's actual headache.`
+  : /supply chain|procurement|sourcing|purchas/i.test(role || "")
+  ? `${p} is in SUPPLY CHAIN/PROCUREMENT — name a sourcing mechanism: two specs in one import file, COA arriving after dispatch not before, a single-source risk, demurrage or landed-cost surprises.`
+  : `Name a mechanism specific to ${role || "their role"} and ${co} — not a generic industry pain. Read the dossier for what they actually deal with.`}
+Reference a plausible real scenario, phrased the way someone in that seat would describe it to a peer — never a boardroom-level abstraction like "commodity market volatility" or "ingredient sourcing risk."
+
+4. COMPANY CONTEXT (1-2 sentences, context not pitch):
+${senderAuthorityBlock ? `Use the pre-approved authority block above — do not shorten, rewrite, or drop its credentials.` : `Include what the sender profile actually provides: years in operation, listed status, plant count, 2-3 named clients. ONLY use facts present in the sender profile or dossier — never invent certifications, processes, or claims (e.g. do not invent phrases like "zero-touch automation hygiene" — if a certification/process isn't in the sender profile, do not mention it).`}
+
+5. OFFER SOMETHING FOR THEIR FILE: Offer something specific and useful — COA, spec sheet, lot-consistency data, landed cost working — framed as useful even if they never buy. Use the phrase "no commitment at all" verbatim somewhere in this section (not "no strings attached" — that phrase is banned, use the tested one).
+
+6. ${hasEmail ? `SINGLE ASK: suggest a 20-min call next week. Do not ask for their email — it is already on file.` : `DOUBLE ASK: ask for their official work email to send the file to, AND suggest a 20-min call if they're open. Both asks in one message — "Would it be okay to share it on your official email? And if useful, happy to do a quick 20-min next week — no deck, just a conversation."`}
+
+SIGN OFF — MANDATORY, do not skip: end with "Best," (or "Warm regards,") on its own line, followed by ${senderName}.
 
 ⛔ FORBIDDEN OUTPUT — THESE WILL RUIN THE MESSAGE. Never write any of the following:
 - Section labels inside the DM body: "PART 1", "PART 2", "PART 3", "PART 1 — Warm Greeting", "PART 2 — Their World", etc.
 - Post-message analysis: "Why This Works:", "Key Elements:", "Structural Notes:"
 - Parenthetical commentary: "(this creates curiosity)", "(soft pitch)", "(builds trust)"
 - Markdown headers: ###, **bold labels**, ---dividers--- inside the DM itself
+- Generic boardroom pain language: "commodity market volatility", "ingredient sourcing risk", "supply chain challenges" — these are the exact clichés that make a DM feel AI-generated. Name the mechanism instead.
+- Fabricated certifications, processes, or claims not present in the sender profile or dossier (e.g. invented phrases like "zero-touch automation hygiene")
+- A message that ends without a sign-off
 - Any explanation of what you wrote or why
 
 WRONG: "PART 1 — Warm Greeting\nHi Arvind..."
 CORRECT: "Hi Arvind, really appreciate you connecting..."
+WRONG pain line: "I can imagine the pressure to keep ingredient sourcing on track while managing commodity market volatility."
+CORRECT pain line: "I imagine one spec deviation mid-run — grit size or moisture off by a touch — is enough to get production and QA both looking at purchase."
 
 After writing the DM: STOP. Do not write "Why This Works", "Key Elements", or any structural notes.
-Output only the DM, ready to send.`;
+Output only the DM, ready to send, ending with the sign-off.`;
         }
 
         return `Write a LinkedIn CONNECTION REQUEST and a FOLLOW-UP DM for ${p} (${role}) at ${co}, from ${senderName}.
