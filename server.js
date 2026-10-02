@@ -786,7 +786,7 @@ If no career journey is in the dossier: fall back to company-level signals (scal
 
 STRUCTURE — write in this exact order, no labels in output:
 
-1. SOFT RESTART: One warm line thanking them for accepting — lead with the career journey signal from Step 0 if one exists ("I saw your move from X to Y — that's a solid shift"), otherwise reference something specific and real about their company from the dossier. Never "great to connect" or "thanks for connecting" alone.
+1. OPENING LINE — confident peer acknowledgment, NOT gratitude: Open with something brief and neutral like "Good to be connected" — NOT "Really appreciate you accepting" or "Thanks so much for connecting." Gratitude-heavy openers frame this as a favor ${senderName} was granted; ${senderName} is reaching out as a peer (a listed company, an established supplier), not someone who should feel lucky to be in ${p}'s network. Immediately follow with the career journey signal from Step 0 if one exists ("Saw your background — [prior companies] to [current company] — that's a shift from X to Y"), otherwise reference something specific and real about their company from the dossier. Keep it observational, not flattering.
 
 2. "I WAS THINKING ABOUT YOUR WORLD...": Name their specific situation right now. If there's a geography change (e.g. India → GCC), name what that transition actually means operationally for someone in their seat — not just "growth is hard." Pull this from the dossier — never invent it.
 
@@ -807,7 +807,8 @@ ${role && /production|plant|manufactur|operations|quality|qc/i.test(role)
   : `Include what the sender profile actually provides: years in operation, listed status, plant count, 2-3 named clients. ONLY use facts present in the sender profile or dossier — never invent certifications, processes, or claims.`}
 Never invent certifications, processes, or claims not present in the sender profile or dossier (e.g. do not invent phrases like "zero-touch automation hygiene").
 
-5. GIVE REAL MICRO-VALUE, NOT A VAGUE OFFER: This is the difference between a message that converts and one that doesn't. Do NOT write vague lines like "we have some data that might be useful" or "COAs and spec sheets are available." Instead, give an ACTUAL number from the dossier or sender profile relevant to their product category right now — e.g. "for extruded snacks we typically see 0.8-1.2mm grits at under 13% moisture work best for predictable expansion" — framed as "I know your exact spec will differ, but that's the range we usually start from." A real number given for free is what makes someone who's seen 100 supplier messages stop and read. Then offer to share the fuller spec sheet/COA "for their file" as a secondary, confident line — not the main event. Frame all of it as mutual exploration, not a hedge: "worth sharing in case it's useful" or "just wanted to share our sales profile for your file" — never defensive phrases like "no commitment at all" or "no strings attached."
+5. GIVE REAL MICRO-VALUE, STATED DIRECTLY — NOT A VAGUE OR APOLOGETIC OFFER: This is the difference between a message that converts and one that doesn't. Do NOT write vague lines like "we have some data that might be useful" or "COAs and spec sheets are available." Instead, give an ACTUAL number from the dossier or sender profile relevant to their product category right now — e.g. "for extruded snacks we typically run 0.8-1.2mm grits at under 13% moisture for consistent expansion, but I know [their company] will have its own exact spec." A real number given for free is what makes someone who's seen 100 supplier messages stop and read.
+State the offer directly and confidently — "Attaching our sales profile here" or "I can share our standard spec sheet / COA" — NOT with self-deprecating qualifiers like "not pitching," "just wanted to share," or "for your file." ${senderName} represents an established, listed company — there is no need to apologize for sharing a profile or soften it as a minor favor. Confidence, not hedging.
 
 6. ${hasEmail ? `SINGLE ASK: suggest a 20-min call next week to explore if there's a fit. Do not ask for their email — it is already on file.` : `DOUBLE ASK: ask for their official work email to send the file to, AND suggest a 20-min call if they're open — framed as exploring a fit, not as a low-pressure favor. Both asks in one message — "What's the best email to send it to? And if useful, happy to do a quick 20-min next week to see if there's a fit worth exploring."`}
 If the dossier or sender profile indicates ${p}'s timezone/region, end the call ask with "Happy to work around [their timezone]" (e.g. GST for Gulf, WAT for Nigeria, IST for India) — small detail, signals you're thinking about their day, not yours.
@@ -826,11 +827,15 @@ SIGN OFF — MANDATORY, do not skip: end with "Best," (or "Warm regards,") on it
 - Defensive/hedging phrases: "no commitment at all", "no strings attached", "no pressure" — these undersell the ask. Connecting on LinkedIn is about exploring synergies, not minimizing commitment.
 - Investor/finance-flavored credentials (IPO premium, stock listing status) when writing to an OPERATIONAL contact (production, plant, manufacturing, QC) — they don't care about your cap table, they care if your spec will work on their line
 - Vague value offers: "we have some data that might be useful", "COAs and spec sheets are available" — give an actual number instead (grit size, moisture %, whatever's relevant to their category)
+- Gratitude-as-favor openers: "Really appreciate you accepting", "Thanks so much for connecting" — these frame the connection as a favor ${senderName} received. ${senderName} is a peer, not a supplier who should feel grateful. Use a brief, neutral opener like "Good to be connected" instead.
+- Self-deprecating qualifiers before an offer: "Not pitching, but...", "Just wanted to share...", "for your file" as a softening phrase — state offers directly and confidently instead ("Attaching our sales profile here").
 - A message that ends without a sign-off
 - Any explanation of what you wrote or why
 
 WRONG: "PART 1 — Warm Greeting\nHi Arvind..."
-CORRECT: "Hi Arvind, really appreciate you connecting..."
+CORRECT: "Hi Arvind, good to be connected..."
+WRONG opener (favor-framing): "Hi Arvind, really appreciate you accepting my connection request..."
+CORRECT opener (peer, confident): "Hi Arvind, good to be connected. Saw your background — [career journey] — ..."
 WRONG pain line pattern (too generic/boardroom): "I can imagine the pressure to keep ingredient sourcing on track while managing commodity market volatility."
 GOOD pain line pattern (specific mechanism, not literal text to copy — write your own version grounded in the dossier): a named physical/operational event like a spec deviation mid-run, a changeover delay, or a QC hold — described the way someone in that seat would describe it to a peer, not a textbook phrase.
 ⚠️ Do not reuse the exact wording of any example in this prompt verbatim — these illustrate the PATTERN, not text to copy. Write a fresh version specific to ${p} and ${co}.
