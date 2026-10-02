@@ -815,8 +815,11 @@ SIGN OFF — MANDATORY, do not skip: end with "Best," (or "Warm regards,") on it
 
 WRONG: "PART 1 — Warm Greeting\nHi Arvind..."
 CORRECT: "Hi Arvind, really appreciate you connecting..."
-WRONG pain line: "I can imagine the pressure to keep ingredient sourcing on track while managing commodity market volatility."
-CORRECT pain line: "I imagine one spec deviation mid-run — grit size or moisture off by a touch — is enough to get production and QA both looking at purchase."
+WRONG pain line pattern (too generic/boardroom): "I can imagine the pressure to keep ingredient sourcing on track while managing commodity market volatility."
+GOOD pain line pattern (specific mechanism, not literal text to copy — write your own version grounded in the dossier): a named physical/operational event like a spec deviation mid-run, a changeover delay, or a QC hold — described the way someone in that seat would describe it to a peer, not a textbook phrase.
+⚠️ Do not reuse the exact wording of any example in this prompt verbatim — these illustrate the PATTERN, not text to copy. Write a fresh version specific to ${p} and ${co}.
+
+PROOFREAD BEFORE OUTPUT: Re-read your draft for grammar before finalizing. Every sentence must be complete — no dangling words like "is definitely an exciting." (missing noun) or missing prepositions like "thinking the kind of" (should be "thinking about the kind of"). Fix any such error before outputting.
 
 After writing the DM: STOP. Do not write "Why This Works", "Key Elements", or any structural notes.
 Output only the DM, ready to send, ending with the sign-off.`;
