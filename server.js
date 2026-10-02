@@ -796,9 +796,9 @@ Reference a plausible real scenario, phrased the way someone in that seat would 
 4. COMPANY CONTEXT (1-2 sentences, context not pitch):
 ${senderAuthorityBlock ? `Use the pre-approved authority block above — do not shorten, rewrite, or drop its credentials.` : `Include what the sender profile actually provides: years in operation, listed status, plant count, 2-3 named clients. ONLY use facts present in the sender profile or dossier — never invent certifications, processes, or claims (e.g. do not invent phrases like "zero-touch automation hygiene" — if a certification/process isn't in the sender profile, do not mention it).`}
 
-5. OFFER SOMETHING FOR THEIR FILE: Offer something specific and useful — COA, spec sheet, lot-consistency data, landed cost working — framed as useful even if they never buy. Use the phrase "no commitment at all" verbatim somewhere in this section (not "no strings attached" — that phrase is banned, use the tested one).
+5. OFFER SOMETHING FOR THEIR FILE: Offer something specific and useful — COA, spec sheet, lot-consistency data, landed cost working — framed with confidence as a starting point to explore if there's a fit. Do NOT hedge or pre-apologize. The reason to connect on LinkedIn is to explore synergies, not to minimize commitment — so never use defensive phrases like "no commitment at all" or "no strings attached." Instead frame it as mutual exploration: "worth sharing in case it's useful for your sourcing plans" or "could be a good starting point to see if there's a fit."
 
-6. ${hasEmail ? `SINGLE ASK: suggest a 20-min call next week. Do not ask for their email — it is already on file.` : `DOUBLE ASK: ask for their official work email to send the file to, AND suggest a 20-min call if they're open. Both asks in one message — "Would it be okay to share it on your official email? And if useful, happy to do a quick 20-min next week — no deck, just a conversation."`}
+6. ${hasEmail ? `SINGLE ASK: suggest a 20-min call next week to explore if there's a fit. Do not ask for their email — it is already on file.` : `DOUBLE ASK: ask for their official work email to send the file to, AND suggest a 20-min call if they're open — framed as exploring a fit, not as a low-pressure favor. Both asks in one message — "What's the best email to send it to? And if useful, happy to do a quick 20-min next week to see if there's a fit worth exploring."`}
 
 SIGN OFF — MANDATORY, do not skip: end with "Best," (or "Warm regards,") on its own line, followed by ${senderName}.
 
@@ -809,6 +809,7 @@ SIGN OFF — MANDATORY, do not skip: end with "Best," (or "Warm regards,") on it
 - Markdown headers: ###, **bold labels**, ---dividers--- inside the DM itself
 - Generic boardroom pain language: "commodity market volatility", "ingredient sourcing risk", "supply chain challenges" — these are the exact clichés that make a DM feel AI-generated. Name the mechanism instead.
 - Fabricated certifications, processes, or claims not present in the sender profile or dossier (e.g. invented phrases like "zero-touch automation hygiene")
+- Defensive/hedging phrases: "no commitment at all", "no strings attached", "no pressure" — these undersell the ask. Connecting on LinkedIn is about exploring synergies, not minimizing commitment.
 - A message that ends without a sign-off
 - Any explanation of what you wrote or why
 
@@ -916,7 +917,7 @@ Name the specific operational headache — not the category. The actual mechanis
 
 Add one sentence of company context — positioned as background, not a pitch. "For context, I'm ${senderName} from [company] — [one specific, factual line on credentials and why it's relevant to their situation]." Use only what's in the sender profile.
 
-Offer something specific for their file — a COA, spec sheet, market note, or landed cost comparison. Use the phrase "no strings attached, even if you're not looking to switch." This is value delivery, not a pitch.${senderLowRiskOffer ? `\nPreferred offer: ${senderLowRiskOffer}` : ""}
+Offer something specific for their file — a COA, spec sheet, market note, or landed cost comparison — framed with confidence as a starting point to explore if there's a fit, not a hedge. Avoid defensive phrases like "no strings attached" or "no commitment" — the point of connecting is to explore synergies. This is value delivery, not a pitch.${senderLowRiskOffer ? `\nPreferred offer: ${senderLowRiskOffer}` : ""}
 
 Close warmly — no meeting ask in this message. The goal is to build the human connection first. Something like: "Would love to get to know you properly. If it ever makes sense, I'd be glad to share a sample or find some way I can genuinely add value to this connection. No rush at all — just good to be connected." Then sign off: Best, ${senderName}
 
@@ -950,7 +951,7 @@ Body:
 - Line 2: Sender intro with authority — name, role, company, credentials (named clients, years operating, certifications)
 - Lines 3-4: Bridge — connect their specific situation to what ${senderName} offers. Technical and specific — name the ingredient, the mechanism, the outcome. Do NOT position as a replacement for their current supplier — position as a second source that improves supply chain reliability. Most procurement managers have a primary supplier and won't switch, but they will add a second qualified source to de-risk their line. Make this feel like an upgrade to their supply chain, not a disruption.
 - Line 5: Proof — named client or credential. Never invent.
-- Line 6: CTA — ask them to share their current spec so you can send a matched sample. "If you could share your current spec, I'd be happy to send a matched sample — no commitment at all."
+- Line 6: CTA — ask them to share their current spec so you can send a matched sample, framed as exploring a fit, not a hedge. "If you could share your current spec, I'd be happy to send a matched sample so we can see if there's a fit worth exploring."
 - Full signature: name · role · company · contact
 
 TOUCH 2 — Day 4 · LinkedIn DM
@@ -1222,7 +1223,7 @@ EMAIL 2 RULES:
 - Lead with a SPECIFIC TRIGGER from the dossier — a company launch, expansion, investment, new product line, market move. Frame it as an opportunity, not a problem.
 - Bridge: connect this trigger to why having a second qualified source matters RIGHT NOW because of this trigger — not someday.
 - No full authority block — they've seen it. One short credibility reminder only: "[Company name], [one credential]."
-- CTA: Reoffer the sample/spec exchange OR offer something specific for their file — a COA, a grade comparison, a market note. Name it precisely. "No strings attached."
+- CTA: Reoffer the sample/spec exchange OR offer something specific for their file — a COA, a grade comparison, a market note. Name it precisely. Frame it as worth exploring, not as a disclaimer — avoid "no strings attached" or "no commitment."
 - End: a soft question tied to the trigger that makes them answer yes or no, not ignore.
 SIGN OFF: ${senderName} · ${senderRole}
 
