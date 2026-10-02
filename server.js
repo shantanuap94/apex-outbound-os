@@ -779,26 +779,40 @@ Emotional context for ${p}:
 
 Key insight: Long is fine if it's relevant. You are not asking for business — you are asking permission to send something useful to their official email. That earns the contact and the meeting in one go. Do not compress this into 3 sentences — a short, generic DM signals mass AI generation to a technical buyer.
 
+STEP 0 — CHECK FOR A CAREER JOURNEY SIGNAL FIRST (highest-priority hook, overrides generic company-growth framing):
+Scan the dossier for ${p}'s career history — previous employers, a recent move, a geography change (e.g. India-based roles moving to a GCC/Middle East/Africa/export market role). If this exists, it is a FAR stronger hook than "your company is scaling" — someone who has worked at well-known companies before and is now building something new notices when a stranger has actually read their background versus skimmed their current job title.
+If a career journey exists: name it specifically in steps 1-2 — "I saw your move from [prior company/companies] to [current company]" — and if there's a geography change, that becomes the frame for step 3's pain (see below).
+If no career journey is in the dossier: fall back to company-level signals (scaling, expansion, new market) as before.
+
 STRUCTURE — write in this exact order, no labels in output:
 
-1. SOFT RESTART: One warm line thanking them for accepting — reference something specific and real about them or their company from the dossier (not "great to connect" or "thanks for connecting" alone).
+1. SOFT RESTART: One warm line thanking them for accepting — lead with the career journey signal from Step 0 if one exists ("I saw your move from X to Y — that's a solid shift"), otherwise reference something specific and real about their company from the dossier. Never "great to connect" or "thanks for connecting" alone.
 
-2. "I WAS THINKING ABOUT YOUR WORLD...": Name their specific situation right now — their role, what their company is scaling/building/changing, a pressure tied to THEIR function (not generic "growth is hard"). Pull this from the dossier — never invent it.
+2. "I WAS THINKING ABOUT YOUR WORLD...": Name their specific situation right now. If there's a geography change (e.g. India → GCC), name what that transition actually means operationally for someone in their seat — not just "growth is hard." Pull this from the dossier — never invent it.
 
 3. NAME THE SPECIFIC PAIN — not category, not industry, their exact headache:
 ${role && /production|plant|manufactur|operations/i.test(role)
-  ? `${p} is in PRODUCTION/OPERATIONS — name a line-level mechanism: a spec deviation stopping a line mid-run, grit expansion or oil uptake shifting between lots, a changeover delay, a QC hold on an incoming batch. NOT generic "commodity volatility" or "missed delivery risk" — those are procurement-level clichés, not a production manager's actual headache.`
+  ? `${p} is in PRODUCTION/OPERATIONS — name a line-level mechanism: a spec deviation stopping a line mid-run, grit expansion or oil uptake shifting between lots, a changeover delay, a QC hold on an incoming batch. NOT generic "commodity volatility" or "missed delivery risk" — those are procurement-level clichés, not a production manager's actual headache.
+IF there's a geography change in the dossier (e.g. India to GCC/Middle East), use CROSS-MARKET EMPATHY — compare the specific operational pain in their old market vs their new one. e.g. monsoon-season moisture swings in India vs heat-in-container issues during Gulf shipping/storage; different humidity bands changing grit expansion ratios between markets. This is far more credible than a generic pain line because it shows you understand that their job changed, not just their employer.`
   : /supply chain|procurement|sourcing|purchas/i.test(role || "")
-  ? `${p} is in SUPPLY CHAIN/PROCUREMENT — name a sourcing mechanism: two specs in one import file, COA arriving after dispatch not before, a single-source risk, demurrage or landed-cost surprises.`
+  ? `${p} is in SUPPLY CHAIN/PROCUREMENT — name a sourcing mechanism: two specs in one import file, COA arriving after dispatch not before, a single-source risk, demurrage or landed-cost surprises. Apply the same cross-market empathy logic above if a geography change exists in the dossier.`
   : `Name a mechanism specific to ${role || "their role"} and ${co} — not a generic industry pain. Read the dossier for what they actually deal with.`}
 Reference a plausible real scenario, phrased the way someone in that seat would describe it to a peer — never a boardroom-level abstraction like "commodity market volatility" or "ingredient sourcing risk."
 
-4. COMPANY CONTEXT (1-2 sentences, context not pitch):
-${senderAuthorityBlock ? `Use the pre-approved authority block above — do not shorten, rewrite, or drop its credentials.` : `Include what the sender profile actually provides: years in operation, listed status, plant count, 2-3 named clients. ONLY use facts present in the sender profile or dossier — never invent certifications, processes, or claims (e.g. do not invent phrases like "zero-touch automation hygiene" — if a certification/process isn't in the sender profile, do not mention it).`}
+4. COMPANY CONTEXT (1-2 sentences, context not pitch) — ROLE-FILTERED, this is critical:
+${role && /production|plant|manufactur|operations|quality|qc/i.test(role)
+  ? `${p} is OPERATIONAL, not financial. DROP investor-facing facts even if they're true and in the sender profile — IPO premium, stock listing status, and similar finance-flavored credentials mean nothing to someone running a production line and will read as "talking about yourself, not him." Keep ONLY what's operationally relevant: years milling, plant count, named clients in their product category (same snack-line category = direct credibility). ${senderAuthorityBlock ? "If the pre-approved authority block above contains investor/listing facts, trim them out here and keep only the operational credentials (years, plants, clients)." : ""}`
+  : senderAuthorityBlock
+  ? `Use the pre-approved authority block above — do not shorten, rewrite, or drop its credentials.`
+  : `Include what the sender profile actually provides: years in operation, listed status, plant count, 2-3 named clients. ONLY use facts present in the sender profile or dossier — never invent certifications, processes, or claims.`}
+Never invent certifications, processes, or claims not present in the sender profile or dossier (e.g. do not invent phrases like "zero-touch automation hygiene").
 
-5. OFFER SOMETHING FOR THEIR FILE: Offer something specific and useful — COA, spec sheet, lot-consistency data, landed cost working — framed with confidence as a starting point to explore if there's a fit. Do NOT hedge or pre-apologize. The reason to connect on LinkedIn is to explore synergies, not to minimize commitment — so never use defensive phrases like "no commitment at all" or "no strings attached." Instead frame it as mutual exploration: "worth sharing in case it's useful for your sourcing plans" or "could be a good starting point to see if there's a fit."
+5. GIVE REAL MICRO-VALUE, NOT A VAGUE OFFER: This is the difference between a message that converts and one that doesn't. Do NOT write vague lines like "we have some data that might be useful" or "COAs and spec sheets are available." Instead, give an ACTUAL number from the dossier or sender profile relevant to their product category right now — e.g. "for extruded snacks we typically see 0.8-1.2mm grits at under 13% moisture work best for predictable expansion" — framed as "I know your exact spec will differ, but that's the range we usually start from." A real number given for free is what makes someone who's seen 100 supplier messages stop and read. Then offer to share the fuller spec sheet/COA "for their file" as a secondary, confident line — not the main event. Frame all of it as mutual exploration, not a hedge: "worth sharing in case it's useful" or "just wanted to share our sales profile for your file" — never defensive phrases like "no commitment at all" or "no strings attached."
 
 6. ${hasEmail ? `SINGLE ASK: suggest a 20-min call next week to explore if there's a fit. Do not ask for their email — it is already on file.` : `DOUBLE ASK: ask for their official work email to send the file to, AND suggest a 20-min call if they're open — framed as exploring a fit, not as a low-pressure favor. Both asks in one message — "What's the best email to send it to? And if useful, happy to do a quick 20-min next week to see if there's a fit worth exploring."`}
+If the dossier or sender profile indicates ${p}'s timezone/region, end the call ask with "Happy to work around [their timezone]" (e.g. GST for Gulf, WAT for Nigeria, IST for India) — small detail, signals you're thinking about their day, not yours.
+
+TONE MATCH: ${liContext ? `A record of the earlier connection request is in the CONVERSATION CONTEXT above — match its register. If it was short and sharp, this DM should still feel human and conversational, not suddenly long and corporate-formal. Keep the tone consistent across touches.` : `Keep the tone human and conversational throughout — not corporate-formal.`}
 
 SIGN OFF — MANDATORY, do not skip: end with "Best," (or "Warm regards,") on its own line, followed by ${senderName}.
 
@@ -810,6 +824,8 @@ SIGN OFF — MANDATORY, do not skip: end with "Best," (or "Warm regards,") on it
 - Generic boardroom pain language: "commodity market volatility", "ingredient sourcing risk", "supply chain challenges" — these are the exact clichés that make a DM feel AI-generated. Name the mechanism instead.
 - Fabricated certifications, processes, or claims not present in the sender profile or dossier (e.g. invented phrases like "zero-touch automation hygiene")
 - Defensive/hedging phrases: "no commitment at all", "no strings attached", "no pressure" — these undersell the ask. Connecting on LinkedIn is about exploring synergies, not minimizing commitment.
+- Investor/finance-flavored credentials (IPO premium, stock listing status) when writing to an OPERATIONAL contact (production, plant, manufacturing, QC) — they don't care about your cap table, they care if your spec will work on their line
+- Vague value offers: "we have some data that might be useful", "COAs and spec sheets are available" — give an actual number instead (grit size, moisture %, whatever's relevant to their category)
 - A message that ends without a sign-off
 - Any explanation of what you wrote or why
 
