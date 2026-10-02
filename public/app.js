@@ -1713,6 +1713,8 @@ async function generateLinkedInMessages(prospectId) {
   if (!entry) return;
   const btn = $("regenLinkedInBtn");
   const streamBox = $("drawerLinkedInStream");
+  const liStage = document.querySelector('input[name="liStage"]:checked')?.value || "new";
+  const liContext = ($("liContextInput")?.value || "").trim();
   if (btn) { btn.textContent = "Generating…"; btn.disabled = true; }
   if (streamBox) { streamBox.textContent = ""; streamBox.style.display = "block"; }
   const icp = getIcp();
@@ -1724,7 +1726,9 @@ async function generateLinkedInMessages(prospectId) {
                     domain: entry.domain, email: entry.email },
         icp, senderProfile: sender, step: "linkedin",
         dossier: entry.dossier || "",
-        linkedinPosts: "" },
+        linkedinPosts: "",
+        liStage,
+        liContext },
       (_, full) => { if (streamBox) streamBox.textContent = full; }
     );
     const liContent = (typeof text === "string" ? text : text?.content) || "";
@@ -1829,8 +1833,16 @@ function renderDrawerTab(tab, entry) {
     }
   } else if (tab === "linkedin") {
     const text = entry.linkedin_messages || "";
-    const regenBtn = !text ? `<div style="margin-bottom:12px"><button class="btn btn-dark btn-sm" id="regenLinkedInBtn">↺ Generate LinkedIn Messages</button></div>` : "";
-    content.innerHTML = `${_tabToolbar(!!text, "linkedin_messages")}${regenBtn}<div id="drawerLinkedInStream" class="drawer-pre stream-box" style="display:none"></div><pre class="drawer-pre">${text || "No LinkedIn copy yet — click Generate above."}</pre>`;
+    const stageSelector = !text ? `
+      <div class="li-gen-panel">
+        <div class="li-gen-row">
+          <label class="li-gen-opt"><input type="radio" name="liStage" value="new" checked><span>Not connected yet</span><small>→ Connection request + follow-up DM</small></label>
+          <label class="li-gen-opt"><input type="radio" name="liStage" value="connected"><span>They accepted my connection</span><small>→ Warm follow-up DM only</small></label>
+        </div>
+        <textarea id="liContextInput" class="drawer-edit-textarea" rows="2" placeholder="Any context? e.g. 'Arvind accepted on 1 Oct, no reply yet' (optional)" style="min-height:60px;margin-top:8px"></textarea>
+        <div style="margin-top:8px"><button class="btn btn-dark btn-sm" id="regenLinkedInBtn">↺ Generate LinkedIn Messages</button></div>
+      </div>` : "";
+    content.innerHTML = `${_tabToolbar(!!text, "linkedin_messages")}${stageSelector}<div id="drawerLinkedInStream" class="drawer-pre stream-box" style="display:none"></div><pre class="drawer-pre">${text || ""}</pre>`;
   } else if (tab === "cadence") {
     const text = entry.cadence || "";
     content.innerHTML = `${_tabToolbar(!!text, "cadence")}<pre class="drawer-pre">${text || "No 8-touch cadence yet — run Step 7."}</pre>`;

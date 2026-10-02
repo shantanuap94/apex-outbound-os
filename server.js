@@ -581,7 +581,7 @@ async function handleChainRun(req, res) {
 
   try {
     const body = await readBody(req);
-    const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply, fewShotExamples, emailNumber, previousEmails } = body;
+    const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply, fewShotExamples, emailNumber, previousEmails, liStage, liContext } = body;
 
     const sender = senderProfile || {};
     const senderName    = sender.name    || "the sender";
@@ -751,7 +751,53 @@ Rules:
 - No "I hope this finds you well", no "we help companies like yours", no buzzwords, no invented statistics
 - Tone: ${senderTone}`,
 
-      linkedin: `Write a LinkedIn CONNECTION REQUEST and a FOLLOW-UP DM for ${p} (${role}) at ${co}, from ${senderName}.${dossierCtx}
+      linkedin: (() => {
+        const isConnected = liStage === "connected";
+        const contextNote = liContext ? `\nSENDER CONTEXT: ${liContext}\n` : "";
+        if (isConnected) {
+          // Stage 2 — they accepted the connection request, now send the warm follow-up DM
+          return `Write a FOLLOW-UP DM (post-connection) for ${p} (${role}) at ${co}, from ${senderName}.
+${p} has already accepted the connection request. Do NOT write a connection request. Write only the follow-up DM.
+${contextNote}${dossierCtx}
+${linkedinPosts ? `\nTheir recent LinkedIn posts:\n${linkedinPosts}\n` : ""}
+
+THE SENDER:
+- ${senderName}, ${senderRole}
+- Company: ${senderOffer}
+
+Emotional context for ${p}:
+- They feel: ${icpFeel}
+- They privately think: ${icpThinkPriv}
+- Their desires: ${icpDesires}
+- Their frustrations: ${icpFrustrations}
+
+---
+
+## FOLLOW-UP DM (post-accept) — the goal is one thing: get their official email + book a 20-min call
+
+STRUCTURE (write in this order, no labels in output):
+1. Warm thanks for connecting — genuine, 1 line, reference something specific about them or their company (not generic "great to connect")
+2. Their world — 1-2 sentences on the operational or professional pressure they live with. Show you understand their day-to-day. Draw from the dossier.
+3. What TBI Corn does in their world — 1-2 sentences connecting the sender's offer to their exact application (not a generic pitch). Named Indian clients if relevant.
+4. File offer — offer a COA, spec sheet, or sample "for their file" — no commitment framing. "No strings attached."
+5. One soft ask — get their work email OR suggest a 20-min call. One or the other, not both.
+
+⛔ FORBIDDEN OUTPUT — THESE WILL RUIN THE MESSAGE. Never write any of the following:
+- Section labels inside the DM body: "PART 1", "PART 2", "PART 3", "PART 1 — Warm Greeting", "PART 2 — Their World", etc.
+- Post-message analysis: "Why This Works:", "Key Elements:", "Structural Notes:"
+- Parenthetical commentary: "(this creates curiosity)", "(soft pitch)", "(builds trust)"
+- Markdown headers: ###, **bold labels**, ---dividers--- inside the DM itself
+- Any explanation of what you wrote or why
+
+WRONG: "PART 1 — Warm Greeting\nHi Arvind..."
+CORRECT: "Hi Arvind, really appreciate you connecting..."
+
+After writing the DM: STOP. Do not write "Why This Works", "Key Elements", or any structural notes.
+Output only the DM, ready to send.`;
+        }
+
+        return `Write a LinkedIn CONNECTION REQUEST and a FOLLOW-UP DM for ${p} (${role}) at ${co}, from ${senderName}.
+${contextNote}${dossierCtx}
 ${linkedinPosts ? `\nTheir recent LinkedIn posts:\n${linkedinPosts}\n` : ""}
 
 THE SENDER (${p} does not know them):
@@ -862,7 +908,8 @@ After writing the DM: STOP. Do not write "Why This Works", do not explain the me
 
 ---
 
-Label each clearly: CONNECTION REQUEST and FOLLOW-UP DM.`,
+Label each clearly: CONNECTION REQUEST and FOLLOW-UP DM.`;
+      })(),
 
       sequence: `Using the intelligence dossier for ${p} at ${co}, write a 3-touch outreach sequence FROM ${senderName}.${dossierCtx}
 

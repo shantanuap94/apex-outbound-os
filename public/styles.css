@@ -1120,6 +1120,13 @@ main { padding: 24px 32px 60px; }
 .ttb-save:hover, .ttb-save-email:hover { opacity: .85; }
 .drawer-edit-textarea { width: 100%; min-height: 320px; font-family: inherit; font-size: 12.5px; line-height: 1.7; padding: 12px 14px; border: 1px solid var(--border, #e4ddd3); border-radius: 7px; background-color: var(--card, #ffffff); color: var(--text, #1a1715); color-scheme: light; resize: vertical; outline: none; box-sizing: border-box; word-break: break-word; }
 .drawer-edit-textarea:focus { border-color: var(--accent, #c85a1c); }
+.li-gen-panel { background: var(--page, #f0ece3); border: 1px solid var(--border, #e4ddd3); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+.li-gen-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.li-gen-opt { display: flex; align-items: flex-start; gap: 7px; cursor: pointer; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border, #e4ddd3); background: var(--card, #fff); flex: 1; min-width: 180px; }
+.li-gen-opt input[type="radio"] { margin-top: 3px; accent-color: var(--accent, #c85a1c); flex-shrink: 0; }
+.li-gen-opt span { font-size: 13px; font-weight: 500; color: var(--text, #1a1715); line-height: 1.4; }
+.li-gen-opt small { display: block; font-size: 11px; color: var(--text-2, #6b6056); margin-top: 2px; }
+.li-gen-opt:has(input:checked) { border-color: var(--accent, #c85a1c); background: #fdf5f0; }
 .drawer-tabs  {
   display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 22px;
 }
