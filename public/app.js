@@ -1743,6 +1743,39 @@ async function generateLinkedInMessages(prospectId) {
   }
 }
 
+async function generateObjectionResponse(prospectId) {
+  const entry = _crmProspects.find((x) => x.id === prospectId);
+  if (!entry) return;
+  const reply = ($("objectionReplyInput")?.value || "").trim();
+  if (!reply) { alert("Paste their reply first."); return; }
+  const btn = $("genObjectionBtn");
+  const streamBox = $("drawerObjectionStream");
+  if (btn) { btn.textContent = "Classifying…"; btn.disabled = true; }
+  if (streamBox) { streamBox.textContent = ""; streamBox.style.display = "block"; }
+  const icp = getIcp();
+  const sender = getSender();
+  try {
+    const text = await postStream(
+      "/api/chain/run",
+      { prospect: { name: entry.name, title: entry.title, company: entry.company,
+                    domain: entry.domain, email: entry.email },
+        icp, senderProfile: sender, step: "objection",
+        dossier: entry.dossier || "",
+        reply },
+      (_, full) => { if (streamBox) streamBox.textContent = full; }
+    );
+    const content = (typeof text === "string" ? text : text?.content) || "";
+    if (!content) { if (btn) { btn.textContent = "✦ Classify & Draft Response"; btn.disabled = false; } return; }
+    await crmUpdateFields(prospectId, { objection_response: content, updated_at: new Date().toISOString() });
+    if (streamBox) streamBox.style.display = "none";
+    const updated = _crmProspects.find((x) => x.id === prospectId);
+    if (updated) renderDrawerTab("objection", updated);
+  } catch (e) {
+    if (streamBox) streamBox.textContent = "Error: " + e.message;
+    if (btn) { btn.textContent = "✦ Classify & Draft Response"; btn.disabled = false; }
+  }
+}
+
 function _tabToolbar(hasContent, field) {
   if (!hasContent) return "";
   return `<div class="tab-toolbar"><button class="ttb-btn ttb-edit" data-field="${field}">✎ Edit</button><button class="ttb-btn ttb-del" data-field="${field}">✕ Clear</button></div>`;
@@ -1839,7 +1872,7 @@ function renderDrawerTab(tab, entry) {
           <label class="li-gen-opt"><input type="radio" name="liStage" value="new" checked><span>Not connected yet</span><small>→ Connection request + follow-up DM</small></label>
           <label class="li-gen-opt"><input type="radio" name="liStage" value="connected"><span>They accepted my connection</span><small>→ Warm follow-up DM only</small></label>
         </div>
-        <textarea id="liContextInput" class="drawer-edit-textarea" rows="2" placeholder="Any context? e.g. 'Arvind accepted on 1 Oct, no reply yet' (optional)" style="min-height:60px;margin-top:8px"></textarea>
+        <textarea id="liContextInput" class="drawer-edit-textarea" rows="4" placeholder="Paste the conversation so far (optional) — your message, their reply, back-and-forth. The AI reads it and crafts the next message in context." style="min-height:90px;margin-top:8px"></textarea>
         <div style="margin-top:8px"><button class="btn btn-dark btn-sm" id="regenLinkedInBtn">↺ Generate LinkedIn Messages</button></div>
       </div>` : "";
     content.innerHTML = `${_tabToolbar(!!text, "linkedin_messages")}${stageSelector}<div id="drawerLinkedInStream" class="drawer-pre stream-box" style="display:none"></div><pre class="drawer-pre">${text || ""}</pre>`;
@@ -1848,7 +1881,12 @@ function renderDrawerTab(tab, entry) {
     content.innerHTML = `${_tabToolbar(!!text, "cadence")}<pre class="drawer-pre">${text || "No 8-touch cadence yet — run Step 7."}</pre>`;
   } else if (tab === "objection") {
     const text = entry.objection_response || "";
-    content.innerHTML = `${_tabToolbar(!!text, "objection_response")}<pre class="drawer-pre">${text || "No objection handler yet."}</pre>`;
+    const replyBox = !text ? `
+      <div class="li-gen-panel">
+        <textarea id="objectionReplyInput" class="drawer-edit-textarea" rows="4" placeholder="Paste their reply or the conversation so far — LinkedIn message, email reply, WhatsApp text. The AI classifies it and drafts a response." style="min-height:90px"></textarea>
+        <div style="margin-top:8px"><button class="btn btn-dark btn-sm" id="genObjectionBtn">✦ Classify &amp; Draft Response</button></div>
+      </div>` : "";
+    content.innerHTML = `${_tabToolbar(!!text, "objection_response")}${replyBox}<div id="drawerObjectionStream" class="drawer-pre stream-box" style="display:none"></div><pre class="drawer-pre">${text || ""}</pre>`;
   }
 }
 
@@ -2058,6 +2096,10 @@ function wireMemory() {
       // Regenerate LinkedIn messages
       const regenLiBtn = e.target.closest("#regenLinkedInBtn");
       if (regenLiBtn) { await generateLinkedInMessages(_currentDrawerId); return; }
+
+      // Classify & draft objection response
+      const genObjBtn = e.target.closest("#genObjectionBtn");
+      if (genObjBtn) { await generateObjectionResponse(_currentDrawerId); return; }
 
       // Edit tab content (dossier / linkedin / cadence / objection)
       const editBtn = e.target.closest(".ttb-edit");

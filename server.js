@@ -753,7 +753,7 @@ Rules:
 
       linkedin: (() => {
         const isConnected = liStage === "connected";
-        const contextNote = liContext ? `\nSENDER CONTEXT: ${liContext}\n` : "";
+        const contextNote = liContext ? `\nCONVERSATION CONTEXT — this may be the actual message thread so far (what ${senderName} said, what ${p} said back), or just a note. Read it carefully before writing. Reference specifics from it naturally. Do NOT repeat points already made in it. Do NOT restate things ${p} already said or already knows:\n"""\n${liContext}\n"""\n` : "";
         if (isConnected) {
           // Stage 2 — they accepted the connection request, now send the warm follow-up DM
           return `Write a FOLLOW-UP DM (post-connection) for ${p} (${role}) at ${co}, from ${senderName}.
