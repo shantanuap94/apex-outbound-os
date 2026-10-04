@@ -108,6 +108,54 @@ async function apifyLinkedInDiscover(company, country) {
   }
 }
 
+// Full LinkedIn profile scrape — career history, headline, education for dossier research.
+// Actor ID is configurable via APIFY_LINKEDIN_PROFILE_ACTOR since output schemas vary between
+// Apify LinkedIn profile scrapers — verify the field names below match your chosen actor's output
+// by checking a sample run in the Apify console, and adjust the extraction below if needed.
+async function apifyLinkedInProfile(profileUrl) {
+  if (!process.env.APIFY_API_KEY || !profileUrl) return null;
+  const actorId = process.env.APIFY_LINKEDIN_PROFILE_ACTOR || "dev_fusion~Linkedin-Profile-Scraper";
+  try {
+    const items = await apifyRunAndWait(actorId, { profileUrls: [profileUrl] }, 60000);
+    const item = Array.isArray(items) ? items[0] : null;
+    if (!item) return null;
+
+    const fullName = item.fullName || item.name || [item.firstName, item.lastName].filter(Boolean).join(" ") || "";
+    const headline = item.headline || item.title || "";
+    const location = item.location || item.geoLocation || "";
+
+    // Different actors name the experience array differently — try common variants.
+    const experiences = item.experiences || item.positions || item.experience || item.workExperience || [];
+    const expLines = (Array.isArray(experiences) ? experiences : []).map((e) => {
+      const title = e.title || e.position || e.role || "";
+      const company = e.companyName || e.company || e.subtitle || e.organization || "";
+      const dates = e.dateRange || e.caption || e.duration || [e.startDate, e.endDate].filter(Boolean).join(" - ") || "";
+      const loc = e.location || "";
+      return `- ${[title, company].filter(Boolean).join(" at ")}${dates ? ` (${dates})` : ""}${loc ? ` — ${loc}` : ""}`;
+    }).filter((l) => l.trim() !== "-");
+
+    const educations = item.educations || item.education || [];
+    const eduLines = (Array.isArray(educations) ? educations : []).map((e) => {
+      const school = e.schoolName || e.school || e.title || "";
+      const degree = e.degree || e.subtitle || "";
+      return `- ${[degree, school].filter(Boolean).join(", ")}`;
+    }).filter((l) => l.trim() !== "-");
+
+    if (!fullName && expLines.length === 0) return null;
+
+    return [
+      fullName ? `Name: ${fullName}` : "",
+      headline ? `Headline: ${headline}` : "",
+      location ? `Location: ${location}` : "",
+      expLines.length ? `\nCareer history (most recent first):\n${expLines.join("\n")}` : "",
+      eduLines.length ? `\nEducation:\n${eduLines.join("\n")}` : "",
+    ].filter(Boolean).join("\n");
+  } catch (e) {
+    console.warn("Apify LinkedIn profile scrape failed:", e.message);
+    return null;
+  }
+}
+
 // ─── Enrichment Providers ─────────────────────────────────────────────────────
 
 async function enrichViaBetterContact(prospect) {
@@ -583,6 +631,18 @@ async function handleChainRun(req, res) {
     const body = await readBody(req);
     const { prospect, icp, senderProfile, step, dossier, signalContext, linkedinPosts, sequenceState, reply, fewShotExamples, emailNumber, previousEmails, liStage, liContext } = body;
 
+    // For research/dossier building, scrape the full LinkedIn profile (career history, headline,
+    // education) via Apify and fold it into the signal context — Perplexity's web search alone
+    // rarely surfaces full LinkedIn work history since LinkedIn blocks general crawlers.
+    let enrichedSignalContext = signalContext || "";
+    if (step === "research" && prospect?.linkedin) {
+      sendEvent({ step, status: 'processing' }); // keep the SSE connection alive during the scrape wait
+      const profileData = await apifyLinkedInProfile(prospect.linkedin);
+      if (profileData) {
+        enrichedSignalContext = `${enrichedSignalContext}\n\n---\nLinkedIn Profile Data (scraped):\n${profileData}`.trim();
+      }
+    }
+
     const sender = senderProfile || {};
     const senderName    = sender.name    || "the sender";
     const senderRole    = sender.role    || "";
@@ -655,7 +715,7 @@ CRITICAL RULES:
     const researchPrompt = `Produce a full prospect intelligence brief for ${senderName} to send to:
 Prospect: ${JSON.stringify(prospect)}
 What ${senderName} offers: ${senderOffer}
-${signalContext ? `\nSignal Context (company news, research):\n${signalContext}` : ""}
+${enrichedSignalContext ? `\nSignal Context (company news, research, LinkedIn profile data):\n${enrichedSignalContext}` : ""}
 ICP psychological profile for reference: ${JSON.stringify(icp || {})}
 
 Respond in exactly these 7 sections:

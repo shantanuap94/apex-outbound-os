@@ -1756,7 +1756,7 @@ async function generateDossier(prospectId) {
   if (streamBox) { streamBox.textContent = "Searching for company and career signals…"; streamBox.style.display = "block"; }
   const icp = getIcp();
   const sender = getSender();
-  const p = { name: entry.name, title: entry.title, company: entry.company, domain: entry.domain, email: entry.email };
+  const p = { name: entry.name, title: entry.title, company: entry.company, domain: entry.domain, email: entry.email, linkedin: entry.linkedin_url || "" };
   try {
     // Step 1 — Perplexity research: company signals + prospect career history
     let signalContext = "";
@@ -1775,9 +1775,12 @@ Also include any recent news, leadership changes, or awards from the last 90 day
       signalContext = res.choices?.[0]?.message?.content || "";
     } catch (_) { /* Perplexity optional — fall through with empty signalContext */ }
 
-    if (streamBox) streamBox.textContent = "Building dossier…";
+    if (streamBox) streamBox.textContent = p.linkedin
+      ? "Scraping LinkedIn profile for career history, then building dossier… (can take up to a minute)"
+      : "Building dossier…";
 
-    // Step 2 — build the full intelligence brief from the signal context
+    // Step 2 — server scrapes the full LinkedIn profile (if a URL is on file) and builds
+    // the full intelligence brief from Perplexity + LinkedIn signal context
     const text = await postStream(
       "/api/chain/run",
       { prospect: p, icp, senderProfile: sender, step: "research", signalContext },
