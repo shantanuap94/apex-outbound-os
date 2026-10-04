@@ -746,6 +746,15 @@
             <span class="ps-toggle-arrow">▼</span>
           </div>
           <div id="prospectSearchBody" class="ps-body" style="display:none">
+            <div class="ps-field" style="margin-bottom:14px">
+              <label>Describe who you're looking for <span class="ps-hint">natural language</span></label>
+              <div style="display:flex;gap:8px">
+                <input type="text" id="psNlQuery" placeholder="Find 20 procurement managers at top snack manufacturing companies in India" style="flex:1">
+                <button class="btn btn-dark btn-sm" id="psNlSearchBtn">✦ Find Leads</button>
+              </div>
+              <div id="psNlStatus" style="font-size:12px;color:var(--text-3);margin-top:6px"></div>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-3);margin:4px 0 12px">— or use structured filters below —</div>
             <div class="ps-row">
               <div class="ps-field">
                 <label>Job Titles <span class="ps-hint">comma separated</span></label>

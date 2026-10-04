@@ -1752,6 +1752,137 @@ async function handleApolloSearch(req, res) {
   }
 }
 
+// Natural-language lead finding: "find me 20 procurement managers at top snack
+// manufacturers in India" → structured Apollo search, resolving vague company
+// categories ("top snack manufacturers") into real companies via Perplexity first.
+async function handleIcpLeadFind(req, res) {
+  res.writeHead(200, {
+    'Content-Type':      'text/event-stream',
+    'Cache-Control':     'no-cache',
+    'Connection':        'keep-alive',
+    'X-Accel-Buffering': 'no',
+    'Access-Control-Allow-Origin': '*',
+  });
+  const sendEvent = (payload) => { try { res.write(`data: ${JSON.stringify(payload)}\n\n`); } catch (_) {} };
+
+  try {
+    const body = await readBody(req);
+    const description = String(body.description || "").trim();
+    if (!description) { sendEvent({ status: 'error', error: 'Describe who you are looking for.' }); return res.end(); }
+    if (!process.env.APOLLO_API_KEY) { sendEvent({ status: 'error', error: 'Apollo API key not configured.' }); return res.end(); }
+
+    sendEvent({ status: 'progress', message: 'Understanding your request…' });
+
+    const ep = getAIEndpoint(body.model || "gpt-4o-mini");
+    const parsePrompt = `Parse this B2B lead-search request into structured JSON. Request: "${description}"
+
+Return ONLY valid JSON, no other text:
+{
+  "titleKeywords": ["procurement manager", "purchasing manager"],
+  "companyCategory": "snack manufacturing companies",
+  "companyNames": [],
+  "locations": ["India"],
+  "count": 20
+}
+
+Rules:
+- titleKeywords: job title keywords to search — include close synonyms for the role mentioned (e.g. "procurement manager" implies "purchasing manager", "sourcing manager" too)
+- companyCategory: the type/category of company in plain words if the request describes a category (e.g. "top snack manufacturers") — null if not company-specific or if specific companies are named instead
+- companyNames: specific company names ONLY if named directly in the request — else empty array
+- locations: country/city/region names mentioned — else empty array
+- count: number of leads requested — default 20 if not stated, cap at 50`;
+
+    const parseRes = await fetch(ep.url, {
+      method: "POST",
+      headers: aiHeaders(ep),
+      body: JSON.stringify({
+        model: ep.model,
+        messages: [{ role: "user", content: parsePrompt }],
+        temperature: 0.1,
+        max_tokens: 400,
+        ...(ep.url.includes("openai") ? { response_format: { type: "json_object" } } : {}),
+      }),
+    });
+    const parseData = await parseRes.json();
+    let filters;
+    try {
+      filters = parseAIJson(parseData.choices?.[0]?.message?.content || "{}");
+    } catch (_) {
+      filters = { titleKeywords: [], companyCategory: null, companyNames: [], locations: [], count: 20 };
+    }
+    filters.titleKeywords = Array.isArray(filters.titleKeywords) ? filters.titleKeywords : [];
+    filters.companyNames  = Array.isArray(filters.companyNames) ? filters.companyNames : [];
+    filters.locations     = Array.isArray(filters.locations) ? filters.locations : [];
+    filters.count         = Math.min(Math.max(parseInt(filters.count, 10) || 20, 1), 50);
+
+    sendEvent({ status: 'progress', message: `Looking for ${filters.titleKeywords.join(", ") || "matching roles"}${filters.companyCategory ? " at " + filters.companyCategory : ""}${filters.locations.length ? " in " + filters.locations.join(", ") : ""}…` });
+
+    // Resolve a vague company category into real companies via Perplexity.
+    let companies = filters.companyNames.map(n => ({ name: n, domain: "" }));
+    if (!companies.length && filters.companyCategory && process.env.PERPLEXITY_API_KEY) {
+      sendEvent({ status: 'progress', message: `Researching ${filters.companyCategory}${filters.locations.length ? " in " + filters.locations.join(", ") : ""}…` });
+      try {
+        const pplxQuery = `List the top 15 ${filters.companyCategory}${filters.locations.length ? " in " + filters.locations.join(", ") : ""}. One per line, format exactly: "Company Name | domain.com" (use "unknown" for domain if you don't know it). No numbering, no other text, no markdown.`;
+        const pr = await fetch("https://api.perplexity.ai/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.PERPLEXITY_API_KEY}` },
+          body: JSON.stringify({ model: "sonar-pro", messages: [{ role: "user", content: pplxQuery }], max_tokens: 800 }),
+        });
+        const pdata = await pr.json();
+        const text = pdata.choices?.[0]?.message?.content || "";
+        companies = text.split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+          const parts = l.replace(/^[\d\.\-\*\s]+/, "").split("|").map(s => s.trim());
+          if (!parts[0]) return null;
+          return { name: parts[0].replace(/^\*\*|\*\*$/g, ""), domain: (parts[1] && parts[1].toLowerCase() !== "unknown") ? parts[1] : "" };
+        }).filter(Boolean).slice(0, 15);
+      } catch (e) {
+        console.warn("Perplexity company resolution failed:", e.message);
+      }
+    }
+    if (!companies.length) companies = [null]; // no company constraint — single unscoped Apollo pass
+
+    sendEvent({ status: 'progress', message: companies[0] ? `Found ${companies.length} companies — now searching for people…` : 'Searching for matching people…' });
+
+    // Apollo people search — one pass per resolved company (or a single unscoped pass)
+    const results = [];
+    const seen = new Set();
+    for (const co of companies) {
+      if (results.length >= filters.count) break;
+      const payload = { page: 1, per_page: 10 };
+      if (filters.titleKeywords.length) payload.person_titles = filters.titleKeywords;
+      if (filters.locations.length) payload.person_locations = filters.locations;
+      if (co?.domain) payload.q_organization_domains = co.domain;
+      else if (co?.name) payload.q_keywords = co.name;
+
+      try {
+        const ar = await fetch("https://api.apollo.io/v1/mixed_people/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-api-key": process.env.APOLLO_API_KEY },
+          body: JSON.stringify(payload),
+        });
+        if (!ar.ok) continue;
+        const adata = await ar.json();
+        for (const person of (adata.people || [])) {
+          const key = person.id || person.email || `${person.first_name}-${person.last_name}-${person.organization?.name}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          results.push(person);
+          if (results.length >= filters.count) break;
+        }
+      } catch (e) {
+        console.warn("Apollo search failed for", co?.name, e.message);
+      }
+      sendEvent({ status: 'progress', message: `Found ${results.length} of ${filters.count} so far…` });
+    }
+
+    sendEvent({ status: 'done', people: results, filters, companiesSearched: companies.filter(Boolean).map(c => c.name) });
+    res.end();
+  } catch (e) {
+    sendEvent({ status: 'error', error: e.message });
+    res.end();
+  }
+}
+
 async function handleLeadsGenerate(req, res) {
   try {
     const body = await readBody(req);
@@ -2286,6 +2417,7 @@ const POST_ROUTES = {
   "/api/apollo/search": handleApolloSearch,
   "/api/perplexity/search": handlePerplexitySearch,
   "/api/leads/generate": handleLeadsGenerate,
+  "/api/leads/find":     handleIcpLeadFind,
   "/api/profile/extract": handleProfileExtract,
   "/api/webhook/email-event": handleWebhookEmailEvent,
   "/api/import/parse":     handleImportParse,

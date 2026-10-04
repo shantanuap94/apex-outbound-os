@@ -1968,6 +1968,85 @@ function wireProspectSearch() {
   }
   const btn = $("psSearchBtn");
   if (btn) btn.addEventListener("click", runProspectSearch);
+
+  const nlBtn = $("psNlSearchBtn");
+  if (nlBtn) nlBtn.addEventListener("click", runIcpLeadFind);
+  const nlInput = $("psNlQuery");
+  if (nlInput) nlInput.addEventListener("keydown", (e) => { if (e.key === "Enter") runIcpLeadFind(); });
+}
+
+async function runIcpLeadFind() {
+  const btn      = $("psNlSearchBtn");
+  const statusEl = $("psNlStatus");
+  const countEl  = $("psResultCount");
+  const resultsEl = $("psResults");
+  const description = ($("psNlQuery")?.value || "").trim();
+  if (!description) { alert("Describe who you're looking for first."); return; }
+
+  btn.textContent = "Searching…"; btn.disabled = true;
+  statusEl.textContent = "";
+  countEl.textContent = "";
+  resultsEl.innerHTML = "";
+
+  try {
+    const res = await fetch(API + "/api/leads/find", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: _selectedModel, description }),
+    });
+    if (!res.ok) { statusEl.textContent = `Error: HTTP ${res.status}`; return; }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    let people = [];
+    let errorMsg = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        try {
+          const evt = JSON.parse(line.slice(6));
+          if (evt.status === "progress") statusEl.textContent = evt.message || "";
+          if (evt.status === "error") errorMsg = evt.error || "Unknown error";
+          if (evt.status === "done") { people = evt.people || []; }
+        } catch (_) {}
+      }
+    }
+
+    if (errorMsg) { statusEl.textContent = "Error: " + errorMsg; return; }
+    statusEl.textContent = "";
+    countEl.textContent = people.length ? `Found ${people.length} matching lead${people.length !== 1 ? "s" : ""}` : "No matching leads found.";
+    if (!people.length) return;
+
+    resultsEl.innerHTML = renderProspectResults(people);
+    resultsEl.querySelectorAll(".ps-add-btn").forEach((addBtn) => {
+      addBtn.addEventListener("click", async () => {
+        const p = people[parseInt(addBtn.dataset.idx, 10)];
+        addBtn.textContent = "Adding…"; addBtn.disabled = true;
+        await saveProspectToMemory({
+          name:     p.name             || "",
+          title:    p.title            || "",
+          company:  p.organization?.name || p.company || "",
+          email:    p.email            || "",
+          linkedin: p.linkedin_url     || "",
+          location: [p.city, p.state, p.country].filter(Boolean).join(", "),
+          domain:   p.organization?.website_url || "",
+        }, {});
+        addBtn.textContent = "Added ✓"; addBtn.disabled = true;
+        renderMemoryList();
+      });
+    });
+  } catch (e) {
+    statusEl.textContent = "Network error: " + e.message;
+  } finally {
+    btn.textContent = "✦ Find Leads"; btn.disabled = false;
+  }
 }
 
 async function runProspectSearch() {
