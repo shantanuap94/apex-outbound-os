@@ -2091,48 +2091,94 @@ async function handleWebhookEmailEvent(req, res) {
   }
 }
 
+// ─── Service API keys — durable storage in Supabase ────────────────────────────
+// Keys saved via the in-app Settings page previously only lived in process.env
+// (plus a best-effort .env write that's silently skipped on Render's read-only
+// filesystem) — meaning they were wiped out on every server restart/deploy.
+// Fix: persist to a Supabase table (service-role access only, no RLS policies
+// granted — anon/publishable key gets zero access) and reload into process.env
+// on every boot. Render's own Environment-tab vars still take priority over
+// anything stored here, so this is purely a durable fallback for self-service
+// keys added through the app.
+const SERVICE_KEY_MAP = {
+  openrouter:    "OPENROUTER_API_KEY",
+  openai:        "OPENAI_API_KEY",
+  perplexity:    "PERPLEXITY_API_KEY",
+  apollo:        "APOLLO_API_KEY",
+  apify:         "APIFY_API_KEY",
+  bettercontact: "BETTERCONTACT_API_KEY",
+  datagma:       "DATAGMA_API_KEY",
+  fullenrich:    "FULLENRICH_API_KEY",
+  leadmagic:     "LEADMAGIC_API_KEY",
+  hunter:        "HUNTER_API_KEY",
+  icypeas:       "ICYPEAS_API_KEY",
+};
+
+async function loadServiceKeysFromDb() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    console.warn("Service-key DB load skipped — SUPABASE_SERVICE_KEY not set (keys saved via Settings UI will not persist across restarts until this is added).");
+    return;
+  }
+  try {
+    const rows = await sbServiceFetch("/app_service_keys?select=service,key_value");
+    let loaded = 0;
+    for (const row of rows || []) {
+      const envKey = SERVICE_KEY_MAP[row.service];
+      // Render's own Environment-tab value always wins if already set.
+      if (envKey && row.key_value && !process.env[envKey]) {
+        process.env[envKey] = row.key_value;
+        loaded++;
+      }
+    }
+    if (loaded) console.log(`  Loaded ${loaded} service key(s) from Supabase.`);
+  } catch (e) {
+    console.warn("Service-key DB load failed:", e.message);
+  }
+}
+
+async function upsertServiceKeyToDb(service, key) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    throw new Error("SUPABASE_SERVICE_KEY not set — cannot durably save this key. Add SUPABASE_SERVICE_KEY in Render (Project Settings → API → service_role key in Supabase) so keys survive deploys.");
+  }
+  await sbServiceFetch("/app_service_keys", {
+    method: "POST",
+    headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({ service, key_value: key, updated_at: new Date().toISOString() }),
+  });
+}
+
 async function handleSettings(req, res) {
   const mask = (k) => k ? `...${k.slice(-8)}` : null;
-  const s = (envKey) => ({ configured: !!process.env[envKey], masked: mask(process.env[envKey]) });
-  json(res, {
-    openrouter:   s("OPENROUTER_API_KEY"),
-    openai:       s("OPENAI_API_KEY"),
-    perplexity:   s("PERPLEXITY_API_KEY"),
-    apollo:       s("APOLLO_API_KEY"),
-    apify:        s("APIFY_API_KEY"),
-    bettercontact: s("BETTERCONTACT_API_KEY"),
-    datagma:      s("DATAGMA_API_KEY"),
-    fullenrich:   s("FULLENRICH_API_KEY"),
-    leadmagic:    s("LEADMAGIC_API_KEY"),
-    hunter:       s("HUNTER_API_KEY"),
-    icypeas:      s("ICYPEAS_API_KEY"),
-  });
+  const out = {};
+  for (const [service, envKey] of Object.entries(SERVICE_KEY_MAP)) {
+    out[service] = { configured: !!process.env[envKey], masked: mask(process.env[envKey]) };
+  }
+  out._keyPersistenceReady = !!process.env.SUPABASE_SERVICE_KEY;
+  json(res, out);
 }
 
 async function handleSettingsKey(req, res) {
   try {
     const body = await readBody(req);
     const { service, key } = body;
-    const MAP = {
-      openrouter:    "OPENROUTER_API_KEY",
-      openai:        "OPENAI_API_KEY",
-      perplexity:    "PERPLEXITY_API_KEY",
-      apollo:        "APOLLO_API_KEY",
-      apify:         "APIFY_API_KEY",
-      bettercontact: "BETTERCONTACT_API_KEY",
-      datagma:       "DATAGMA_API_KEY",
-      fullenrich:    "FULLENRICH_API_KEY",
-      leadmagic:     "LEADMAGIC_API_KEY",
-      hunter:        "HUNTER_API_KEY",
-      icypeas:       "ICYPEAS_API_KEY",
-    };
-    if (!MAP[service] || !String(key || "").trim()) { json(res, { error: "Invalid service or key" }, 400); return; }
-    const envKey = MAP[service];
+    if (!SERVICE_KEY_MAP[service] || !String(key || "").trim()) { json(res, { error: "Invalid service or key" }, 400); return; }
+    const envKey = SERVICE_KEY_MAP[service];
     const trimmedKey = String(key).trim();
-    process.env[envKey] = trimmedKey;
+    process.env[envKey] = trimmedKey; // immediate effect for the current running process
 
-    // Persist to .env so the key survives local restarts
-    // (silently ignored on Render where the FS is read-only)
+    // Durable persistence — Supabase (survives restarts/deploys), not the old
+    // .env-file write, which is silently skipped on Render's read-only filesystem.
+    let persisted = true;
+    let persistWarning = null;
+    try {
+      await upsertServiceKeyToDb(service, trimmedKey);
+    } catch (dbErr) {
+      persisted = false;
+      persistWarning = dbErr.message;
+      console.warn("Service key DB persist failed:", dbErr.message);
+    }
+
+    // Best-effort local .env write too, for local dev convenience only.
     try {
       const envPath = path.join(__dirname, ".env");
       let content = "";
@@ -2143,10 +2189,10 @@ async function handleSettingsKey(req, res) {
       else { lines.push(`${envKey}=${trimmedKey}`); }
       fs.writeFileSync(envPath, lines.join("\n").trimEnd() + "\n", "utf8");
     } catch (writeErr) {
-      console.warn(".env write skipped (read-only fs):", writeErr.message);
+      // Expected/silent on Render (read-only fs) — Supabase persistence above is what matters there.
     }
 
-    json(res, { ok: true, masked: `...${trimmedKey.slice(-8)}` });
+    json(res, { ok: true, masked: `...${trimmedKey.slice(-8)}`, persisted, persistWarning });
   } catch (e) {
     json(res, { error: e.message }, 500);
   }
@@ -2269,14 +2315,17 @@ const server = http.createServer(async (req, res) => {
   res.end("Not found");
 });
 
-server.listen(PORT, () => {
-  const k = (v) => (v ? "connected" : "not set");
-  console.log(`\n  Apex Outbound OS  →  http://localhost:${PORT}\n`);
-  console.log(`  OpenAI:     ${k(process.env.OPENAI_API_KEY)}`);
-  console.log(`  Apollo:     ${k(process.env.APOLLO_API_KEY)}`);
-  console.log(`  Perplexity: ${k(process.env.PERPLEXITY_API_KEY)}`);
-  console.log(`  Apify:      ${k(process.env.APIFY_API_KEY)}`);
-  console.log(`  Supabase:   ${k(process.env.SUPABASE_URL)}\n`);
+loadServiceKeysFromDb().finally(() => {
+  server.listen(PORT, () => {
+    const k = (v) => (v ? "connected" : "not set");
+    console.log(`\n  Apex Outbound OS  →  http://localhost:${PORT}\n`);
+    console.log(`  OpenAI:     ${k(process.env.OPENAI_API_KEY)}`);
+    console.log(`  Apollo:     ${k(process.env.APOLLO_API_KEY)}`);
+    console.log(`  Perplexity: ${k(process.env.PERPLEXITY_API_KEY)}`);
+    console.log(`  Apify:      ${k(process.env.APIFY_API_KEY)}`);
+    console.log(`  Supabase:   ${k(process.env.SUPABASE_URL)}`);
+    console.log(`  Key persistence (SUPABASE_SERVICE_KEY): ${k(process.env.SUPABASE_SERVICE_KEY)}\n`);
+  });
 });
 
 // ─── Graceful shutdown ────────────────────────────────────────────────────────

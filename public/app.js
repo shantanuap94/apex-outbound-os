@@ -794,12 +794,20 @@ function wireSettings() {
         _setDot(svc, true);
         _setMasked(svc, res.masked);
         input.value = "";
-        // Show brief confirmation
+        // Show brief confirmation — flag clearly if it won't survive a restart/deploy
         const msg = document.createElement("span");
         msg.className = "svc-save-msg show";
-        msg.textContent = "✓ Saved";
-        btn.insertAdjacentElement("afterend", msg);
-        setTimeout(() => msg.remove(), 2000);
+        if (res.persisted === false) {
+          msg.style.color = "var(--danger, #c0392b)";
+          msg.textContent = "⚠ Saved for now, but NOT durable — add SUPABASE_SERVICE_KEY in Render or this key will be lost on the next deploy";
+          btn.insertAdjacentElement("afterend", msg);
+          // Leave this one visible longer since it's an actionable warning, not a routine confirmation
+          setTimeout(() => msg.remove(), 12000);
+        } else {
+          msg.textContent = "✓ Saved";
+          btn.insertAdjacentElement("afterend", msg);
+          setTimeout(() => msg.remove(), 2000);
+        }
         if (svc === "openrouter") fetchOpenRouterCredits();
       } catch (e) {
         alert("Could not save key: " + e.message);
