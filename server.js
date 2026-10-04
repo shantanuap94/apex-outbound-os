@@ -816,6 +816,10 @@ Rules:
         const contextNote = liContext ? `\nCONVERSATION CONTEXT — this may be the actual message thread so far (what ${senderName} said, what ${p} said back), or just a note. Read it carefully before writing. Reference specifics from it naturally. Do NOT repeat points already made in it. Do NOT restate things ${p} already said or already knows:\n"""\n${liContext}\n"""\n` : "";
         if (isConnected) {
           const hasEmail = !!(prospect?.email && String(prospect.email).trim());
+          // AIDA staging: with no prior conversation on record, this IS Touch 1-2 (AWARENESS) —
+          // no call ask, no attachment. Only treat as a later touch if liContext shows an actual
+          // conversation/exchange already happened (pasted thread, prior touch notes, etc.).
+          const isFirstTouch = !liContext || liContext.trim().length < 20;
           // Stage 2 — they accepted the connection request, now send the warm follow-up DM
           return `Write a FOLLOW-UP DM (post-connection, no reply yet) for ${p} (${role}) at ${co}, from ${senderName}.
 ${p} has already accepted the connection request. Do NOT write a connection request. Write only the follow-up DM.
@@ -835,9 +839,11 @@ Emotional context for ${p}:
 
 ---
 
-## FOLLOW-UP DM — GOAL: ${hasEmail ? "book a 20-min call (their work email is already known: " + prospect.email + ")" : "get their official work email AND book a 20-min call, in this one message"}
+## FOLLOW-UP DM — GOAL: ${isFirstTouch
+  ? "AWARENESS touch (Touch 1-2 of the relationship) — build credibility and show real understanding of their world. NO call ask, NO attachment in this message. The goal is purely to earn a reply by being specific and useful, not to close anything yet."
+  : hasEmail ? "book a 20-min call (their work email is already known: " + prospect.email + ")" : "get their official work email AND book a 20-min call, in this one message"}
 
-Key insight: Long is fine if it's relevant. You are not asking for business — you are asking permission to send something useful to their official email. That earns the contact and the meeting in one go. Do not compress this into 3 sentences — a short, generic DM signals mass AI generation to a technical buyer.
+Key insight: Long is fine if it's relevant. ${isFirstTouch ? "This early in the relationship, you are not asking for anything — you are earning the right to ask later by being genuinely useful first." : "You are not asking for business — you are asking permission to send something useful to their official email. That earns the contact and the meeting in one go."} Do not compress this into 3 sentences — a short, generic DM signals mass AI generation to a technical buyer.
 
 STEP 0 — CHECK FOR A CAREER JOURNEY SIGNAL FIRST (highest-priority hook, overrides generic company-growth framing):
 Scan the dossier for ${p}'s career history — previous employers, a recent move, a geography change (e.g. India-based roles moving to a GCC/Middle East/Africa/export market role). If this exists, it is a FAR stronger hook than "your company is scaling" — someone who has worked at well-known companies before and is now building something new notices when a stranger has actually read their background versus skimmed their current job title.
@@ -853,7 +859,7 @@ STRUCTURE — write in this exact order, no labels in output:
 3. NAME THE SPECIFIC PAIN — not category, not industry, their exact headache:
 ${role && /production|plant|manufactur|operations/i.test(role)
   ? `${p} is in PRODUCTION/OPERATIONS — name a line-level mechanism: a spec deviation stopping a line mid-run, grit expansion or oil uptake shifting between lots, a changeover delay, a QC hold on an incoming batch. NOT generic "commodity volatility" or "missed delivery risk" — those are procurement-level clichés, not a production manager's actual headache.
-IF there's a geography change in the dossier (e.g. India to GCC/Middle East), use CROSS-MARKET EMPATHY — compare the specific operational pain in their old market vs their new one. e.g. monsoon-season moisture swings in India vs heat-in-container issues during Gulf shipping/storage; different humidity bands changing grit expansion ratios between markets. This is far more credible than a generic pain line because it shows you understand that their job changed, not just their employer.`
+IF there's a geography change in the dossier (e.g. India to GCC/Middle East), use CROSS-MARKET EMPATHY — compare the specific operational pain in their old market vs their new one, with REAL NUMBERS, not vague gestures. Pattern (write your own version, do not copy these exact figures unless they're confirmed in the dossier/sender profile): "In India it's monsoon moisture swing and grit-size variation lot to lot. In GCC it's heat in container during a 40-45 day transit — internal temps of 42-47°C — and a moisture pickup of even 0.6-0.8% is enough to drop expansion from 4.1x to 3.6x on the same extruder setting. Then production compensates with screw speed, QA flags texture, and both teams end up looking at the purchase spec." That level of numeric specificity is what makes a production head who's seen 100 supplier messages actually stop and read — vague phrases like "heat in container" with no numbers attached read as generic.`
   : /supply chain|procurement|sourcing|purchas/i.test(role || "")
   ? `${p} is in SUPPLY CHAIN/PROCUREMENT — name a sourcing mechanism: two specs in one import file, COA arriving after dispatch not before, a single-source risk, demurrage or landed-cost surprises. Apply the same cross-market empathy logic above if a geography change exists in the dossier.`
   : `Name a mechanism specific to ${role || "their role"} and ${co} — not a generic industry pain. Read the dossier for what they actually deal with.`}
@@ -868,10 +874,14 @@ ${role && /production|plant|manufactur|operations|quality|qc/i.test(role)
 Never invent certifications, processes, or claims not present in the sender profile or dossier (e.g. do not invent phrases like "zero-touch automation hygiene").
 
 5. GIVE REAL MICRO-VALUE, STATED DIRECTLY — NOT A VAGUE OR APOLOGETIC OFFER: This is the difference between a message that converts and one that doesn't. Do NOT write vague lines like "we have some data that might be useful" or "COAs and spec sheets are available." Instead, give an ACTUAL number from the dossier or sender profile relevant to their product category right now — e.g. "for extruded snacks we typically run 0.8-1.2mm grits at under 13% moisture for consistent expansion, but I know [their company] will have its own exact spec." A real number given for free is what makes someone who's seen 100 supplier messages stop and read.
-State the offer directly and confidently — "Attaching our sales profile here" or "I can share our standard spec sheet / COA" — NOT with self-deprecating qualifiers like "not pitching," "just wanted to share," or "for your file." ${senderName} represents an established, listed company — there is no need to apologize for sharing a profile or soften it as a minor favor. Confidence, not hedging.
+${isFirstTouch
+  ? `NO ATTACHMENT, NO FILE OFFER YET — this is Touch 1-2 (Awareness). Do not offer to send a spec sheet, COA, or sales profile in this message; that comes from Touch 6 onward. Close this message with a soft, low-key forward-reference instead — e.g. "I'll share a couple of notes from our [relevant shipments/clients] on how we handle [their specific pain] — might be relevant for your line at [their plant]." This sets up the next touch without asking for anything now.`
+  : `State the offer directly and confidently — "Attaching our sales profile here" or "I can share our standard spec sheet / COA" — NOT with self-deprecating qualifiers like "not pitching," "just wanted to share," or "for your file." ${senderName} represents an established, listed company — there is no need to apologize for sharing a profile or soften it as a minor favor. Confidence, not hedging.`}
 
-6. ${hasEmail ? `SINGLE ASK: suggest a 20-min call next week to explore if there's a fit. Do not ask for their email — it is already on file.` : `DOUBLE ASK: ask for their official work email to send the file to, AND suggest a 20-min call if they're open — framed as exploring a fit, not as a low-pressure favor. Both asks in one message — "What's the best email to send it to? And if useful, happy to do a quick 20-min next week to see if there's a fit worth exploring."`}
-If the dossier or sender profile indicates ${p}'s timezone/region, end the call ask with "Happy to work around [their timezone]" (e.g. GST for Gulf, WAT for Nigeria, IST for India) — small detail, signals you're thinking about their day, not yours.
+6. ${isFirstTouch
+  ? `NO CALL ASK, NO EMAIL ASK in this message. Awareness-stage touches earn trust before asking for anything — end on the soft forward-reference from step 5, not a question that demands a response. If you wrote a confident closer in step 5, step 6 is simply the sign-off — do not add a CTA here.`
+  : hasEmail ? `SINGLE ASK: suggest a 20-min call next week to explore if there's a fit. Do not ask for their email — it is already on file.` : `DOUBLE ASK: ask for their official work email to send the file to, AND suggest a 20-min call if they're open — framed as exploring a fit, not as a low-pressure favor. Both asks in one message — "What's the best email to send it to? And if useful, happy to do a quick 20-min next week to see if there's a fit worth exploring."`}
+${!isFirstTouch ? `If the dossier or sender profile indicates ${p}'s timezone/region, end the call ask with "Happy to work around [their timezone]" (e.g. GST for Gulf, WAT for Nigeria, IST for India) — small detail, signals you're thinking about their day, not yours.` : ""}
 
 TONE MATCH: ${liContext ? `A record of the earlier connection request is in the CONVERSATION CONTEXT above — match its register. If it was short and sharp, this DM should still feel human and conversational, not suddenly long and corporate-formal. Keep the tone consistent across touches.` : `Keep the tone human and conversational throughout — not corporate-formal.`}
 
@@ -889,6 +899,7 @@ SIGN OFF — MANDATORY, do not skip: end with "Best," (or "Warm regards,") on it
 - Vague value offers: "we have some data that might be useful", "COAs and spec sheets are available" — give an actual number instead (grit size, moisture %, whatever's relevant to their category)
 - Gratitude-as-favor openers: "Really appreciate you accepting", "Thanks so much for connecting" — these frame the connection as a favor ${senderName} received. ${senderName} is a peer, not a supplier who should feel grateful. Use a brief, neutral opener like "Good to be connected" instead.
 - Self-deprecating qualifiers before an offer: "Not pitching, but...", "Just wanted to share...", "for your file" as a softening phrase — state offers directly and confidently instead ("Attaching our sales profile here").
+- Low-value filler openers: "Just following up", "Just checking in", "Sorry to bother", "I know you are busy" — these add no information and read as a nudge, not a message worth reading.
 - A message that ends without a sign-off
 - Any explanation of what you wrote or why
 
