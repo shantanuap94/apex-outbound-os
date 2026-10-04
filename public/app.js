@@ -1711,6 +1711,10 @@ async function generateNextEmail(prospectId, emailNum) {
 async function generateLinkedInMessages(prospectId) {
   const entry = _crmProspects.find((x) => x.id === prospectId);
   if (!entry) return;
+  if (!entry.dossier) {
+    const proceed = confirm("No dossier yet for " + (entry.name || "this prospect") + " — the message will be generic without their career history and company signals. Build the dossier first for a much stronger icebreaker?\n\nOK = build dossier first\nCancel = generate anyway (generic)");
+    if (proceed) { await generateDossier(prospectId); return; }
+  }
   const btn = $("regenLinkedInBtn");
   const streamBox = $("drawerLinkedInStream");
   const liStage = document.querySelector('input[name="liStage"]:checked')?.value || "new";
@@ -1740,6 +1744,54 @@ async function generateLinkedInMessages(prospectId) {
   } catch (e) {
     if (streamBox) streamBox.textContent = "Error: " + e.message;
     if (btn) { btn.textContent = "↺ Generate LinkedIn Messages"; btn.disabled = false; }
+  }
+}
+
+async function generateDossier(prospectId) {
+  const entry = _crmProspects.find((x) => x.id === prospectId);
+  if (!entry) return;
+  const btn = $("genDossierBtn");
+  const streamBox = $("drawerDossierStream");
+  if (btn) { btn.textContent = "Researching…"; btn.disabled = true; }
+  if (streamBox) { streamBox.textContent = "Searching for company and career signals…"; streamBox.style.display = "block"; }
+  const icp = getIcp();
+  const sender = getSender();
+  const p = { name: entry.name, title: entry.title, company: entry.company, domain: entry.domain, email: entry.email };
+  try {
+    // Step 1 — Perplexity research: company signals + prospect career history
+    let signalContext = "";
+    try {
+      const query = `Research ${p.name ? p.name + " at " : ""}${p.company}${p.domain ? " (" + p.domain + ")" : ""}. I need these 6 specific things:
+
+1. FOUNDING: When was ${p.company} founded? Where did they start? What did they originally make or do?
+2. EXACT PRODUCTS: List the exact product names, brand names, SKUs, or project lines that ${p.company} sells — not categories, actual names.
+3. RECENT LAUNCHES: Any new products, projects, campaigns, or expansions in the last 12 months — include specific month and year if available.
+4. PROSPECT CAREER: ${p.name ? p.name + "'s" : "The prospect's"} LinkedIn career history — past companies, past roles, years at each, and any geography change (e.g. moving to a new country/region for the current role). Go back at least 3-5 roles.
+5. THEIR CUSTOMER: Who does ${p.company} sell to? What industries, company types, or end-users buy from them?
+6. COMPLIANCE / AUDIT: What certifications, regulations, or audits does ${p.company} live with (e.g. ISO, BRC, RERA, FSSAI, SONCAP, FDA, HACCP)?
+
+Also include any recent news, leadership changes, or awards from the last 90 days.`;
+      const res = await post("/api/perplexity/search", { messages: [{ role: "user", content: query }] });
+      signalContext = res.choices?.[0]?.message?.content || "";
+    } catch (_) { /* Perplexity optional — fall through with empty signalContext */ }
+
+    if (streamBox) streamBox.textContent = "Building dossier…";
+
+    // Step 2 — build the full intelligence brief from the signal context
+    const text = await postStream(
+      "/api/chain/run",
+      { prospect: p, icp, senderProfile: sender, step: "research", signalContext },
+      (_, full) => { if (streamBox) streamBox.textContent = full; }
+    );
+    const dossierContent = (typeof text === "string" ? text : text?.content) || "";
+    if (!dossierContent) { if (btn) { btn.textContent = "✦ Research & Build Dossier"; btn.disabled = false; } return; }
+    await crmUpdateFields(prospectId, { dossier: dossierContent, updated_at: new Date().toISOString() });
+    if (streamBox) streamBox.style.display = "none";
+    const updated = _crmProspects.find((x) => x.id === prospectId);
+    if (updated) renderDrawerTab("dossier", updated);
+  } catch (e) {
+    if (streamBox) streamBox.textContent = "Error: " + e.message;
+    if (btn) { btn.textContent = "✦ Research & Build Dossier"; btn.disabled = false; }
   }
 }
 
@@ -1789,7 +1841,8 @@ function renderDrawerTab(tab, entry) {
 
   if (tab === "dossier") {
     const text = entry.dossier || "";
-    content.innerHTML = `${_tabToolbar(!!text, "dossier")}<pre class="drawer-pre">${text || "No dossier yet — run the Agent Chain first."}</pre>`;
+    const researchBtn = !text ? `<div style="margin-bottom:12px"><button class="btn btn-dark btn-sm" id="genDossierBtn">✦ Research &amp; Build Dossier</button></div>` : "";
+    content.innerHTML = `${_tabToolbar(!!text, "dossier")}${researchBtn}<div id="drawerDossierStream" class="drawer-pre stream-box" style="display:none"></div><pre class="drawer-pre">${text || "No dossier yet — click Research above to pull career history, company signals and build the full intelligence brief."}</pre>`;
   } else if (tab === "emails") {
     const idx  = entry.active_email_idx || 1;
     const due  = getEmailDueStatus(entry);
@@ -2100,6 +2153,10 @@ function wireMemory() {
       // Classify & draft objection response
       const genObjBtn = e.target.closest("#genObjectionBtn");
       if (genObjBtn) { await generateObjectionResponse(_currentDrawerId); return; }
+
+      // Research & build dossier
+      const genDossierBtn = e.target.closest("#genDossierBtn");
+      if (genDossierBtn) { await generateDossier(_currentDrawerId); return; }
 
       // Edit tab content (dossier / linkedin / cadence / objection)
       const editBtn = e.target.closest(".ttb-edit");
